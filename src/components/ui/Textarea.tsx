@@ -19,7 +19,7 @@ export const Textarea: React.FC<TextareaProps> = ({
         </label>
       )}
       <textarea 
-        className={`w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-gray-600 bg-transparent resize-none ${
+        className={`w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 resize-none ${
           error ? 'border-red-500' : ''
         } ${className}`}
         {...props}

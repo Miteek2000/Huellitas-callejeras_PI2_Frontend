@@ -14,7 +14,7 @@ export const Header: React.FC = () => {
             <Image src="/imagenes/Hogar.svg" alt="Inicio" width={24} height={24} />
           </Link>
           
-          {/* Por el momento no tendra rutas definicas, despues les agrego un link*/}
+          {/* Por el momento no tendra rutas definidas, despues les agrego un link*/}
           <button className="hover:opacity-80 transition-opacity">
             <Image src="/imagenes/Estadisticas.svg" alt="Estadísticas" width={24} height={24} />
           </button>
