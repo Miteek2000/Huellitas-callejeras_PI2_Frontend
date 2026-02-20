@@ -32,7 +32,7 @@ export const Select: React.FC<SelectProps> = ({
           </div>
         )}
         <select 
-          className={`w-full ${icon ? 'pl-11' : 'pl-4'} pr-10 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 appearance-none ${
+          className={`w-full ${icon ? 'pl-11' : 'pl-4'} pr-10 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 appearance-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-300 ${
             error ? 'border-red-500' : ''
           } ${className}`}
           {...props}

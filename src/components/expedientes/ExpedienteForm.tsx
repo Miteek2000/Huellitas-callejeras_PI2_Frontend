@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Input, Select, Checkbox, Textarea } from '@/components/ui';
+import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/components/ui';
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
+import { useExpedienteForm, type ExpedienteFormData } from './useExpedienteForm';
 import Image from 'next/image';
 
 interface Movimiento {
@@ -14,126 +15,52 @@ interface Movimiento {
 
 interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
+  initialData?: Partial<ExpedienteFormData>;
+  initialPhotoUrl?: string;
+  readOnly?: boolean;
+  cancelMessage?: string;
+  onCancelConfirmed?: () => void;
 }
 
-export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial }) => {
+export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
+  onOpenHistorial,
+  initialData,
+  initialPhotoUrl,
+  readOnly = false,
+  cancelMessage = '¿Deseas cancelar este expediente?',
+  onCancelConfirmed,
+}) => {
   const router = useRouter();
-
-  const todayDate = new Date().toISOString().split('T')[0];
-  
-  const [formData, setFormData] = useState({
-    nombre: '',
-    especie: '',
-    raza: '',
-    edad: '',
-    sexo: '',
-    peso: '',
-    tamano: '',
-    tipoMovimiento: '',
-    fecha: todayDate,
-    motivo: '',
-    lugar: '',
-    descripcion: '',
-    comportamientoAgresivo: false,
-    enfermedadDegenerativa: false,
-    discapacidades: false,
+  const {
+    formData,
+    setFormData,
+    errors,
+    especiesOptions,
+    sexoOptions,
+    movimientoOptions,
+    fileInputRef,
+    fotoPreviewUrl,
+    showCancelConfirm,
+    showSaveSuccess,
+    handleInputChange,
+    handleSubmit,
+    handleCancel,
+    handleConfirmCancel,
+    handleCloseSaveSuccess,
+    handleFotoClick,
+    handleFotoChange,
+    setShowCancelConfirm,
+  } = useExpedienteForm({
+    onCancelConfirmed: onCancelConfirmed ?? (() => router.back()),
+    initialData,
+    initialPhotoUrl,
   });
 
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
-
-  const especiesOptions = [
-    { value: '', label: 'Seleccione...' },
-    { value: 'perro', label: 'Perro' },
-    { value: 'gato', label: 'Gato' },
-  ];
-
-  const sexoOptions = [
-    { value: '', label: 'Seleccione...' },
-    { value: 'macho', label: 'Macho' },
-    { value: 'hembra', label: 'Hembra' },
-  ];
-
-  const movimientoOptions = [
-    { value: '', label: 'Seleccione...' },
-    { value: 'rescate', label: 'Rescate' },
-    { value: 'retorno', label: 'Retorno' },
-    { value: 'defuncion', label: 'Defunción' },
-    { value: 'adopcion', label: 'Adopción' },
-  ];
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
-
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: false }));
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const nextErrors: Record<string, boolean> = {};
-    const isEmpty = (value: string) => value.trim() === '';
-
-    if (isEmpty(formData.nombre)) nextErrors.nombre = true;
-    if (isEmpty(formData.especie)) nextErrors.especie = true;
-    if (isEmpty(formData.raza)) nextErrors.raza = true;
-    if (isEmpty(formData.edad)) nextErrors.edad = true;
-    if (isEmpty(formData.sexo)) nextErrors.sexo = true;
-    if (isEmpty(formData.peso)) nextErrors.peso = true;
-    if (isEmpty(formData.tamano)) nextErrors.tamano = true;
-    if (isEmpty(formData.tipoMovimiento)) nextErrors.tipoMovimiento = true;
-    if (isEmpty(formData.fecha)) nextErrors.fecha = true;
-    if (isEmpty(formData.motivo)) nextErrors.motivo = true;
-    if (isEmpty(formData.lugar)) nextErrors.lugar = true;
-    if (isEmpty(formData.descripcion)) nextErrors.descripcion = true;
-    if (!fotoFile) nextErrors.foto = true;
-
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
-      return;
-    }
-
-    console.log('Datos del formulario:', formData);
-    // Aquí iría la lógica para guardar
-  };
-
-  const handleCancel = () => {
-    router.back();
-  };
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [fotoFile, setFotoFile] = useState<File | null>(null);
-  const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(null);
-
-  const handleFotoClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    if (fotoPreviewUrl) {
-      URL.revokeObjectURL(fotoPreviewUrl);
-    }
-    if (file) {
-      setFotoFile(file);
-      setFotoPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setFotoFile(null);
-      setFotoPreviewUrl(null);
-    }
-
-    if (errors.foto) {
-      setErrors(prev => ({ ...prev, foto: false }));
-    }
-  };
+  const handleToggle = (field: 'comportamientoAgresivo' | 'enfermedadDegenerativa' | 'discapacidades') =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (readOnly) return;
+      setFormData(prev => ({ ...prev, [field]: !e.target.checked }));
+    };
 
   return (
     <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-8">
@@ -153,7 +80,12 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                   alt="Foto del paciente"
                   className="w-full h-full object-cover"/>
               ) : (
-                <button type="button" onClick={handleFotoClick} className="hover:opacity-80 transition-opacity">
+                <button
+                  type="button"
+                  onClick={readOnly ? undefined : handleFotoClick}
+                  disabled={readOnly}
+                  className="hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
                 </button>
               )}
@@ -162,6 +94,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 type="file"
                 accept="image/*"
                 className="hidden"
+                disabled={readOnly}
                 onChange={handleFotoChange}
               />
             </div>
@@ -181,6 +114,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.nombre}
               onChange={handleInputChange}
               placeholder=""
+              disabled={readOnly}
               className={errors.nombre ? 'border-red-500' : ''}
             />
 
@@ -190,6 +124,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.especie}
               onChange={handleInputChange}
               options={especiesOptions}
+              disabled={readOnly}
               className={errors.especie ? 'border-red-500' : ''}
             />
 
@@ -199,6 +134,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.raza}
               onChange={handleInputChange}
               placeholder=""
+              disabled={readOnly}
               className={errors.raza ? 'border-red-500' : ''}
             />
 
@@ -209,6 +145,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.edad}
               onChange={handleInputChange}
               placeholder=""
+              disabled={readOnly}
               className={errors.edad ? 'border-red-500' : ''}
             />
 
@@ -218,6 +155,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.sexo}
               onChange={handleInputChange}
               options={sexoOptions}
+              disabled={readOnly}
               className={errors.sexo ? 'border-red-500' : ''}
             />
 
@@ -228,6 +166,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.peso}
               onChange={handleInputChange}
               placeholder=""
+              disabled={readOnly}
               className={errors.peso ? 'border-red-500' : ''}
             />
 
@@ -237,6 +176,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.tamano}
               onChange={handleInputChange}
               placeholder=""
+              disabled={readOnly}
               className={errors.tamano ? 'border-red-500' : ''}
             />
 
@@ -255,13 +195,15 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                       label="Si"
                       name="comportamientoAgresivo"
                       checked={formData.comportamientoAgresivo}
+                      disabled={readOnly}
                       onChange={handleInputChange}
                     />
                     <Checkbox 
                       label="No"
                       name="comportamientoAgresivo"
                       checked={!formData.comportamientoAgresivo}
-                      onChange={(e) => setFormData(prev => ({ ...prev, comportamientoAgresivo: !e.target.checked }))}
+                      disabled={readOnly}
+                      onChange={handleToggle('comportamientoAgresivo')}
                     />
                   </div>
                 </div>
@@ -273,13 +215,15 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                       label="Si"
                       name="enfermedadDegenerativa"
                       checked={formData.enfermedadDegenerativa}
+                      disabled={readOnly}
                       onChange={handleInputChange}
                     />
                     <Checkbox 
                       label="No"
                       name="enfermedadDegenerativa"
                       checked={!formData.enfermedadDegenerativa}
-                      onChange={(e) => setFormData(prev => ({ ...prev, enfermedadDegenerativa: !e.target.checked }))}
+                      disabled={readOnly}
+                      onChange={handleToggle('enfermedadDegenerativa')}
                     />
                   </div>
                 </div>
@@ -291,13 +235,15 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                       label="Si"
                       name="discapacidades"
                       checked={formData.discapacidades}
+                      disabled={readOnly}
                       onChange={handleInputChange}
                     />
                     <Checkbox 
                       label="No"
                       name="discapacidades"
                       checked={!formData.discapacidades}
-                      onChange={(e) => setFormData(prev => ({ ...prev, discapacidades: !e.target.checked }))}
+                      disabled={readOnly}
+                      onChange={handleToggle('discapacidades')}
                     />
                   </div>
                 </div>
@@ -319,6 +265,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 value={formData.tipoMovimiento}
                 onChange={handleInputChange}
                 options={movimientoOptions}
+                disabled={readOnly}
                 className={errors.tipoMovimiento ? 'border-red-500' : ''}
               />
               <Input
@@ -327,6 +274,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 type="date"
                 value={formData.fecha}
                 onChange={handleInputChange}
+                disabled={readOnly}
                 className={errors.fecha ? 'border-red-500' : ''}
               />
               <Textarea
@@ -336,6 +284,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 onChange={handleInputChange}
                 rows={3}
                 placeholder=""
+                disabled={readOnly}
                 className={errors.motivo ? 'border-red-500' : ''}
               />
             </div>
@@ -353,6 +302,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 value={formData.lugar}
                 onChange={handleInputChange}
                 placeholder=""
+                disabled={readOnly}
                 className={errors.lugar ? 'border-red-500' : ''}
               />
               <Textarea
@@ -362,6 +312,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 onChange={handleInputChange}
                 rows={4}
                 placeholder=""
+                disabled={readOnly}
                 className={errors.descripcion ? 'border-red-500' : ''}
               />
             </div>
@@ -369,7 +320,12 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
         </div>
 
         <div className="flex justify-center space-x-4 mt-16">
-          <Button type="submit" variant="primary" className="!bg-[#2B264F] !text-white px-54 h-10 flex items-center justify-center font-semibold">
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={readOnly}
+            className="!bg-[#2B264F] !text-white hover:bg-[#7BB75A] px-54 h-10 flex items-center justify-center font-semibold"
+          >
             Guardar
           </Button>
           <Button type="button" variant="secondary" onClick={handleCancel} className=" !bg-[#A7A7A7] !text-white px-54 h-10 flex items-center justify-center font-semibold">
@@ -377,6 +333,22 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
           </Button>
         </div>
       </form>
+
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        message={cancelMessage}
+        confirmLabel="aceptar"
+        cancelLabel="cancelar"
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
+
+      <ConfirmModal
+        isOpen={showSaveSuccess}
+        message="Expediente guardado correctamente"
+        confirmLabel="aceptar"
+        onConfirm={handleCloseSaveSuccess}
+      />
     </div>
   );
 };
