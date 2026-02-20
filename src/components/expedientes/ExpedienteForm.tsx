@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Input, Select, Checkbox, Textarea } from '@/components/ui';
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
@@ -18,6 +18,8 @@ interface ExpedienteFormProps {
 
 export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial }) => {
   const router = useRouter();
+
+  const todayDate = new Date().toISOString().split('T')[0];
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -28,7 +30,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
     peso: '',
     tamano: '',
     tipoMovimiento: '',
-    fecha: '',
+    fecha: todayDate,
     motivo: '',
     lugar: '',
     descripcion: '',
@@ -36,6 +38,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
     enfermedadDegenerativa: false,
     discapacidades: false,
   });
+
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   const especiesOptions = [
     { value: '', label: 'Seleccione...' },
@@ -49,6 +53,14 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
     { value: 'hembra', label: 'Hembra' },
   ];
 
+  const movimientoOptions = [
+    { value: '', label: 'Seleccione...' },
+    { value: 'rescate', label: 'Rescate' },
+    { value: 'retorno', label: 'Retorno' },
+    { value: 'defuncion', label: 'Defunción' },
+    { value: 'adopcion', label: 'Adopción' },
+  ];
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
@@ -58,16 +70,69 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: false }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const nextErrors: Record<string, boolean> = {};
+    const isEmpty = (value: string) => value.trim() === '';
+
+    if (isEmpty(formData.nombre)) nextErrors.nombre = true;
+    if (isEmpty(formData.especie)) nextErrors.especie = true;
+    if (isEmpty(formData.raza)) nextErrors.raza = true;
+    if (isEmpty(formData.edad)) nextErrors.edad = true;
+    if (isEmpty(formData.sexo)) nextErrors.sexo = true;
+    if (isEmpty(formData.peso)) nextErrors.peso = true;
+    if (isEmpty(formData.tamano)) nextErrors.tamano = true;
+    if (isEmpty(formData.tipoMovimiento)) nextErrors.tipoMovimiento = true;
+    if (isEmpty(formData.fecha)) nextErrors.fecha = true;
+    if (isEmpty(formData.motivo)) nextErrors.motivo = true;
+    if (isEmpty(formData.lugar)) nextErrors.lugar = true;
+    if (isEmpty(formData.descripcion)) nextErrors.descripcion = true;
+    if (!fotoFile) nextErrors.foto = true;
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
     console.log('Datos del formulario:', formData);
     // Aquí iría la lógica para guardar
   };
 
   const handleCancel = () => {
     router.back();
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
+  const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(null);
+
+  const handleFotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (fotoPreviewUrl) {
+      URL.revokeObjectURL(fotoPreviewUrl);
+    }
+    if (file) {
+      setFotoFile(file);
+      setFotoPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setFotoFile(null);
+      setFotoPreviewUrl(null);
+    }
+
+    if (errors.foto) {
+      setErrors(prev => ({ ...prev, foto: false }));
+    }
   };
 
   return (
@@ -77,10 +142,28 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
           <div className="relative w-60 h-60 flex-shrink-0">
             <div className="absolute inset-0 bg-[#5F7A91] rounded-full"></div>
             <div className="absolute inset-2 bg-white rounded-full"></div>
-            <div className="absolute inset-4 bg-[#2B5278] rounded-full flex items-center justify-center">
-              <button type="button" className="hover:opacity-80 transition-opacity">
-                <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
-              </button>
+            <div
+              className={`absolute inset-4 bg-[#2B5278] rounded-full overflow-hidden flex items-center justify-center ${
+                errors.foto ? 'ring-2 ring-red-500' : ''
+              }`}
+            >
+              {fotoPreviewUrl ? (
+                <img
+                  src={fotoPreviewUrl}
+                  alt="Foto del paciente"
+                  className="w-full h-full object-cover"/>
+              ) : (
+                <button type="button" onClick={handleFotoClick} className="hover:opacity-80 transition-opacity">
+                  <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFotoChange}
+              />
             </div>
           </div>
 
@@ -98,6 +181,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.nombre}
               onChange={handleInputChange}
               placeholder=""
+              className={errors.nombre ? 'border-red-500' : ''}
             />
 
             <Select
@@ -106,6 +190,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.especie}
               onChange={handleInputChange}
               options={especiesOptions}
+              className={errors.especie ? 'border-red-500' : ''}
             />
 
             <Input
@@ -114,6 +199,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.raza}
               onChange={handleInputChange}
               placeholder=""
+              className={errors.raza ? 'border-red-500' : ''}
             />
 
             <Input
@@ -123,6 +209,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.edad}
               onChange={handleInputChange}
               placeholder=""
+              className={errors.edad ? 'border-red-500' : ''}
             />
 
             <Select
@@ -131,6 +218,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.sexo}
               onChange={handleInputChange}
               options={sexoOptions}
+              className={errors.sexo ? 'border-red-500' : ''}
             />
 
             <Input
@@ -140,6 +228,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.peso}
               onChange={handleInputChange}
               placeholder=""
+              className={errors.peso ? 'border-red-500' : ''}
             />
 
             <Input
@@ -148,6 +237,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
               value={formData.tamano}
               onChange={handleInputChange}
               placeholder=""
+              className={errors.tamano ? 'border-red-500' : ''}
             />
 
             <div className="mt-8">
@@ -223,12 +313,13 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
-              <Input
+              <Select
                 label="Tipo de movimiento"
                 name="tipoMovimiento"
                 value={formData.tipoMovimiento}
                 onChange={handleInputChange}
-                placeholder=""
+                options={movimientoOptions}
+                className={errors.tipoMovimiento ? 'border-red-500' : ''}
               />
               <Input
                 label="Fecha"
@@ -236,6 +327,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 type="date"
                 value={formData.fecha}
                 onChange={handleInputChange}
+                className={errors.fecha ? 'border-red-500' : ''}
               />
               <Textarea
                 label="Motivo"
@@ -244,6 +336,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 onChange={handleInputChange}
                 rows={3}
                 placeholder=""
+                className={errors.motivo ? 'border-red-500' : ''}
               />
             </div>
 
@@ -260,6 +353,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 value={formData.lugar}
                 onChange={handleInputChange}
                 placeholder=""
+                className={errors.lugar ? 'border-red-500' : ''}
               />
               <Textarea
                 label="Descripción"
@@ -268,6 +362,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({ onOpenHistorial 
                 onChange={handleInputChange}
                 rows={4}
                 placeholder=""
+                className={errors.descripcion ? 'border-red-500' : ''}
               />
             </div>
           </div>
