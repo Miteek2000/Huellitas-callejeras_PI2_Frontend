@@ -1,93 +1,147 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ExpedienteForm, HistorialMovimientosModal, type Movimiento } from '@/components/expedientes';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import {
+  ExpedienteForm,
+  HistorialMovimientosModal,
+  type Movimiento,
+} from '@/components/expedientes';
+import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
+
+import { AnimalsService } from '@/app/services/animals.service';
+import { MovementsService } from '@/app/services/movements.service';
 
 export default function EditarExpedientePage() {
   const router = useRouter();
+  const params = useParams();
+
+  const animalId = params.id as string;
+
   const [isEditing, setIsEditing] = useState(false);
   const [showHistorial, setShowHistorial] = useState(false);
-  const [movimientos, setMovimientos] = useState<Movimiento[]>([
-    {
-      fecha_movimiento: '2026-02-20',
-      tipo_movimiento: 'rescate',
-      motivo: 'Encontrado en el Parque Central con signos de desnutrición',
-      id_animal: 1,
-    },
-    {
-      fecha_movimiento: '2026-02-18',
-      tipo_movimiento: 'retorno',
-      motivo: 'Regreso del veterinario después de chequeo general',
-      id_animal: 1,
-    },
-    {
-      fecha_movimiento: '2026-02-15',
-      tipo_movimiento: 'rescate',
-      motivo: 'Primera llegada al refugio',
-      id_animal: 1,
-    },
-  ]);
 
-  const handleSaveMovimiento = (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => {
-    const nuevoMovimiento: Movimiento = {
-      ...movimiento,
-      id_animal: 1, 
-    };
-    setMovimientos(prev => [nuevoMovimiento, ...prev]);
+  const [expediente, setExpediente] = useState<Animal | null>(null);
+  const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!animalId) return;
+    loadData();
+  }, [animalId]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+
+      const animal = await AnimalsService.getById(animalId);
+
+      const allMovements = await MovementsService.getAll();
+
+      const animalMovements = allMovements.filter(
+        (m) => String(m.id_animal) === String(animalId)
+      );
+
+      setExpediente(animal);
+      setMovimientos(animalMovements);
+    } catch (error) {
+      console.error('Error cargando expediente:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-   /*datos de ejemplito. remplazar mock por fetch*/
-  const mockExpediente = {
-    nombre: 'Luna',
-    especie: 'perro',
-    raza: 'Mestizo',
-    edad: '3',
-    sexo: 'hembra',
-    peso: '12',
-    tamano: 'mediano',
-    lugar: 'Parque Central',
-    descripcion: 'Se encontro con desnutricion leve.',
-    es_agresivo: false,
-    enfermedad_no_tratable: false,
-    discapacidad: false,
+  const handleUpdateAnimal = async (data: Animal) => {
+    try {
+      await AnimalsService.update(animalId, data);
+
+      await loadData();
+
+      setIsEditing(false);
+
+    } catch (error) {
+      console.error('Error actualizando animal:', error);
+    }
   };
+
+  const handleSaveMovimiento = async (
+    movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>
+  ) => {
+    try {
+      const nuevoMovimiento = await MovementsService.create({
+        ...movimiento,
+        id_animal: animalId,
+      });
+
+      setMovimientos((prev) => [nuevoMovimiento, ...prev]);
+    } catch (error) {
+      console.error('Error guardando movimiento:', error);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-6">Cargando expediente...</div>;
+  }
+
+  if (!expediente) {
+    return <div className="p-6">Expediente no encontrado</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] p-6">
       <div className="max-w-7xl mx-auto mb-6 mt-6">
         <div className="w-full md:w-1/2 bg-[#E8E8E8] rounded-lg shadow-sm p-2 flex items-center justify-between">
+          
           <div className="flex items-center text-gray-700">
             <button
               onClick={() => router.back()}
-              className="flex items-center hover:text-gray-900">
-              <Image src="/imagenes/flecha.svg" alt="Volver" width={34} height={34} />
+              className="flex items-center hover:text-gray-900"
+            >
+              <Image
+                src="/imagenes/flecha.svg"
+                alt="Volver"
+                width={34}
+                height={34}
+              />
             </button>
-            <span className="ml-2 text-[#182F51]">Editar expediente</span>
+
+            <span className="ml-2 text-[#182F51]">
+              Editar expediente
+            </span>
           </div>
+
           <button
             type="button"
             onClick={() => setIsEditing(true)}
-            className="hover:opacity-80 transition-opacity">
-            <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
+            className="hover:opacity-80 transition-opacity"
+          >
+            <Image
+              src="/imagenes/edit.svg"
+              alt="Editar"
+              width={34}
+              height={34}
+            />
           </button>
         </div>
       </div>
 
       <ExpedienteForm
-        initialData={mockExpediente}
+        initialData={expediente}
         initialPhotoUrl="/imagenes/yo-prueba.jpg"
         readOnly={!isEditing}
         cancelMessage="¿Deseas cancelar los cambios?"
         onCancelConfirmed={() => router.push('/')}
         onOpenHistorial={() => setShowHistorial(true)}
-        onSaveMovimiento={handleSaveMovimiento}/>
+        onSaveMovimiento={handleSaveMovimiento}
+        onSaveAnimal={handleUpdateAnimal}
+      />
 
       <HistorialMovimientosModal
         isOpen={showHistorial}
         onClose={() => setShowHistorial(false)}
-        movimientos={movimientos}/>
+        movimientos={movimientos}
+      />
     </div>
   );
 }

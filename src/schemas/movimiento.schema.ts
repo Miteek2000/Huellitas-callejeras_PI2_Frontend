@@ -1,8 +1,8 @@
 export interface Movimiento {
-  id_movimiento?: number;
+  id_movimiento?: string;
   fecha_movimiento: string;
   tipo_movimiento: string;
   motivo: string;
-  id_animal: number;
+  id_animal: string;
 }
 

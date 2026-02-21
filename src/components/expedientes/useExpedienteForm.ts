@@ -6,7 +6,9 @@ import type { Movimiento } from '@/schemas/movimiento.schema';
 
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
-  onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => void;
+  onSaveMovimiento?: (movimiento: Omit<Movimiento,
+     'id_movimiento' | 'id_animal'>) => void;
+  onSaveAnimal?: (animal: Animal) => Promise<void>; 
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
 }
@@ -88,20 +90,21 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const nextErrors: Record<string, boolean> = {};
     const isEmpty = (value: string) => value.trim() === '';
-    const edadNum = typeof formData.edad === 'string' ? Number(formData.edad) : formData.edad;
-    const pesoNum = typeof formData.peso === 'string' ? Number(formData.peso) : formData.peso;
+
+    const edadNum = Number(formData.edad);
+    const pesoNum = Number(formData.peso);
 
     if (isEmpty(formData.nombre)) nextErrors.nombre = true;
     if (isEmpty(formData.especie)) nextErrors.especie = true;
     if (isEmpty(formData.raza)) nextErrors.raza = true;
-    if (!formData.edad || isNaN(edadNum) || edadNum <= 0) nextErrors.edad = true;
+    if (!edadNum || edadNum <= 0) nextErrors.edad = true;
     if (isEmpty(formData.sexo)) nextErrors.sexo = true;
-    if (!formData.peso || isNaN(pesoNum) || pesoNum <= 0) nextErrors.peso = true;
+    if (!pesoNum || pesoNum <= 0) nextErrors.peso = true;
     if (isEmpty(formData.tamano)) nextErrors.tamano = true;
     if (isEmpty(formData.lugar)) nextErrors.lugar = true;
     if (isEmpty(formData.descripcion)) nextErrors.descripcion = true;
@@ -112,11 +115,26 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       return;
     }
 
-    if (options?.onSaveMovimiento && movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo) {
-      options.onSaveMovimiento(movimientoData);
-    }
+    try {
 
-    setShowSaveSuccess(true);
+      if (options?.onSaveAnimal) {
+        await options.onSaveAnimal(formData);
+      }
+
+      if (
+        options?.onSaveMovimiento &&
+        movimientoData.tipo_movimiento &&
+        movimientoData.fecha_movimiento &&
+        movimientoData.motivo
+      ) {
+        options.onSaveMovimiento(movimientoData);
+      }
+
+      setShowSaveSuccess(true);
+
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleCancel = () => {

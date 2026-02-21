@@ -12,6 +12,7 @@ import Image from 'next/image';
 interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => void;
+  onSaveAnimal?: (animal: Animal) => Promise<void>;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
   readOnly?: boolean;
@@ -22,6 +23,7 @@ interface ExpedienteFormProps {
 export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   onOpenHistorial,
   onSaveMovimiento,
+  onSaveAnimal,
   initialData,
   initialPhotoUrl,
   readOnly = false,
@@ -54,6 +56,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     initialPhotoUrl,
     onCancelConfirmed,
     onSaveMovimiento,
+    onSaveAnimal,
   });
 
   const handleToggle = (field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad') =>

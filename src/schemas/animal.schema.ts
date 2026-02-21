@@ -1,6 +1,7 @@
 export interface Animal {
-  id_animal?: number;
+  id_animal?: string;
   nombre: string;
+  estado: string;
   especie: string;
   raza: string;
   edad: string | number;
