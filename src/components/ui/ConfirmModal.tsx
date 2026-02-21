@@ -30,7 +30,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2 rounded-full bg-gray-300 text-white text-sm"
+              className="px-6 py-2 rounded-full bg-[#9F9F9F] text-white text-sm hover:bg-[#888888] transition-colors"
             >
               {cancelLabel}
             </button>

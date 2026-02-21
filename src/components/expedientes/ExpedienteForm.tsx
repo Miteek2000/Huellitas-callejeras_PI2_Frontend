@@ -32,6 +32,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     errors,
     especiesOptions,
     sexoOptions,
+    tamanoOptions,
     fileInputRef,
     fotoPreviewUrl,
     showCancelConfirm,
@@ -164,12 +165,12 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               className={errors.peso ? 'border-red-500' : ''}
             />
 
-            <Input
+            <Select
               label="Tamaño"
               name="tamano"
               value={formData.tamano}
               onChange={handleInputChange}
-              placeholder=""
+              options={tamanoOptions}
               disabled={readOnly}
               className={errors.tamano ? 'border-red-500' : ''}
             />

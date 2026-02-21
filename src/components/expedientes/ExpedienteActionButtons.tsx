@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui';
+import { Button, ConfirmModal } from '@/components/ui';
 import Image from 'next/image';
 
 type RecupercacionState = 'recuperacion' | 'adopcion' | 'adoptado' | 'defuncion';
@@ -22,10 +22,26 @@ interface ExpedienteActionButtonsProps {
 export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = ({ onHistorialClick }) => {
   const [state, setState] = useState<RecupercacionState>('recuperacion');
   const [isOpen, setIsOpen] = useState(false);
+  const [showConfirmChange, setShowConfirmChange] = useState(false);
+  const [pendingState, setPendingState] = useState<RecupercacionState | null>(null);
 
   const handleStateSelect = (newState: RecupercacionState) => {
-    setState(newState);
+    setPendingState(newState);
     setIsOpen(false);
+    setShowConfirmChange(true);
+  };
+
+  const handleConfirmStateChange = () => {
+    if (pendingState) {
+      setState(pendingState);
+    }
+    setShowConfirmChange(false);
+    setPendingState(null);
+  };
+
+  const handleCancelStateChange = () => {
+    setShowConfirmChange(false);
+    setPendingState(null);
   };
 
   return (
@@ -62,6 +78,15 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
       <Button type="button" onClick={onHistorialClick}>
         Historial de Movimientos
       </Button>
+
+      <ConfirmModal
+        isOpen={showConfirmChange}
+        message="¿Estás seguro de cambiar este estado?"
+        confirmLabel="Cambiar"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmStateChange}
+        onCancel={handleCancelStateChange}
+      />
     </div>
   );
 };

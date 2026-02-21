@@ -46,6 +46,15 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     { value: 'hembra', label: 'Hembra' },
   ];
 
+  const tamanoOptions = [
+    { value: '', label: 'Seleccione...' },
+    { value: 'miniatura', label: 'Miniatura' },
+    { value: 'pequeño', label: 'Pequeño' },
+    { value: 'mediano', label: 'Mediano' },
+    { value: 'grande', label: 'Grande' },
+    { value: 'gigante', label: 'Gigante' },
+  ];
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(options?.initialPhotoUrl ?? null);
@@ -133,6 +142,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     errors,
     especiesOptions,
     sexoOptions,
+    tamanoOptions,
     fileInputRef,
     fotoPreviewUrl,
     showCancelConfirm,

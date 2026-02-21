@@ -33,13 +33,13 @@ export const HistorialMovimientosModal: React.FC<HistorialMovimientosModalProps>
       onClick={onClose}
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
       <div 
-        className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4"
+        className="bg-[#C8D1D7] rounded-lg shadow-xl w-full max-w-2xl mx-4"
         onClick={(e) => e.stopPropagation()}>
-        <div className="bg-[#194566] text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Entradas/salidas</h2>
+        <div className="bg-[#194566] text-white px-6 py-4 rounded-t-lg relative">
+          <h2 className="text-lg font-semibold text-center">Entradas/salidas</h2>
           <button
             onClick={onClose}
-            className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors">
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
