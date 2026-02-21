@@ -4,7 +4,8 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/components/ui';
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
-import { useExpedienteForm, type ExpedienteFormData } from './useExpedienteForm';
+import { useExpedienteForm } from './useExpedienteForm';
+import type { ExpedienteFormData } from '@/schemas/expediente.schema';
 import Image from 'next/image';
 
 interface Movimiento {

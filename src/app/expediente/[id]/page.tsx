@@ -2,13 +2,15 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExpedienteForm } from '@/components/expedientes';
+import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
 import Image from 'next/image';
 
 export default function EditarExpedientePage() {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [showHistorial, setShowHistorial] = useState(false);
 
+   /*datos de ejemplito. remplazar mock por fetch*/
   const mockExpediente = {
     nombre: 'Luna',
     especie: 'perro',
@@ -26,6 +28,23 @@ export default function EditarExpedientePage() {
     enfermedadDegenerativa: false,
     discapacidades: false,
   };
+  const mockMovimientos = [
+    {
+      fecha: '2026-02-20',
+      tipoMovimiento: 'rescate',
+      motivo: 'Encontrado en el Parque Central con signos de desnutrición',
+    },
+    {
+      fecha: '2026-02-18',
+      tipoMovimiento: 'retorno',
+      motivo: 'Regreso del veterinario después de chequeo general',
+    },
+    {
+      fecha: '2026-02-15',
+      tipoMovimiento: 'rescate',
+      motivo: 'Primera llegada al refugio',
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] p-6">
@@ -56,6 +75,13 @@ export default function EditarExpedientePage() {
         readOnly={!isEditing}
         cancelMessage="¿Deseas cancelar los cambios?"
         onCancelConfirmed={() => router.push('/')}
+        onOpenHistorial={() => setShowHistorial(true)}
+      />
+
+      <HistorialMovimientosModal
+        isOpen={showHistorial}
+        onClose={() => setShowHistorial(false)}
+        movimientos={mockMovimientos}
       />
     </div>
   );
