@@ -6,10 +6,12 @@ import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/compo
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
 import { useExpedienteForm } from './useExpedienteForm';
 import type { Animal } from '@/schemas/animal.schema';
+import type { Movimiento } from '@/schemas/movimiento.schema';
 import Image from 'next/image';
 
 interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
+  onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => void;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
   readOnly?: boolean;
@@ -19,6 +21,7 @@ interface ExpedienteFormProps {
 
 export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   onOpenHistorial,
+  onSaveMovimiento,
   initialData,
   initialPhotoUrl,
   readOnly = false,
@@ -29,6 +32,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   const {
     formData,
     setFormData,
+    movimientoData,
     errors,
     especiesOptions,
     sexoOptions,
@@ -45,10 +49,11 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     handleFotoClick,
     handleFotoChange,
     setShowCancelConfirm,
-  } = useExpedienteForm({
-    onCancelConfirmed: onCancelConfirmed ?? (() => router.back()),
-    initialData,
+  } = useExpedienteForm({ 
+    initialData, 
     initialPhotoUrl,
+    onCancelConfirmed,
+    onSaveMovimiento,
   });
 
   const handleToggle = (field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad') =>
@@ -90,8 +95,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 accept="image/*"
                 className="hidden"
                 disabled={readOnly}
-                onChange={handleFotoChange}
-              />
+                onChange={handleFotoChange}/>
             </div>
           </div>
 
@@ -247,6 +251,52 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
           </div>
 
           <div className="space-y-4">
+            <div>
+              <div className="flex items-center mb-4">
+                <div className="bg-[#5A7A8F] text-white px-6 py-2 rounded-l-md">
+                  <h3 className="text-sm font-medium">Registro de movimientos</h3>
+                </div>
+                <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
+              </div>
+
+              <Select
+                label="Tipo de movimiento"
+                name="tipo_movimiento"
+                value={movimientoData.tipo_movimiento}
+                onChange={handleInputChange}
+                options={[
+                  { value: '', label: 'Seleccione...' },
+                  { value: 'rescate', label: 'Rescate' },
+                  { value: 'retorno', label: 'Retorno' },
+                  { value: 'adopcion', label: 'Adopción' },
+                  { value: 'defuncion', label: 'Defunción' },
+                ]}
+                disabled={readOnly}
+                className={errors.tipo_movimiento ? 'border-red-500' : ''}
+              />
+
+              <Input
+                label="Fecha"
+                name="fecha_movimiento"
+                type="date"
+                value={movimientoData.fecha_movimiento}
+                onChange={handleInputChange}
+                placeholder=""
+                disabled={readOnly}
+                className={errors.fecha_movimiento ? 'border-red-500' : ''}
+              />
+
+              <Textarea
+                label="Motivo"
+                name="motivo_movimiento"
+                value={movimientoData.motivo}
+                onChange={handleInputChange}
+                rows={3}
+                placeholder=""
+                disabled={readOnly}
+                className={errors.motivo_movimiento ? 'border-red-500' : ''}
+              />
+            </div>
 
             <div className="mt-4">
               <div className="flex items-center mb-4">

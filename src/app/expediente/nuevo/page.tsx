@@ -11,6 +11,14 @@ export default function ExpedientePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
 
+  const handleSaveMovimiento = (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => {
+    const nuevoMovimiento: Movimiento = {
+      ...movimiento,
+      id_animal: 0, 
+    };
+    setMovimientos(prev => [nuevoMovimiento, ...prev]);
+  };
+
   return (
     <div className="min-h-screen bg-[#FFFFFF] p-6">
       <div className="max-w-7xl mx-auto mb-6 mt-6">
@@ -29,13 +37,14 @@ export default function ExpedientePage() {
         </div>
       </div>
 
-      <ExpedienteForm onOpenHistorial={() => setIsModalOpen(true)} />
+      <ExpedienteForm 
+        onOpenHistorial={() => setIsModalOpen(true)}
+        onSaveMovimiento={handleSaveMovimiento}/>
       
       <HistorialMovimientosModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        movimientos={movimientos}
-      />
+        movimientos={movimientos}/>
     </div>
   );
 }

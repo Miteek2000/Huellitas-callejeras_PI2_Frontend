@@ -2,30 +2,14 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
+import { ExpedienteForm, HistorialMovimientosModal, type Movimiento } from '@/components/expedientes';
 import Image from 'next/image';
 
 export default function EditarExpedientePage() {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [showHistorial, setShowHistorial] = useState(false);
-
-   /*datos de ejemplito. remplazar mock por fetch*/
-  const mockExpediente = {
-    nombre: 'Luna',
-    especie: 'perro',
-    raza: 'Mestizo',
-    edad: '3',
-    sexo: 'hembra',
-    peso: '12',
-    tamano: 'mediano',
-    lugar: 'Parque Central',
-    descripcion: 'Se encontro con desnutricion leve.',
-    es_agresivo: false,
-    enfermedad_no_tratable: false,
-    discapacidad: false,
-  };
-  const mockMovimientos = [
+  const [movimientos, setMovimientos] = useState<Movimiento[]>([
     {
       fecha_movimiento: '2026-02-20',
       tipo_movimiento: 'rescate',
@@ -44,7 +28,31 @@ export default function EditarExpedientePage() {
       motivo: 'Primera llegada al refugio',
       id_animal: 1,
     },
-  ];
+  ]);
+
+  const handleSaveMovimiento = (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => {
+    const nuevoMovimiento: Movimiento = {
+      ...movimiento,
+      id_animal: 1, 
+    };
+    setMovimientos(prev => [nuevoMovimiento, ...prev]);
+  };
+
+   /*datos de ejemplito. remplazar mock por fetch*/
+  const mockExpediente = {
+    nombre: 'Luna',
+    especie: 'perro',
+    raza: 'Mestizo',
+    edad: '3',
+    sexo: 'hembra',
+    peso: '12',
+    tamano: 'mediano',
+    lugar: 'Parque Central',
+    descripcion: 'Se encontro con desnutricion leve.',
+    es_agresivo: false,
+    enfermedad_no_tratable: false,
+    discapacidad: false,
+  };
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] p-6">
@@ -53,8 +61,7 @@ export default function EditarExpedientePage() {
           <div className="flex items-center text-gray-700">
             <button
               onClick={() => router.back()}
-              className="flex items-center hover:text-gray-900"
-            >
+              className="flex items-center hover:text-gray-900">
               <Image src="/imagenes/flecha.svg" alt="Volver" width={34} height={34} />
             </button>
             <span className="ml-2 text-[#182F51]">Editar expediente</span>
@@ -62,8 +69,7 @@ export default function EditarExpedientePage() {
           <button
             type="button"
             onClick={() => setIsEditing(true)}
-            className="hover:opacity-80 transition-opacity"
-          >
+            className="hover:opacity-80 transition-opacity">
             <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
           </button>
         </div>
@@ -76,13 +82,12 @@ export default function EditarExpedientePage() {
         cancelMessage="¿Deseas cancelar los cambios?"
         onCancelConfirmed={() => router.push('/')}
         onOpenHistorial={() => setShowHistorial(true)}
-      />
+        onSaveMovimiento={handleSaveMovimiento}/>
 
       <HistorialMovimientosModal
         isOpen={showHistorial}
         onClose={() => setShowHistorial(false)}
-        movimientos={mockMovimientos}
-      />
+        movimientos={movimientos}/>
     </div>
   );
 }

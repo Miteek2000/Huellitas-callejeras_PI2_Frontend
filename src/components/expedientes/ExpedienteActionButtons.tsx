@@ -50,8 +50,7 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
         <Button 
           type="button" 
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center space-x-2 pl-3"
-        >
+          className="flex items-center space-x-2 pl-3">
           <span>
               <Image src="/imagenes/estado.svg" alt="Estado" width={30} height={30} />
           </span>
@@ -85,8 +84,7 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
         confirmLabel="Cambiar"
         cancelLabel="Cancelar"
         onConfirm={handleConfirmStateChange}
-        onCancel={handleCancelStateChange}
-      />
+        onCancel={handleCancelStateChange}/>
     </div>
   );
 };

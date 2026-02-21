@@ -2,9 +2,11 @@
 
 import { useRef, useState } from 'react';
 import { Animal } from '@/schemas/animal.schema';
+import type { Movimiento } from '@/schemas/movimiento.schema';
 
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
+  onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => void;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
 }
@@ -24,6 +26,12 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     enfermedad_no_tratable: false,
     discapacidad: false,
   };
+
+  const [movimientoData, setMovimientoData] = useState({
+    tipo_movimiento: '',
+    fecha_movimiento: '',
+    motivo: '',
+  });
 
   const [formData, setFormData] = useState<Animal>(() => ({
     ...defaultFormData,
@@ -66,7 +74,13 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+
+      if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
+        const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
+        setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
     }
 
     if (errors[name]) {
@@ -96,6 +110,10 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
+    }
+
+    if (options?.onSaveMovimiento && movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo) {
+      options.onSaveMovimiento(movimientoData);
     }
 
     setShowSaveSuccess(true);
@@ -139,6 +157,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   return {
     formData,
     setFormData,
+    movimientoData,
     errors,
     especiesOptions,
     sexoOptions,
