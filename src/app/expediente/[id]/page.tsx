@@ -19,30 +19,30 @@ export default function EditarExpedientePage() {
     sexo: 'hembra',
     peso: '12',
     tamano: 'mediano',
-    tipoMovimiento: 'rescate',
-    fecha: '2026-02-20',
-    motivo: 'Rescate en la calle',
     lugar: 'Parque Central',
     descripcion: 'Se encontro con desnutricion leve.',
-    comportamientoAgresivo: false,
-    enfermedadDegenerativa: false,
-    discapacidades: false,
+    es_agresivo: false,
+    enfermedad_no_tratable: false,
+    discapacidad: false,
   };
   const mockMovimientos = [
     {
-      fecha: '2026-02-20',
-      tipoMovimiento: 'rescate',
+      fecha_movimiento: '2026-02-20',
+      tipo_movimiento: 'rescate',
       motivo: 'Encontrado en el Parque Central con signos de desnutrición',
+      id_animal: 1,
     },
     {
-      fecha: '2026-02-18',
-      tipoMovimiento: 'retorno',
+      fecha_movimiento: '2026-02-18',
+      tipo_movimiento: 'retorno',
       motivo: 'Regreso del veterinario después de chequeo general',
+      id_animal: 1,
     },
     {
-      fecha: '2026-02-15',
-      tipoMovimiento: 'rescate',
+      fecha_movimiento: '2026-02-15',
+      tipo_movimiento: 'rescate',
       motivo: 'Primera llegada al refugio',
+      id_animal: 1,
     },
   ];
 

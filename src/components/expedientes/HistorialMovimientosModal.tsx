@@ -2,12 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-
-interface Movimiento {
-  fecha: string;
-  tipoMovimiento: string;
-  motivo: string;
-}
+import type { Movimiento } from '@/schemas/movimiento.schema';
 
 interface HistorialMovimientosModalProps {
   isOpen: boolean;
@@ -22,11 +17,11 @@ export const HistorialMovimientosModal: React.FC<HistorialMovimientosModalProps>
 }) => {
   if (!isOpen) return null;
 
-  const getTipoRegistro = (tipoMovimiento: string) => {
-    if (tipoMovimiento === 'rescate' || tipoMovimiento === 'retorno') {
+  const getTipoRegistro = (tipo_movimiento: string) => {
+    if (tipo_movimiento === 'rescate' || tipo_movimiento === 'retorno') {
       return 'Entrada';
     }
-    if (tipoMovimiento === 'defuncion' || tipoMovimiento === 'adopcion') {
+    if (tipo_movimiento === 'defuncion' || tipo_movimiento === 'adopcion') {
       return 'Salida';
     }
     return '—';
@@ -68,9 +63,9 @@ export const HistorialMovimientosModal: React.FC<HistorialMovimientosModalProps>
                 <tbody>
                   {movimientos.map((mov, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                      <td className="px-4 py-3 text-sm text-gray-800">{mov.fecha}</td>
-                      <td className="px-4 py-3 text-sm text-gray-800">{getTipoRegistro(mov.tipoMovimiento)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-800">{mov.tipoMovimiento}</td>
+                      <td className="px-4 py-3 text-sm text-gray-800">{mov.fecha_movimiento}</td>
+                      <td className="px-4 py-3 text-sm text-gray-800">{getTipoRegistro(mov.tipo_movimiento)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-800">{mov.tipo_movimiento}</td>
                       <td className="px-4 py-3 text-sm text-gray-800">{mov.motivo}</td>
                     </tr>
                   ))}

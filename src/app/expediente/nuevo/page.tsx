@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExpedienteForm, HistorialMovimientosModal, type Movimiento } from '@/components/expedientes';
+import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
+import type { Movimiento } from '@/schemas/movimiento.schema';
 import Image from 'next/image';
 
 export default function ExpedientePage() {

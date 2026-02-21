@@ -1,18 +1,16 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ExpedienteFormData } from '@/schemas/expediente.schema';
+import { Animal } from '@/schemas/animal.schema';
 
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
-  initialData?: Partial<ExpedienteFormData>;
+  initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
 }
 
 export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
-  const todayDate = new Date().toISOString().split('T')[0];
-
-  const defaultFormData: ExpedienteFormData = {
+  const defaultFormData: Animal = {
     nombre: '',
     especie: '',
     raza: '',
@@ -20,17 +18,14 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     sexo: '',
     peso: '',
     tamano: '',
-    tipoMovimiento: '',
-    fecha: todayDate,
-    motivo: '',
     lugar: '',
     descripcion: '',
-    comportamientoAgresivo: false,
-    enfermedadDegenerativa: false,
-    discapacidades: false,
+    es_agresivo: false,
+    enfermedad_no_tratable: false,
+    discapacidad: false,
   };
 
-  const [formData, setFormData] = useState<ExpedienteFormData>(() => ({
+  const [formData, setFormData] = useState<Animal>(() => ({
     ...defaultFormData,
     ...options?.initialData,
   }));
@@ -49,14 +44,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     { value: '', label: 'Seleccione...' },
     { value: 'macho', label: 'Macho' },
     { value: 'hembra', label: 'Hembra' },
-  ];
-
-  const movimientoOptions = [
-    { value: '', label: 'Seleccione...' },
-    { value: 'rescate', label: 'Rescate' },
-    { value: 'retorno', label: 'Retorno' },
-    { value: 'defuncion', label: 'Defuncion' },
-    { value: 'adopcion', label: 'Adopcion' },
   ];
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,17 +70,16 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
     const nextErrors: Record<string, boolean> = {};
     const isEmpty = (value: string) => value.trim() === '';
+    const edadNum = typeof formData.edad === 'string' ? Number(formData.edad) : formData.edad;
+    const pesoNum = typeof formData.peso === 'string' ? Number(formData.peso) : formData.peso;
 
     if (isEmpty(formData.nombre)) nextErrors.nombre = true;
     if (isEmpty(formData.especie)) nextErrors.especie = true;
     if (isEmpty(formData.raza)) nextErrors.raza = true;
-    if (isEmpty(formData.edad)) nextErrors.edad = true;
+    if (!formData.edad || isNaN(edadNum) || edadNum <= 0) nextErrors.edad = true;
     if (isEmpty(formData.sexo)) nextErrors.sexo = true;
-    if (isEmpty(formData.peso)) nextErrors.peso = true;
+    if (!formData.peso || isNaN(pesoNum) || pesoNum <= 0) nextErrors.peso = true;
     if (isEmpty(formData.tamano)) nextErrors.tamano = true;
-    if (isEmpty(formData.tipoMovimiento)) nextErrors.tipoMovimiento = true;
-    if (isEmpty(formData.fecha)) nextErrors.fecha = true;
-    if (isEmpty(formData.motivo)) nextErrors.motivo = true;
     if (isEmpty(formData.lugar)) nextErrors.lugar = true;
     if (isEmpty(formData.descripcion)) nextErrors.descripcion = true;
     if (!fotoFile && !fotoPreviewUrl) nextErrors.foto = true;
@@ -147,7 +133,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     errors,
     especiesOptions,
     sexoOptions,
-    movimientoOptions,
     fileInputRef,
     fotoPreviewUrl,
     showCancelConfirm,

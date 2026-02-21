@@ -5,18 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/components/ui';
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
 import { useExpedienteForm } from './useExpedienteForm';
-import type { ExpedienteFormData } from '@/schemas/expediente.schema';
+import type { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
-
-interface Movimiento {
-  fecha: string;
-  tipoMovimiento: string;
-  motivo: string;
-}
 
 interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
-  initialData?: Partial<ExpedienteFormData>;
+  initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
   readOnly?: boolean;
   cancelMessage?: string;
@@ -38,7 +32,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     errors,
     especiesOptions,
     sexoOptions,
-    movimientoOptions,
     fileInputRef,
     fotoPreviewUrl,
     showCancelConfirm,
@@ -57,7 +50,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     initialPhotoUrl,
   });
 
-  const handleToggle = (field: 'comportamientoAgresivo' | 'enfermedadDegenerativa' | 'discapacidades') =>
+  const handleToggle = (field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad') =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (readOnly) return;
       setFormData(prev => ({ ...prev, [field]: !e.target.checked }));
@@ -194,17 +187,17 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                   <div className="flex space-x-4">
                     <Checkbox 
                       label="Si"
-                      name="comportamientoAgresivo"
-                      checked={formData.comportamientoAgresivo}
+                      name="es_agresivo"
+                      checked={formData.es_agresivo}
                       disabled={readOnly}
                       onChange={handleInputChange}
                     />
                     <Checkbox 
                       label="No"
-                      name="comportamientoAgresivo"
-                      checked={!formData.comportamientoAgresivo}
+                      name="es_agresivo"
+                      checked={!formData.es_agresivo}
                       disabled={readOnly}
-                      onChange={handleToggle('comportamientoAgresivo')}
+                      onChange={handleToggle('es_agresivo')}
                     />
                   </div>
                 </div>
@@ -214,17 +207,17 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                   <div className="flex space-x-4">
                     <Checkbox 
                       label="Si"
-                      name="enfermedadDegenerativa"
-                      checked={formData.enfermedadDegenerativa}
+                      name="enfermedad_no_tratable"
+                      checked={formData.enfermedad_no_tratable}
                       disabled={readOnly}
                       onChange={handleInputChange}
                     />
                     <Checkbox 
                       label="No"
-                      name="enfermedadDegenerativa"
-                      checked={!formData.enfermedadDegenerativa}
+                      name="enfermedad_no_tratable"
+                      checked={!formData.enfermedad_no_tratable}
                       disabled={readOnly}
-                      onChange={handleToggle('enfermedadDegenerativa')}
+                      onChange={handleToggle('enfermedad_no_tratable')}
                     />
                   </div>
                 </div>
@@ -234,17 +227,17 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                   <div className="flex space-x-4">
                     <Checkbox 
                       label="Si"
-                      name="discapacidades"
-                      checked={formData.discapacidades}
+                      name="discapacidad"
+                      checked={formData.discapacidad}
                       disabled={readOnly}
                       onChange={handleInputChange}
                     />
                     <Checkbox 
                       label="No"
-                      name="discapacidades"
-                      checked={!formData.discapacidades}
+                      name="discapacidad"
+                      checked={!formData.discapacidad}
                       disabled={readOnly}
-                      onChange={handleToggle('discapacidades')}
+                      onChange={handleToggle('discapacidad')}
                     />
                   </div>
                 </div>
@@ -253,42 +246,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
           </div>
 
           <div className="space-y-4">
-            <div>
-              <div className="flex items-center mb-4">
-                <div className="bg-[#5A7A8F] text-white px-6 py-2 rounded-l-md">
-                  <h3 className="text-sm font-medium">Registro de movimientos</h3>
-                </div>
-                <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
-              </div>
-              <Select
-                label="Tipo de movimiento"
-                name="tipoMovimiento"
-                value={formData.tipoMovimiento}
-                onChange={handleInputChange}
-                options={movimientoOptions}
-                disabled={readOnly}
-                className={errors.tipoMovimiento ? 'border-red-500' : ''}
-              />
-              <Input
-                label="Fecha"
-                name="fecha"
-                type="date"
-                value={formData.fecha}
-                onChange={handleInputChange}
-                disabled={readOnly}
-                className={errors.fecha ? 'border-red-500' : ''}
-              />
-              <Textarea
-                label="Motivo"
-                name="motivo"
-                value={formData.motivo}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder=""
-                disabled={readOnly}
-                className={errors.motivo ? 'border-red-500' : ''}
-              />
-            </div>
 
             <div className="mt-4">
               <div className="flex items-center mb-4">
@@ -304,8 +261,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 onChange={handleInputChange}
                 placeholder=""
                 disabled={readOnly}
-                className={errors.lugar ? 'border-red-500' : ''}
-              />
+                className={errors.lugar ? 'border-red-500' : ''}/>
+
               <Textarea
                 label="Descripción"
                 name="descripcion"
@@ -314,8 +271,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 rows={4}
                 placeholder=""
                 disabled={readOnly}
-                className={errors.descripcion ? 'border-red-500' : ''}
-              />
+                className={errors.descripcion ? 'border-red-500' : ''}/>
             </div>
           </div>
         </div>
@@ -325,8 +281,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
             type="submit"
             variant="primary"
             disabled={readOnly}
-            className="!bg-[#2B264F] !text-white hover:bg-[#7BB75A] px-54 h-10 flex items-center justify-center font-semibold"
-          >
+            className="!bg-[#2B264F] !text-white hover:bg-[#7BB75A] px-54 h-10 flex items-center justify-center font-semibold">
             Guardar
           </Button>
           <Button type="button" variant="secondary" onClick={handleCancel} className=" !bg-[#A7A7A7] !text-white px-54 h-10 flex items-center justify-center font-semibold">
@@ -341,17 +296,13 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
         confirmLabel="aceptar"
         cancelLabel="cancelar"
         onConfirm={handleConfirmCancel}
-        onCancel={() => setShowCancelConfirm(false)}
-      />
+        onCancel={() => setShowCancelConfirm(false)}/>
 
       <ConfirmModal
         isOpen={showSaveSuccess}
         message="Expediente guardado correctamente"
         confirmLabel="aceptar"
-        onConfirm={handleCloseSaveSuccess}
-      />
+        onConfirm={handleCloseSaveSuccess}/>
     </div>
   );
 };
-
-export type { Movimiento };
