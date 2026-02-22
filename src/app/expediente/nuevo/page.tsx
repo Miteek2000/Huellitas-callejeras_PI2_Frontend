@@ -16,51 +16,47 @@ export default function ExpedientePage() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
-  const [pendingMovimiento, setPendingMovimiento] = useState<  
-    Omit<Movimiento, 'id_movimiento' | 'id_animal'> | null
-  >(null);
+  const [pendingMovimiento, setPendingMovimiento] = useState<Omit<Movimiento, 'id_movimiento' | 'animal_id'> | null>(null);
 
   const handleSaveAnimal = async (data: Animal, fotoFile?: File | null) => {
-  const formData = new FormData();
+    const form = new FormData();
+    form.append('nombre', data.nombre);
+    form.append('estado', data.estado);
+    form.append('especie', data.especie);
+    form.append('raza', data.raza);
+    form.append('edad', String(data.edad));
+    form.append('peso', String(data.peso));
+    form.append('sexo', data.sexo);
+    form.append('tamano', data.tamano);
+    form.append('lugar', data.lugar);
+    form.append('descripcion', data.descripcion);
+    form.append('es_agresivo', String(data.es_agresivo));
+    form.append('enfermedad_no_tratable', String(data.enfermedad_no_tratable));
+    form.append('discapacidad', String(data.discapacidad));
+    form.append('refugio_id', REFUGIO_ID);
+    form.append('usuario_id', USUARIO_ID);
 
-  formData.append('nombre', data.nombre);
-  formData.append('estado', data.estado);
-  formData.append('especie', data.especie);
-  formData.append('raza', data.raza);
-  formData.append('edad', String(data.edad));
-  formData.append('peso', String(data.peso));
-  formData.append('sexo', data.sexo);
-  formData.append('tamano', data.tamano);
-  formData.append('lugar', data.lugar);
-  formData.append('descripcion', data.descripcion);
-  formData.append('es_agresivo', String(data.es_agresivo));
-  formData.append('enfermedad_no_tratable', String(data.enfermedad_no_tratable));
-  formData.append('discapacidad', String(data.discapacidad));
-  formData.append('refugio_id', REFUGIO_ID);
-  formData.append('usuario_id', USUARIO_ID);
+    if (fotoFile) {
+      form.append('imagen', fotoFile);
+    }
 
-  if (fotoFile) {
-    formData.append('imagen', fotoFile);
-  }
+    const animalCreado = await AnimalsService.createWithForm(form);
 
-  const animalCreado = await AnimalsService.createWithForm(formData);
+    if (pendingMovimiento && animalCreado.id_animal) {
+      await MovementsService.create({
+        ...pendingMovimiento,
+        animal_id: animalCreado.id_animal, 
+      });
+    }
 
-  if (pendingMovimiento && animalCreado.id_animal) {
-    await MovementsService.create({
-      ...pendingMovimiento,
-      id_animal: animalCreado.id_animal,
-    });
-  }
-
-  router.push(`/expediente/${animalCreado.id_animal}`);
-};
+    router.push(`/expediente/${animalCreado.id_animal}`);
+  };
 
   const handleSaveMovimiento = (
-    movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>
+    movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
   ) => {
-    setPendingMovimiento(movimiento); 
-
-    setMovimientos(prev => [{ ...movimiento, id_animal: '' }, ...prev]);
+    setPendingMovimiento(movimiento);
+    setMovimientos(prev => [{ ...movimiento, animal_id: '' }, ...prev]); 
   };
 
   return (
@@ -68,9 +64,7 @@ export default function ExpedientePage() {
       <div className="max-w-7xl mx-auto mb-6 mt-6">
         <div className="w-full md:w-1/2 bg-[#E8E8E8] rounded-lg shadow-sm p-2 flex items-center justify-between">
           <div className="flex items-center text-gray-700">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center hover:text-gray-900">
+            <button onClick={() => router.back()} className="flex items-center hover:text-gray-900">
               <Image src="/imagenes/flecha.svg" alt="Volver" width={34} height={34} />
             </button>
             <span className="ml-2 text-[#182F51]">Expediente del paciente</span>

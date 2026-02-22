@@ -8,49 +8,34 @@ export const MovementsService = {
     return await apiFetch<Movimiento[]>(ENDPOINTS.MOVEMENTS);
   },
 
-  async getById(id: string | number): Promise<Movimiento> {
+  async getById(id: string): Promise<Movimiento> {
     return await apiFetch<Movimiento>(`${ENDPOINTS.MOVEMENTS}/${id}`);
   },
 
-  async getByAnimalId(animalId: string | number): Promise<Movimiento[]> {
-
+  async getByAnimalId(animalId: string): Promise<Movimiento[]> {
     const movements = await apiFetch<Movimiento[]>(ENDPOINTS.MOVEMENTS);
-
     return movements.filter(
-      (movement) =>
-        String(movement.id_animal) === String(animalId)
+      (m) => String(m.animal_id) === String(animalId)
     );
   },
 
-  async create(
-    data: Omit<Movimiento, 'id_movimiento'>
-  ): Promise<Movimiento> {
-
+  async create(data: Omit<Movimiento, 'id_movimiento'>): Promise<Movimiento> {
     return await apiFetch<Movimiento>(ENDPOINTS.MOVEMENTS, {
       method: 'POST',
       body: JSON.stringify(data),
     });
-
   },
 
-  async update(
-    id: string | number,
-    data: Partial<Movimiento>
-  ): Promise<Movimiento> {
-
+  async update(id: string, data: Partial<Movimiento>): Promise<Movimiento> {
     return await apiFetch<Movimiento>(`${ENDPOINTS.MOVEMENTS}/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
-
   },
 
-  async delete(id: string | number): Promise<void> {
-
+  async delete(id: string): Promise<void> {
     await apiFetch<void>(`${ENDPOINTS.MOVEMENTS}/${id}`, {
       method: 'DELETE',
     });
-
   },
-
 };

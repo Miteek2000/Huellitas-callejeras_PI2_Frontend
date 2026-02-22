@@ -3,6 +3,6 @@ export interface Movimiento {
   fecha_movimiento: string;
   tipo_movimiento: string;
   motivo: string;
-  id_animal: string;
+  animal_id: string;
 }
 

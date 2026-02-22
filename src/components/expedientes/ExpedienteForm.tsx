@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/components/ui';
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
 import { useExpedienteForm } from './useExpedienteForm';
@@ -11,7 +10,7 @@ import Image from 'next/image';
 
 interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
-  onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => void;
+  onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
   onSaveAnimal?: (animal: Animal, fotoFile?: File | null) => Promise<void>;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
@@ -30,7 +29,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   cancelMessage = '¿Deseas cancelar este expediente?',
   onCancelConfirmed,
 }) => {
-  const router = useRouter();
   const {
     formData,
     setFormData,
@@ -39,6 +37,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     especiesOptions,
     sexoOptions,
     tamanoOptions,
+    tipoMovimientoOptions,
+    motivoOptions,
     fileInputRef,
     fotoFile,
     fotoPreviewUrl,
@@ -80,11 +80,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               }`}
             >
               {fotoPreviewUrl ? (
-                <img
-                  src={fotoPreviewUrl}
-                  alt="Foto del paciente"
-                  className="w-full h-full object-cover"
-                />
+                <img src={fotoPreviewUrl} alt="Foto del paciente" className="w-full h-full object-cover" />
               ) : (
                 <button
                   type="button"
@@ -95,14 +91,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                   <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
                 </button>
               )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                disabled={readOnly}
-                onChange={handleFotoChange}
-              />
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" disabled={readOnly} onChange={handleFotoChange} />
             </div>
           </div>
 
@@ -110,79 +99,21 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
             <h1 className="text-2xl font-semibold text-[#194566] mb-4">Expediente de paciente</h1>
             <ExpedienteActionButtons
               onHistorialClick={onOpenHistorial}
-              onStateChange={handleEstadoChange}    
-              currentState={initialData?.estado}    
+              onStateChange={handleEstadoChange}
+              currentState={initialData?.estado}
             />
           </div>
         </div>
 
         <div className="text-[#2B264F] grid grid-cols-2 gap-8">
           <div className="space-y-4">
-            <Input
-              label="Nombre"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleInputChange}
-              placeholder=""
-              disabled={readOnly}
-              className={errors.nombre ? 'border-red-500' : ''}
-            />
-            <Select
-              label="Especie"
-              name="especie"
-              value={formData.especie}
-              onChange={handleInputChange}
-              options={especiesOptions}
-              disabled={readOnly}
-              className={errors.especie ? 'border-red-500' : ''}
-            />
-            <Input
-              label="Raza"
-              name="raza"
-              value={formData.raza}
-              onChange={handleInputChange}
-              placeholder=""
-              disabled={readOnly}
-              className={errors.raza ? 'border-red-500' : ''}
-            />
-            <Input
-              label="Edad"
-              name="edad"
-              type="number"
-              value={formData.edad}
-              onChange={handleInputChange}
-              placeholder=""
-              disabled={readOnly}
-              className={errors.edad ? 'border-red-500' : ''}
-            />
-            <Select
-              label="Sexo"
-              name="sexo"
-              value={formData.sexo}
-              onChange={handleInputChange}
-              options={sexoOptions}
-              disabled={readOnly}
-              className={errors.sexo ? 'border-red-500' : ''}
-            />
-            <Input
-              label="Peso"
-              name="peso"
-              type="number"
-              value={formData.peso}
-              onChange={handleInputChange}
-              placeholder=""
-              disabled={readOnly}
-              className={errors.peso ? 'border-red-500' : ''}
-            />
-            <Select
-              label="Tamaño"
-              name="tamano"
-              value={formData.tamano}
-              onChange={handleInputChange}
-              options={tamanoOptions}
-              disabled={readOnly}
-              className={errors.tamano ? 'border-red-500' : ''}
-            />
+            <Input label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.nombre ? 'border-red-500' : ''} />
+            <Select label="Especie" name="especie" value={formData.especie} onChange={handleInputChange} options={especiesOptions} disabled={readOnly} className={errors.especie ? 'border-red-500' : ''} />
+            <Input label="Raza" name="raza" value={formData.raza} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.raza ? 'border-red-500' : ''} />
+            <Input label="Edad" name="edad" type="number" value={formData.edad} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.edad ? 'border-red-500' : ''} />
+            <Select label="Sexo" name="sexo" value={formData.sexo} onChange={handleInputChange} options={sexoOptions} disabled={readOnly} className={errors.sexo ? 'border-red-500' : ''} />
+            <Input label="Peso" name="peso" type="number" value={formData.peso} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.peso ? 'border-red-500' : ''} />
+            <Select label="Tamaño" name="tamano" value={formData.tamano} onChange={handleInputChange} options={tamanoOptions} disabled={readOnly} className={errors.tamano ? 'border-red-500' : ''} />
 
             <div className="mt-8">
               <div className="flex items-center mb-4">
@@ -230,13 +161,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 name="tipo_movimiento"
                 value={movimientoData.tipo_movimiento}
                 onChange={handleInputChange}
-                options={[
-                  { value: '', label: 'Seleccione...' },
-                  { value: 'rescate', label: 'Rescate' },
-                  { value: 'retorno', label: 'Retorno' },
-                  { value: 'adopcion', label: 'Adopción' },
-                  { value: 'defuncion', label: 'Defunción' },
-                ]}
+                options={tipoMovimientoOptions}
                 disabled={readOnly}
                 className={errors.tipo_movimiento ? 'border-red-500' : ''}
               />
@@ -250,15 +175,14 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 disabled={readOnly}
                 className={errors.fecha_movimiento ? 'border-red-500' : ''}
               />
-              <Textarea
+              <Select
                 label="Motivo"
                 name="motivo_movimiento"
                 value={movimientoData.motivo}
                 onChange={handleInputChange}
-                rows={3}
-                placeholder=""
+                options={motivoOptions}
                 disabled={readOnly}
-                className={errors.motivo_movimiento ? 'border-red-500' : ''}
+                className={errors.motivo ? 'border-red-500' : ''}
               />
             </div>
 
@@ -269,62 +193,24 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
-              <Input
-                label="Lugar"
-                name="lugar"
-                value={formData.lugar}
-                onChange={handleInputChange}
-                placeholder=""
-                disabled={readOnly}
-                className={errors.lugar ? 'border-red-500' : ''}
-              />
-              <Textarea
-                label="Descripción"
-                name="descripcion"
-                value={formData.descripcion}
-                onChange={handleInputChange}
-                rows={4}
-                placeholder=""
-                disabled={readOnly}
-                className={errors.descripcion ? 'border-red-500' : ''}
-              />
+              <Input label="Lugar" name="lugar" value={formData.lugar} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.lugar ? 'border-red-500' : ''} />
+              <Textarea label="Descripción" name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows={4} placeholder="" disabled={readOnly} className={errors.descripcion ? 'border-red-500' : ''} />
             </div>
           </div>
         </div>
 
         <div className="flex justify-center space-x-4 mt-16">
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={readOnly}
-            className="!bg-[#2B264F] !text-white hover:bg-[#7BB75A] px-54 h-10 flex items-center justify-center font-semibold">
+          <Button type="submit" variant="primary" disabled={readOnly} className="!bg-[#2B264F] !text-white hover:bg-[#7BB75A] px-54 h-10 flex items-center justify-center font-semibold">
             Guardar
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleCancel}
-            className="!bg-[#A7A7A7] !text-white px-54 h-10 flex items-center justify-center font-semibold">
+          <Button type="button" variant="secondary" onClick={handleCancel} className="!bg-[#A7A7A7] !text-white px-54 h-10 flex items-center justify-center font-semibold">
             Cancelar
           </Button>
         </div>
       </form>
 
-      <ConfirmModal
-        isOpen={showCancelConfirm}
-        message={cancelMessage}
-        confirmLabel="aceptar"
-        cancelLabel="cancelar"
-        onConfirm={handleConfirmCancel}
-        onCancel={() => setShowCancelConfirm(false)}
-      />
-
-      <ConfirmModal
-        isOpen={showSaveSuccess}
-        message="Expediente guardado correctamente"
-        confirmLabel="aceptar"
-        onConfirm={handleCloseSaveSuccess}
-      />
+      <ConfirmModal isOpen={showCancelConfirm} message={cancelMessage} confirmLabel="aceptar" cancelLabel="cancelar" onConfirm={handleConfirmCancel} onCancel={() => setShowCancelConfirm(false)} />
+      <ConfirmModal isOpen={showSaveSuccess} message="Expediente guardado correctamente" confirmLabel="aceptar" onConfirm={handleCloseSaveSuccess} />
     </div>
   );
 };

@@ -6,7 +6,7 @@ import type { Movimiento } from '@/schemas/movimiento.schema';
 
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
-  onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => void;
+  onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
   onSaveAnimal?: (animal: Animal, fotoFile?: File | null) => Promise<void>;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
@@ -63,6 +63,20 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     { value: 'mediano', label: 'Mediano' },
     { value: 'grande', label: 'Grande' },
     { value: 'gigante', label: 'Gigante' },
+  ];
+
+  const tipoMovimientoOptions = [
+    { value: '', label: 'Seleccione...' },
+    { value: 'entrada', label: 'Entrada' },
+    { value: 'salida', label: 'Salida' },
+  ];
+
+  const motivoOptions = [
+    { value: '', label: 'Seleccione...' },
+    { value: 'rescate', label: 'Rescate' },
+    { value: 'adopcion', label: 'Adopción' },
+    { value: 'defuncion', label: 'Defunción' },
+    { value: 'retorno', label: 'Retorno' },
   ];
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -177,6 +191,8 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     especiesOptions,
     sexoOptions,
     tamanoOptions,
+    tipoMovimientoOptions,
+    motivoOptions,
     fileInputRef,
     fotoFile,
     fotoPreviewUrl,
