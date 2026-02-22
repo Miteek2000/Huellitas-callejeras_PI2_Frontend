@@ -6,9 +6,8 @@ import type { Movimiento } from '@/schemas/movimiento.schema';
 
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
-  onSaveMovimiento?: (movimiento: Omit<Movimiento,
-     'id_movimiento' | 'id_animal'>) => void;
-  onSaveAnimal?: (animal: Animal) => Promise<void>; 
+  onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => void;
+  onSaveAnimal?: (animal: Animal, fotoFile?: File | null) => Promise<void>;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
 }
@@ -16,6 +15,7 @@ interface UseExpedienteFormOptions {
 export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const defaultFormData: Animal = {
     nombre: '',
+    estado: '',
     especie: '',
     raza: '',
     edad: '',
@@ -52,8 +52,8 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
   const sexoOptions = [
     { value: '', label: 'Seleccione...' },
-    { value: 'macho', label: 'Macho' },
-    { value: 'hembra', label: 'Hembra' },
+    { value: 'Macho', label: 'Macho' },
+    { value: 'Hembra', label: 'Hembra' },
   ];
 
   const tamanoOptions = [
@@ -67,16 +67,26 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
-  const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(options?.initialPhotoUrl ?? null);
+  const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(
+    options?.initialPhotoUrl ?? null
+  );
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleEstadoChange = (apiValue: string) => {
+    setFormData(prev => ({ ...prev, estado: apiValue }));
+    if (errors.estado) {
+      setErrors(prev => ({ ...prev, estado: false }));
+    }
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
-
       if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
         const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
         setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
@@ -94,12 +104,13 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     e.preventDefault();
 
     const nextErrors: Record<string, boolean> = {};
-    const isEmpty = (value: string) => value.trim() === '';
+    const isEmpty = (value: string) => !value || value.trim() === '';
 
     const edadNum = Number(formData.edad);
     const pesoNum = Number(formData.peso);
 
     if (isEmpty(formData.nombre)) nextErrors.nombre = true;
+    if (isEmpty(formData.estado)) nextErrors.estado = true;
     if (isEmpty(formData.especie)) nextErrors.especie = true;
     if (isEmpty(formData.raza)) nextErrors.raza = true;
     if (!edadNum || edadNum <= 0) nextErrors.edad = true;
@@ -116,9 +127,8 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     }
 
     try {
-
       if (options?.onSaveAnimal) {
-        await options.onSaveAnimal(formData);
+        await options.onSaveAnimal(formData, fotoFile);
       }
 
       if (
@@ -131,34 +141,24 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       }
 
       setShowSaveSuccess(true);
-
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleCancel = () => {
-    setShowCancelConfirm(true);
-  };
+  const handleCancel = () => setShowCancelConfirm(true);
 
   const handleConfirmCancel = () => {
     setShowCancelConfirm(false);
     options?.onCancelConfirmed?.();
   };
 
-  const handleCloseSaveSuccess = () => {
-    setShowSaveSuccess(false);
-  };
-
-  const handleFotoClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleCloseSaveSuccess = () => setShowSaveSuccess(false);
+  const handleFotoClick = () => fileInputRef.current?.click();
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
-    if (fotoPreviewUrl) {
-      URL.revokeObjectURL(fotoPreviewUrl);
-    }
+    if (fotoPreviewUrl) URL.revokeObjectURL(fotoPreviewUrl);
     if (file) {
       setFotoFile(file);
       setFotoPreviewUrl(URL.createObjectURL(file));
@@ -166,10 +166,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       setFotoFile(null);
       setFotoPreviewUrl(null);
     }
-
-    if (errors.foto) {
-      setErrors(prev => ({ ...prev, foto: false }));
-    }
+    if (errors.foto) setErrors(prev => ({ ...prev, foto: false }));
   };
 
   return {
@@ -181,10 +178,12 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     sexoOptions,
     tamanoOptions,
     fileInputRef,
+    fotoFile,
     fotoPreviewUrl,
     showCancelConfirm,
     showSaveSuccess,
     handleInputChange,
+    handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,

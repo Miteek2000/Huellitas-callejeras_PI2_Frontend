@@ -12,7 +12,7 @@ import Image from 'next/image';
 interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'id_animal'>) => void;
-  onSaveAnimal?: (animal: Animal) => Promise<void>;
+  onSaveAnimal?: (animal: Animal, fotoFile?: File | null) => Promise<void>;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
   readOnly?: boolean;
@@ -40,10 +40,12 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     sexoOptions,
     tamanoOptions,
     fileInputRef,
+    fotoFile,
     fotoPreviewUrl,
     showCancelConfirm,
     showSaveSuccess,
     handleInputChange,
+    handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,
@@ -51,8 +53,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     handleFotoClick,
     handleFotoChange,
     setShowCancelConfirm,
-  } = useExpedienteForm({ 
-    initialData, 
+  } = useExpedienteForm({
+    initialData,
     initialPhotoUrl,
     onCancelConfirmed,
     onSaveMovimiento,
@@ -67,7 +69,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-8">
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <div className="flex items-center space-x-6 mb-8">
           <div className="relative w-60 h-60 flex-shrink-0">
             <div className="absolute inset-0 bg-[#5F7A91] rounded-full"></div>
@@ -81,7 +83,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 <img
                   src={fotoPreviewUrl}
                   alt="Foto del paciente"
-                  className="w-full h-full object-cover"/>
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <button
                   type="button"
@@ -98,13 +101,18 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 accept="image/*"
                 className="hidden"
                 disabled={readOnly}
-                onChange={handleFotoChange}/>
+                onChange={handleFotoChange}
+              />
             </div>
           </div>
 
           <div>
             <h1 className="text-2xl font-semibold text-[#194566] mb-4">Expediente de paciente</h1>
-            <ExpedienteActionButtons onHistorialClick={onOpenHistorial} />
+            <ExpedienteActionButtons
+              onHistorialClick={onOpenHistorial}
+              onStateChange={handleEstadoChange}    
+              currentState={initialData?.estado}    
+            />
           </div>
         </div>
 
@@ -119,7 +127,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               disabled={readOnly}
               className={errors.nombre ? 'border-red-500' : ''}
             />
-
             <Select
               label="Especie"
               name="especie"
@@ -129,7 +136,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               disabled={readOnly}
               className={errors.especie ? 'border-red-500' : ''}
             />
-
             <Input
               label="Raza"
               name="raza"
@@ -139,7 +145,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               disabled={readOnly}
               className={errors.raza ? 'border-red-500' : ''}
             />
-
             <Input
               label="Edad"
               name="edad"
@@ -150,7 +155,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               disabled={readOnly}
               className={errors.edad ? 'border-red-500' : ''}
             />
-
             <Select
               label="Sexo"
               name="sexo"
@@ -160,7 +164,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               disabled={readOnly}
               className={errors.sexo ? 'border-red-500' : ''}
             />
-
             <Input
               label="Peso"
               name="peso"
@@ -171,7 +174,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               disabled={readOnly}
               className={errors.peso ? 'border-red-500' : ''}
             />
-
             <Select
               label="Tamaño"
               name="tamano"
@@ -193,60 +195,22 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta comportamientos agresivos?</p>
                   <div className="flex space-x-4">
-                    <Checkbox 
-                      label="Si"
-                      name="es_agresivo"
-                      checked={formData.es_agresivo}
-                      disabled={readOnly}
-                      onChange={handleInputChange}
-                    />
-                    <Checkbox 
-                      label="No"
-                      name="es_agresivo"
-                      checked={!formData.es_agresivo}
-                      disabled={readOnly}
-                      onChange={handleToggle('es_agresivo')}
-                    />
+                    <Checkbox label="Si" name="es_agresivo" checked={formData.es_agresivo} disabled={readOnly} onChange={handleInputChange} />
+                    <Checkbox label="No" name="es_agresivo" checked={!formData.es_agresivo} disabled={readOnly} onChange={handleToggle('es_agresivo')} />
                   </div>
                 </div>
-
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta alguna enfermedad degenerativa o sin cura?</p>
                   <div className="flex space-x-4">
-                    <Checkbox 
-                      label="Si"
-                      name="enfermedad_no_tratable"
-                      checked={formData.enfermedad_no_tratable}
-                      disabled={readOnly}
-                      onChange={handleInputChange}
-                    />
-                    <Checkbox 
-                      label="No"
-                      name="enfermedad_no_tratable"
-                      checked={!formData.enfermedad_no_tratable}
-                      disabled={readOnly}
-                      onChange={handleToggle('enfermedad_no_tratable')}
-                    />
+                    <Checkbox label="Si" name="enfermedad_no_tratable" checked={formData.enfermedad_no_tratable} disabled={readOnly} onChange={handleInputChange} />
+                    <Checkbox label="No" name="enfermedad_no_tratable" checked={!formData.enfermedad_no_tratable} disabled={readOnly} onChange={handleToggle('enfermedad_no_tratable')} />
                   </div>
                 </div>
-
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta discapacidades?</p>
                   <div className="flex space-x-4">
-                    <Checkbox 
-                      label="Si"
-                      name="discapacidad"
-                      checked={formData.discapacidad}
-                      disabled={readOnly}
-                      onChange={handleInputChange}
-                    />
-                    <Checkbox 
-                      label="No"
-                      name="discapacidad"
-                      checked={!formData.discapacidad}
-                      disabled={readOnly}
-                      onChange={handleToggle('discapacidad')}
-                    />
+                    <Checkbox label="Si" name="discapacidad" checked={formData.discapacidad} disabled={readOnly} onChange={handleInputChange} />
+                    <Checkbox label="No" name="discapacidad" checked={!formData.discapacidad} disabled={readOnly} onChange={handleToggle('discapacidad')} />
                   </div>
                 </div>
               </div>
@@ -261,7 +225,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
-
               <Select
                 label="Tipo de movimiento"
                 name="tipo_movimiento"
@@ -277,7 +240,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 disabled={readOnly}
                 className={errors.tipo_movimiento ? 'border-red-500' : ''}
               />
-
               <Input
                 label="Fecha"
                 name="fecha_movimiento"
@@ -288,7 +250,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 disabled={readOnly}
                 className={errors.fecha_movimiento ? 'border-red-500' : ''}
               />
-
               <Textarea
                 label="Motivo"
                 name="motivo_movimiento"
@@ -315,8 +276,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 onChange={handleInputChange}
                 placeholder=""
                 disabled={readOnly}
-                className={errors.lugar ? 'border-red-500' : ''}/>
-
+                className={errors.lugar ? 'border-red-500' : ''}
+              />
               <Textarea
                 label="Descripción"
                 name="descripcion"
@@ -325,7 +286,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 rows={4}
                 placeholder=""
                 disabled={readOnly}
-                className={errors.descripcion ? 'border-red-500' : ''}/>
+                className={errors.descripcion ? 'border-red-500' : ''}
+              />
             </div>
           </div>
         </div>
@@ -338,7 +300,11 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
             className="!bg-[#2B264F] !text-white hover:bg-[#7BB75A] px-54 h-10 flex items-center justify-center font-semibold">
             Guardar
           </Button>
-          <Button type="button" variant="secondary" onClick={handleCancel} className=" !bg-[#A7A7A7] !text-white px-54 h-10 flex items-center justify-center font-semibold">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleCancel}
+            className="!bg-[#A7A7A7] !text-white px-54 h-10 flex items-center justify-center font-semibold">
             Cancelar
           </Button>
         </div>
@@ -350,13 +316,15 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
         confirmLabel="aceptar"
         cancelLabel="cancelar"
         onConfirm={handleConfirmCancel}
-        onCancel={() => setShowCancelConfirm(false)}/>
+        onCancel={() => setShowCancelConfirm(false)}
+      />
 
       <ConfirmModal
         isOpen={showSaveSuccess}
         message="Expediente guardado correctamente"
         confirmLabel="aceptar"
-        onConfirm={handleCloseSaveSuccess}/>
+        onConfirm={handleCloseSaveSuccess}
+      />
     </div>
   );
 };

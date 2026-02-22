@@ -19,6 +19,12 @@ export const AnimalsService = {
       body: JSON.stringify(data),
     }),
 
+  createWithForm: (formData: FormData): Promise<Animal> =>
+  apiFetch<Animal>(ENDPOINTS.ANIMALS, {
+    method: 'POST',
+    body: formData,
+  }),
+
   update: (id: string, data: UpdateAnimalDTO): Promise<Animal> =>
     apiFetch<Animal>(`${ENDPOINTS.ANIMALS}/${id}`, {
       method: 'PATCH',

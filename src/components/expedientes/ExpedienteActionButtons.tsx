@@ -13,14 +13,36 @@ const stateLabels: Record<RecupercacionState, string> = {
   defuncion: 'Defunción',
 };
 
+const stateApiValues: Record<RecupercacionState, string> = {
+  recuperacion: 'en_recuperacion',
+  adopcion: 'en_adopcion',
+  adoptado: 'adoptado',
+  defuncion: 'en_defuncion',
+};
+
+const apiToState: Record<string, RecupercacionState> = {
+  en_recuperacion: 'recuperacion',
+  en_adopcion: 'adopcion',
+  adoptado: 'adoptado',
+  en_defuncion: 'defuncion',
+};
+
 const stateOrder: RecupercacionState[] = ['recuperacion', 'adopcion', 'adoptado', 'defuncion'];
 
 interface ExpedienteActionButtonsProps {
   onHistorialClick?: () => void;
+  onStateChange?: (apiValue: string) => void;  
+  currentState?: string;                       
 }
 
-export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = ({ onHistorialClick }) => {
-  const [state, setState] = useState<RecupercacionState>('recuperacion');
+export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = ({
+  onHistorialClick,
+  onStateChange,
+  currentState,
+}) => {
+  const [state, setState] = useState<RecupercacionState>(
+    apiToState[currentState ?? ''] ?? 'recuperacion'
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirmChange, setShowConfirmChange] = useState(false);
   const [pendingState, setPendingState] = useState<RecupercacionState | null>(null);
@@ -34,6 +56,7 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
   const handleConfirmStateChange = () => {
     if (pendingState) {
       setState(pendingState);
+      onStateChange?.(stateApiValues[pendingState]); 
     }
     setShowConfirmChange(false);
     setPendingState(null);
@@ -47,12 +70,12 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
   return (
     <div className="flex space-x-4">
       <div className="relative">
-        <Button 
-          type="button" 
+        <Button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center space-x-2 pl-3">
           <span>
-              <Image src="/imagenes/estado.svg" alt="Estado" width={30} height={30} />
+            <Image src="/imagenes/estado.svg" alt="Estado" width={30} height={30} />
           </span>
           <span>{stateLabels[state]}</span>
         </Button>
@@ -84,7 +107,8 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
         confirmLabel="Cambiar"
         cancelLabel="Cancelar"
         onConfirm={handleConfirmStateChange}
-        onCancel={handleCancelStateChange}/>
+        onCancel={handleCancelStateChange}
+      />
     </div>
   );
 };

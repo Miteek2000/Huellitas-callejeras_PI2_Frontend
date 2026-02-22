@@ -52,14 +52,21 @@ export default function EditarExpedientePage() {
     }
   };
 
+  const REFUGIO_ID = 'd7195b56-5911-4c31-aedf-93f6da91f22a';
+  const USUARIO_ID = '903afe32-a10c-4e04-9ecd-dd3ea4e9695e';
+
   const handleUpdateAnimal = async (data: Animal) => {
     try {
-      await AnimalsService.update(animalId, data);
+      const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
+
+      await AnimalsService.update(animalId, {
+        ...payload,
+        refugio_id: REFUGIO_ID,
+        usuario_id: USUARIO_ID,
+      });
 
       await loadData();
-
       setIsEditing(false);
-
     } catch (error) {
       console.error('Error actualizando animal:', error);
     }
