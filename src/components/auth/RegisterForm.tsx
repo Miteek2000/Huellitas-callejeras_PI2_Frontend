@@ -2,26 +2,7 @@
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui';
-
-interface RegisterFormData {
-  nombreRefugio: string;
-  capacidad: string;
-  estado: string;
-  municipio: string;
-  colonia: string;
-  calle: string;
-  numeroInterior: string;
-  numeroExterior: string;
-  nombres: string;
-  apellidoPaterno: string;
-  apellidoMaterno: string;
-  email: string;
-  contrasena: string;
-}
-
-interface RegisterFormProps {
-  onSubmit?: (data: RegisterFormData) => void;
-}
+import type { RegisterFormData, RegisterFormProps } from '@/schemas/auth.schema';
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -38,6 +19,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
     apellidoMaterno: '',
     email: '',
     contrasena: '',
+    confirmarContrasena: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,15 +37,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
       <div 
         className="absolute inset-0 bg-repeat"
         style={{
-          backgroundImage: 'url(/imagenes/fondo.png)',
+          backgroundImage: 'url(/imagenes/Fondo-inicio-sesion.png)',
           backgroundSize: '400px 400px',
         }}
       />
       
-      {/* Aqui inicia el formulario pa que no se me olvide  */}
       <div className="relative z-10 flex items-center justify-center min-h-screen py-12 px-4">
-        <div className="bg-white/95 rounded-3xl shadow-2xl w-full max-w-md p-8">
-          <h1 className="text-3xl font-bold text-[#2B4F5F] text-center mb-8">
+        <div className="bg-[#E8E8E8] rounded-3xl shadow-2xl w-full max-w-md p-8">
+          <h1 className="text-3xl font-bold text-[#182F51] text-center mb-8">
             Darse de alta
           </h1>
 
@@ -73,7 +54,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
               value={formData.nombreRefugio}
               onChange={handleInputChange}
               placeholder="Nombre del refugio"
-              className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+              className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
             />
             
             <Input
@@ -82,11 +63,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
               value={formData.capacidad}
               onChange={handleInputChange}
               placeholder="Capacidad"
-              className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+              className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
             />
 
             <div className="pt-2">
-              <p className="text-sm font-medium text-gray-700 mb-3">
+              <p className="text-sm font-medium text-[#606060] mb-3">
                 Dirección del refugio
               </p>
               
@@ -96,7 +77,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.estado}
                   onChange={handleInputChange}
                   placeholder="Estado"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -104,7 +85,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.municipio}
                   onChange={handleInputChange}
                   placeholder="Municipio"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -112,15 +93,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.colonia}
                   onChange={handleInputChange}
                   placeholder="Colonia"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
-                  name="calle1"
+                  name="calle"
                   value={formData.calle}
                   onChange={handleInputChange}
                   placeholder="Calle"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -129,7 +110,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                     value={formData.numeroInterior}
                     onChange={handleInputChange}
                     placeholder="Número interior"
-                    className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                    className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                   />
                   
                   <Input
@@ -137,7 +118,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                     value={formData.numeroExterior}
                     onChange={handleInputChange}
                     placeholder="Número exterior"
-                    className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                    className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                   />
                 </div>
               </div>
@@ -145,7 +126,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
 
 
             <div className="pt-2">
-              <p className="text-sm font-medium text-gray-700 mb-3">
+              <p className="text-sm font-medium text-[#606060] mb-3">
                 Administrador de refugio
               </p>
               
@@ -155,7 +136,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.nombres}
                   onChange={handleInputChange}
                   placeholder="Nombres"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -163,7 +144,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.apellidoPaterno}
                   onChange={handleInputChange}
                   placeholder="Apellido Paterno"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -171,7 +152,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.apellidoMaterno}
                   onChange={handleInputChange}
                   placeholder="Apellido Materno"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -180,7 +161,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="email"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -189,10 +170,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.contrasena}
                   onChange={handleInputChange}
                   placeholder="Contraseña"
-                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
                 />
               </div>
             </div>
+
+                <Input
+                  name="confirmarContrasena"
+                  type="password"
+                  value={formData.confirmarContrasena}
+                  onChange={handleInputChange}
+                  placeholder="Confirmar contraseña"
+                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                />
 
 
             <div className="pt-6">
