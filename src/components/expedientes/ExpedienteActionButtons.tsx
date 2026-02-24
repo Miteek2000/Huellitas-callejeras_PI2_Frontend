@@ -4,30 +4,33 @@ import React, { useState } from 'react';
 import { Button, ConfirmModal } from '@/components/ui';
 import Image from 'next/image';
 
-type RecupercacionState = 'recuperacion' | 'adopcion' | 'adoptado' | 'defuncion';
+type RecupercacionState = 'recuperacion' | 'adopcion' | 'adoptado' | 'defuncion' | 'extraviado';
 
 const stateLabels: Record<RecupercacionState, string> = {
   recuperacion: 'Recuperación',
   adopcion: 'En adopción',
   adoptado: 'Adoptado',
   defuncion: 'Defunción',
+  extraviado: 'Extraviado',
 };
 
 const stateApiValues: Record<RecupercacionState, string> = {
-  recuperacion: 'en_recuperacion',
-  adopcion: 'en_adopcion',
+  recuperacion: 'recuperacion',
+  adopcion: 'adopcion',
   adoptado: 'adoptado',
-  defuncion: 'en_defuncion',
+  defuncion: 'defuncion',
+  extraviado: 'extraviado',
 };
 
 const apiToState: Record<string, RecupercacionState> = {
-  en_recuperacion: 'recuperacion',
-  en_adopcion: 'adopcion',
+  recuperacion: 'recuperacion',
+  adopcion: 'adopcion',
   adoptado: 'adoptado',
-  en_defuncion: 'defuncion',
+  defuncion: 'defuncion',
+  extraviado: 'extraviado',
 };
 
-const stateOrder: RecupercacionState[] = ['recuperacion', 'adopcion', 'adoptado', 'defuncion'];
+const stateOrder: RecupercacionState[] = ['recuperacion', 'adopcion', 'adoptado', 'defuncion', 'extraviado'];
 
 interface ExpedienteActionButtonsProps {
   onHistorialClick?: () => void;

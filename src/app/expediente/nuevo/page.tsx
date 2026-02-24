@@ -1,24 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import type { Animal } from '@/schemas/animal.schema';
-import { AnimalsService, type CreateAnimalDTO } from '@/app/services/animals.service';
+import { AnimalsService } from '@/app/services/animals.service';
 import { MovementsService } from '@/app/services/movements.service';
 import Image from 'next/image';
 
-const REFUGIO_ID = 'd7195b56-5911-4c31-aedf-93f6da91f22a';
-const USUARIO_ID = '903afe32-a10c-4e04-9ecd-dd3ea4e9695e';
+const REFUGIO_ID = 'a732ec74-e803-4b85-aa1f-74d9d30ea827';
+const USUARIO_ID = '6f390bb9-91c2-4448-8808-dac6c2a2db6b';
 
 export default function ExpedientePage() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
-  const [pendingMovimiento, setPendingMovimiento] = useState<Omit<Movimiento, 'id_movimiento' | 'animal_id'> | null>(null);
+  const pendingMovimientoRef = useRef<Omit<Movimiento, 'id_movimiento' | 'animal_id'> | null>(null);
 
-  const handleSaveAnimal = async (data: Animal, fotoFile?: File | null) => {
+  const handleSaveAnimal = async (data: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => {
     const form = new FormData();
     form.append('nombre', data.nombre);
     form.append('estado', data.estado);
@@ -42,21 +42,23 @@ export default function ExpedientePage() {
 
     const animalCreado = await AnimalsService.createWithForm(form);
 
-    if (pendingMovimiento && animalCreado.id_animal) {
-      await MovementsService.create({
-        ...pendingMovimiento,
-        animal_id: animalCreado.id_animal, 
-      });
-    }
+  if (movimiento && animalCreado.id_animal) {
+    await MovementsService.create({
+      ...movimiento,
+      animal_id: animalCreado.id_animal,
+    });
+  }
 
+  console.log('movimiento recibido en handleSaveAnimal:', movimiento);
+  console.log('animal creado:', animalCreado);
+    
     router.push(`/expediente/${animalCreado.id_animal}`);
   };
 
   const handleSaveMovimiento = (
     movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
   ) => {
-    setPendingMovimiento(movimiento);
-    setMovimientos(prev => [{ ...movimiento, animal_id: '' }, ...prev]); 
+   setMovimientos(prev => [{ ...movimiento, animal_id: '' }, ...prev]);
   };
 
   return (

@@ -11,7 +11,7 @@ import Image from 'next/image';
 interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
-  onSaveAnimal?: (animal: Animal, fotoFile?: File | null) => Promise<void>;
+  onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
   readOnly?: boolean;
@@ -77,19 +77,26 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
             <div
               className={`absolute inset-4 bg-[#2B5278] rounded-full overflow-hidden flex items-center justify-center ${
                 errors.foto ? 'ring-2 ring-red-500' : ''
-              }`}
+              } ${!readOnly ? 'cursor-pointer group' : ''}`}
+              onClick={readOnly ? undefined : handleFotoClick}
             >
               {fotoPreviewUrl ? (
-                <img src={fotoPreviewUrl} alt="Foto del paciente" className="w-full h-full object-cover" />
+                <>
+                  <img src={fotoPreviewUrl} alt="Foto del paciente" className="w-full h-full object-cover" />
+                  {!readOnly && (
+                    <div className="absolute inset-0bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                      <Image
+                        src="/imagenes/agregarImagen.svg"
+                        alt="Cambiar foto"
+                        width={40}
+                        height={40}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      />
+                    </div>
+                  )}
+                </>
               ) : (
-                <button
-                  type="button"
-                  onClick={readOnly ? undefined : handleFotoClick}
-                  disabled={readOnly}
-                  className="hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
-                </button>
+                <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
               )}
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" disabled={readOnly} onChange={handleFotoChange} />
             </div>

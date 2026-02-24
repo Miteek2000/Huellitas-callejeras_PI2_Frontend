@@ -8,9 +8,11 @@ import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
 import { AnimalsService } from '@/app/services/animals.service';
 import { MovementsService } from '@/app/services/movements.service';
+import { getImageUrl } from '@/app/lib/endpoints';
 
-const REFUGIO_ID = 'd7195b56-5911-4c31-aedf-93f6da91f22a';
-const USUARIO_ID = '903afe32-a10c-4e04-9ecd-dd3ea4e9695e';
+
+const REFUGIO_ID = 'a732ec74-e803-4b85-aa1f-74d9d30ea827';
+const USUARIO_ID = '6f390bb9-91c2-4448-8808-dac6c2a2db6b';
 
 export default function EditarExpedientePage() {
   const router = useRouter();
@@ -42,7 +44,7 @@ export default function EditarExpedientePage() {
     }
   };
 
-  const handleUpdateAnimal = async (data: Animal) => {
+  const handleUpdateAnimal = async (data: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => {
     try {
       const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
       await AnimalsService.update(animalId, {
@@ -50,6 +52,14 @@ export default function EditarExpedientePage() {
         refugio_id: REFUGIO_ID,
         usuario_id: USUARIO_ID,
       });
+    if (movimiento) {
+      const nuevoMovimiento = await MovementsService.create({
+        ...movimiento,
+        animal_id: animalId,
+      });
+      setMovimientos(prev => [nuevoMovimiento, ...prev]);
+    }
+    
       await loadData();
       setIsEditing(false);
     } catch (error) {
@@ -92,7 +102,7 @@ export default function EditarExpedientePage() {
 
       <ExpedienteForm
         initialData={expediente}
-        initialPhotoUrl="/imagenes/yo-prueba.jpg"
+        initialPhotoUrl={getImageUrl(expediente.imagen)}
         readOnly={!isEditing}
         cancelMessage="¿Deseas cancelar los cambios?"
         onCancelConfirmed={() => router.push('/')}

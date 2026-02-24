@@ -7,7 +7,7 @@ import type { Movimiento } from '@/schemas/movimiento.schema';
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
-  onSaveAnimal?: (animal: Animal, fotoFile?: File | null) => Promise<void>;
+  onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
 }
@@ -15,7 +15,7 @@ interface UseExpedienteFormOptions {
 export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const defaultFormData: Animal = {
     nombre: '',
-    estado: '',
+    estado: 'recuperacion',
     especie: '',
     raza: '',
     edad: '',
@@ -59,7 +59,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const tamanoOptions = [
     { value: '', label: 'Seleccione...' },
     { value: 'miniatura', label: 'Miniatura' },
-    { value: 'pequeño', label: 'Pequeño' },
+    { value: 'pequeno', label: 'Pequeño' },
     { value: 'mediano', label: 'Mediano' },
     { value: 'grande', label: 'Grande' },
     { value: 'gigante', label: 'Gigante' },
@@ -140,18 +140,16 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       return;
     }
 
+
+    const movimiento = movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo ? movimientoData : undefined;
+
+
+     console.log('movimientoData:', movimientoData);
+    console.log('movimiento a enviar:', movimientoData);
+
     try {
       if (options?.onSaveAnimal) {
-        await options.onSaveAnimal(formData, fotoFile);
-      }
-
-      if (
-        options?.onSaveMovimiento &&
-        movimientoData.tipo_movimiento &&
-        movimientoData.fecha_movimiento &&
-        movimientoData.motivo
-      ) {
-        options.onSaveMovimiento(movimientoData);
+        await options.onSaveAnimal(formData, fotoFile, movimiento);
       }
 
       setShowSaveSuccess(true);
