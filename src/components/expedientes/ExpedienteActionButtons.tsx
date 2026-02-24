@@ -14,17 +14,17 @@ const stateLabels: Record<RecupercacionState, string> = {
 };
 
 const stateApiValues: Record<RecupercacionState, string> = {
-  recuperacion: 'en_recuperacion',
-  adopcion: 'en_adopcion',
+  recuperacion: 'recuperacion',
+  adopcion: 'adopcion',
   adoptado: 'adoptado',
-  defuncion: 'en_defuncion',
+  defuncion: 'defuncion',
 };
 
 const apiToState: Record<string, RecupercacionState> = {
-  en_recuperacion: 'recuperacion',
-  en_adopcion: 'adopcion',
+  recuperacion: 'recuperacion',
+  adopcion: 'adopcion',
   adoptado: 'adoptado',
-  en_defuncion: 'defuncion',
+  defuncion: 'defuncion',
 };
 
 const stateOrder: RecupercacionState[] = ['recuperacion', 'adopcion', 'adoptado', 'defuncion'];

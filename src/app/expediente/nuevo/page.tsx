@@ -9,8 +9,8 @@ import { AnimalsService, type CreateAnimalDTO } from '@/app/services/animals.ser
 import { MovementsService } from '@/app/services/movements.service';
 import Image from 'next/image';
 
-const REFUGIO_ID = 'd7195b56-5911-4c31-aedf-93f6da91f22a';
-const USUARIO_ID = '903afe32-a10c-4e04-9ecd-dd3ea4e9695e';
+const REFUGIO_ID = 'f16dc945-a56f-48b4-a459-334dd53e8d5b';
+const USUARIO_ID = '6e5d65e0-3b84-4fc9-93b9-fe6f54fce60e';
 
 export default function ExpedientePage() {
   const router = useRouter();
