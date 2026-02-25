@@ -11,9 +11,6 @@ import { MovementsService } from '@/app/services/movements.service';
 import { getImageUrl } from '@/app/lib/endpoints';
 
 
-const REFUGIO_ID = 'a732ec74-e803-4b85-aa1f-74d9d30ea827';
-const USUARIO_ID = '6f390bb9-91c2-4448-8808-dac6c2a2db6b';
-
 export default function EditarExpedientePage() {
   const router = useRouter();
   const params = useParams();
@@ -48,9 +45,7 @@ export default function EditarExpedientePage() {
     try {
       const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
       await AnimalsService.update(animalId, {
-        ...payload,
-        refugio_id: REFUGIO_ID,
-        usuario_id: USUARIO_ID,
+        ...payload
       });
     if (movimiento) {
       const nuevoMovimiento = await MovementsService.create({

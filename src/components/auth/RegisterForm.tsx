@@ -45,7 +45,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowErrors(true);
-    const hasEmpty = requiredFields.some((field) => !formData[field]);
+    const hasEmpty = requiredFields.some((field) => !formData[field as keyof typeof formData]);
     if (hasEmpty) return;
     const dataToSubmit: RegisterFormData = {
       nombreRefugio: formData.nombreRefugio,
