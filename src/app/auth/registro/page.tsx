@@ -21,12 +21,6 @@ export default function RegistroPage() {
         return;
       }
 
-      const parseNumero = (valor: string): number | undefined => {
-        if (!valor || valor.toUpperCase() === 'S/N') return undefined;
-        const num = parseInt(valor);
-        return isNaN(num) ? undefined : num;
-      };
-
       const registroData: RegistroCompletoData = {
         refugio: {
           nombre: data.nombreRefugio,
@@ -35,8 +29,8 @@ export default function RegistroPage() {
           municipio: data.municipio,
           colonia: data.colonia,
           calle: data.calle,
-          num_exterior: parseNumero(data.numeroExterior),
-          num_interior: parseNumero(data.numeroInterior),
+          num_exterior: data.numeroExterior,
+          num_interior: data.numeroInterior,
         },
         usuario: {
           nombre: data.nombres,

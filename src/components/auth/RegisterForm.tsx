@@ -22,13 +22,31 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
     confirmarContrasena: '',
   });
 
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+  const [showErrors, setShowErrors] = useState(false);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const requiredFields = [
+    'nombreRefugio', 'capacidad', 'estado', 'municipio', 'colonia', 'calle',
+    'nombres', 'apellidoPaterno', 'apellidoMaterno', 'email', 'contrasena', 'confirmarContrasena'
+  ];
+
+  const getError = (name: string) => {
+    if (!showErrors && !touched[name]) return '';
+    if (requiredFields.includes(name) && !formData[name as keyof typeof formData]) return 'Este campo es obligatorio';
+    return '';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowErrors(true);
+    const hasEmpty = requiredFields.some((field) => !formData[field]);
+    if (hasEmpty) return;
     const dataToSubmit: RegisterFormData = {
       nombreRefugio: formData.nombreRefugio,
       capacidad: Number(formData.capacidad) || 0,
@@ -36,8 +54,8 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
       municipio: formData.municipio,
       colonia: formData.colonia,
       calle: formData.calle,
-      numeroInterior: formData.numeroInterior,
-      numeroExterior: formData.numeroExterior,
+      numeroInterior: formData.numeroInterior !== '' ? Number(formData.numeroInterior) : 0,
+      numeroExterior: formData.numeroExterior !== '' ? Number(formData.numeroExterior) : 0,
       nombres: formData.nombres,
       apellidoPaterno: formData.apellidoPaterno,
       apellidoMaterno: formData.apellidoMaterno,
@@ -71,6 +89,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
               onChange={handleInputChange}
               placeholder="Nombre del refugio"
               className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+              error={getError('nombreRefugio')}
             />
             
             <Input
@@ -80,6 +99,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
               onChange={handleInputChange}
               placeholder="Capacidad"
               className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+              error={getError('capacidad')}
             />
 
             <div className="pt-2">
@@ -94,6 +114,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Estado"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('estado')}
                 />
                 
                 <Input
@@ -102,6 +123,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Municipio"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('municipio')}
                 />
                 
                 <Input
@@ -110,6 +132,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Colonia"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('colonia')}
                 />
                 
                 <Input
@@ -118,23 +141,28 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Calle"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('calle')}
                 />
                 
                 <div className="grid grid-cols-2 gap-4">
                   <Input
                     name="numeroInterior"
+                    type="number"
                     value={formData.numeroInterior}
                     onChange={handleInputChange}
                     placeholder="Número interior"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                    error={getError('numeroInterior')}
                   />
                   
                   <Input
                     name="numeroExterior"
+                    type="number"
                     value={formData.numeroExterior}
                     onChange={handleInputChange}
                     placeholder="Número exterior"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                    error={getError('numeroExterior')}
                   />
                 </div>
               </div>
@@ -153,6 +181,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Nombres"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('nombres')}
                 />
                 
                 <Input
@@ -161,6 +190,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Apellido Paterno"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('apellidoPaterno')}
                 />
                 
                 <Input
@@ -169,6 +199,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Apellido Materno"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('apellidoMaterno')}
                 />
                 
                 <Input
@@ -178,6 +209,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="email"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('email')}
                 />
                 
                 <Input
@@ -187,6 +219,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Contraseña"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('contrasena')}
                 />
               </div>
             </div>
@@ -198,6 +231,7 @@ export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => voi
                   onChange={handleInputChange}
                   placeholder="Confirmar contraseña"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
+                  error={getError('confirmarContrasena')}
                 />
 
 

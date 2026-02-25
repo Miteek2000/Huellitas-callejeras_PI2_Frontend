@@ -7,8 +7,8 @@ export interface RegisterFormData {
   municipio: string;
   colonia: string;
   calle: string;
-  numeroInterior: string;
-  numeroExterior: string;
+  numeroInterior: number;
+  numeroExterior: number;
   nombres: string;
   apellidoPaterno: string;
   apellidoMaterno: string;
