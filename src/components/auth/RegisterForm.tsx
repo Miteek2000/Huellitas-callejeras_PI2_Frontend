@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui';
-import type { RegisterFormData, RegisterFormProps } from '@/schemas/auth.schema';
+import type { RegisterFormData } from '@/schemas/auth.schema';
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
+export const RegisterForm: React.FC<{ onSubmit?: (data: RegisterFormData) => void }> = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     nombreRefugio: '',
     capacidad: '',

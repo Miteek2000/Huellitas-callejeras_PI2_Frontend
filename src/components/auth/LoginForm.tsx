@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui';
-import type { LoginFormData, LoginFormProps } from '@/schemas/auth.schema';
+import type { LoginFormData } from '@/schemas/auth.schema';
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void }> = ({ onSubmit }) => {
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
