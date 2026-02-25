@@ -5,7 +5,7 @@ import { Input } from '@/components/ui';
 import type { RegisterFormData, RegisterFormProps } from '@/schemas/auth.schema';
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const [formData, setFormData] = useState({
     nombreRefugio: '',
     capacidad: '',
     estado: '',
@@ -29,7 +29,23 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.(formData);
+    const dataToSubmit: RegisterFormData = {
+      nombreRefugio: formData.nombreRefugio,
+      capacidad: Number(formData.capacidad) || 0,
+      estado: formData.estado,
+      municipio: formData.municipio,
+      colonia: formData.colonia,
+      calle: formData.calle,
+      numeroInterior: formData.numeroInterior,
+      numeroExterior: formData.numeroExterior,
+      nombres: formData.nombres,
+      apellidoPaterno: formData.apellidoPaterno,
+      apellidoMaterno: formData.apellidoMaterno,
+      email: formData.email,
+      contrasena: formData.contrasena,
+      confirmarContrasena: formData.confirmarContrasena,
+    };
+    onSubmit?.(dataToSubmit);
   };
 
   return (
@@ -38,7 +54,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
         className="absolute inset-0 bg-repeat"
         style={{
           backgroundImage: 'url(/imagenes/Fondo-inicio-sesion.png)',
-          backgroundSize: '400px 400px',
+          backgroundSize: 'auto',
         }}
       />
       
@@ -54,7 +70,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
               value={formData.nombreRefugio}
               onChange={handleInputChange}
               placeholder="Nombre del refugio"
-              className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+              className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
             />
             
             <Input
@@ -63,7 +79,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
               value={formData.capacidad}
               onChange={handleInputChange}
               placeholder="Capacidad"
-              className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+              className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
             />
 
             <div className="pt-2">
@@ -77,7 +93,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.estado}
                   onChange={handleInputChange}
                   placeholder="Estado"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -85,7 +101,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.municipio}
                   onChange={handleInputChange}
                   placeholder="Municipio"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -93,7 +109,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.colonia}
                   onChange={handleInputChange}
                   placeholder="Colonia"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -101,7 +117,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.calle}
                   onChange={handleInputChange}
                   placeholder="Calle"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -110,7 +126,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                     value={formData.numeroInterior}
                     onChange={handleInputChange}
                     placeholder="Número interior"
-                    className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                    className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                   />
                   
                   <Input
@@ -118,7 +134,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                     value={formData.numeroExterior}
                     onChange={handleInputChange}
                     placeholder="Número exterior"
-                    className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                    className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                   />
                 </div>
               </div>
@@ -136,7 +152,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.nombres}
                   onChange={handleInputChange}
                   placeholder="Nombres"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -144,7 +160,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.apellidoPaterno}
                   onChange={handleInputChange}
                   placeholder="Apellido Paterno"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -152,7 +168,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.apellidoMaterno}
                   onChange={handleInputChange}
                   placeholder="Apellido Materno"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -161,7 +177,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="email"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
                 
                 <Input
@@ -170,7 +186,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.contrasena}
                   onChange={handleInputChange}
                   placeholder="Contraseña"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
               </div>
             </div>
@@ -181,14 +197,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                   value={formData.confirmarContrasena}
                   onChange={handleInputChange}
                   placeholder="Confirmar contraseña"
-                  className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 />
 
 
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full bg-[#2B264F] text-white py-3 rounded-lg text-lg font-medium hover:bg-[#1F1B3D] transition-colors"
+                className="w-full bg-[#2B264F] text-white py-2 rounded-3xl text-lg font-semibold hover:bg-[#1F1B3D] transition-colors"
               >
                 Registrarse
               </button>

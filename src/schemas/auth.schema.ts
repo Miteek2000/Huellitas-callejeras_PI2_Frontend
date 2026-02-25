@@ -1,6 +1,6 @@
 export interface RegisterFormData {
   nombreRefugio: string;
-  capacidad: string;
+  capacidad: number;
   estado: string;
   municipio: string;
   colonia: string;

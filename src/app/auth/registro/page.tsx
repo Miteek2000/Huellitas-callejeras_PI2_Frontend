@@ -13,8 +13,8 @@ export default function RegistroPage() {
       // Aquí irá la lógica de registro con el backend
       // await AuthService.register(data);
       
-      // Redirigir al login después del registro exitoso
-      // router.push('/auth/login');
+      // TODO: Redirigir al dashboard después del registro exitoso
+      // router.push('/dashboard');
     } catch (error) {
       console.error('Error en el registro:', error);
     }
