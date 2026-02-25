@@ -11,6 +11,9 @@ export const Input: React.FC<InputProps> = ({
   className = '',
   ...props 
 }) => {
+  const defaultBg = className.includes('bg-') ? '' : 'bg-[#D9D9D9]';
+  const defaultBorder = className.includes('border-') ? '' : 'border-none';
+  
   return (
     <div className="mb-4">
       {label && (
@@ -19,9 +22,9 @@ export const Input: React.FC<InputProps> = ({
         </label>
       )}
       <input 
-        className={`w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-300 ${
-          error ? 'border-red-500' : ''
-        } ${className}`}
+        className={`w-full px-4 py-2 rounded-lg ${defaultBg} ${defaultBorder} text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-300 
+          autofill:bg-inherit autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]
+          ${error ? 'border-red-500 !border !border-solid' : ''} ${className}`}
         {...props}
       />
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}

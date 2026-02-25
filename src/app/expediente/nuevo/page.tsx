@@ -9,8 +9,8 @@ import { AnimalsService } from '@/app/services/animals.service';
 import { MovementsService } from '@/app/services/movements.service';
 import Image from 'next/image';
 
-const REFUGIO_ID = 'a732ec74-e803-4b85-aa1f-74d9d30ea827';
-const USUARIO_ID = '6f390bb9-91c2-4448-8808-dac6c2a2db6b';
+const REFUGIO_ID = 'f16dc945-a56f-48b4-a459-334dd53e8d5b';
+const USUARIO_ID = '6e5d65e0-3b84-4fc9-93b9-fe6f54fce60e';
 
 export default function ExpedientePage() {
   const router = useRouter();
