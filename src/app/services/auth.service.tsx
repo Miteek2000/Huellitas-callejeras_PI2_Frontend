@@ -23,23 +23,19 @@ interface RolResponse {
 
 export const AuthService = {
   async registroCompleto(data: RegistroCompletoData): Promise<AuthResponse> {
-    // 1. Crear refugio
+
     const refugioCreado = await RefugiosService.create(data.refugio);
 
-    // 2. Crear rol "propietario" vinculado al refugio
     const rolPayload: CreateRolDTO = {
       nombre: 'propietario',
       refugio_id: refugioCreado.id_refugio,
     };
-
-    
 
     const rolCreado = await apiFetch<RolResponse>(ENDPOINTS.ROLES, {
       method: 'POST',
       body: JSON.stringify(rolPayload),
     });
 
-    // 3. Crear usuario con el refugio y rol creados
     const registerPayload: RegisterDTO = {
       nombre: data.usuario.nombre,
       apellido_p: data.usuario.apellido_p,
@@ -51,7 +47,6 @@ export const AuthService = {
       refugio_id: refugioCreado.id_refugio,
     };
 
-    // auth.service.ts - línea antes del apiFetch de register
     console.log('Payload register:', JSON.stringify(registerPayload, null, 2));
 
     const response = await apiFetch<AuthResponse>(ENDPOINTS.AUTH.REGISTER, {
