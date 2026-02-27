@@ -1,24 +1,17 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+
 import { AnimalsService } from '@/app/services/animals.service';
 import { MovementsService } from '@/app/services/movements.service';
 import { ExpedienteCard } from '@/components/animals/ExpedienteCard';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DeleteConfirmModal } from '@/components/animals/DeleteConfirmModal';
 import Link from 'next/link';
 import Image from 'next/image';
+import type { Animal } from '@/schemas/animal.schema';
+import type { Movimiento } from '@/schemas/movimiento.schema';
 
-interface Animal {
-	id_animal?: string;
-	nombre: string;
-	raza: string;
-	imagen?: string | null;
-}
-
-interface Movimiento {
-	tipo_movimiento: string;
-	animal_id: string;
-}
 
 const getTipoHuella = (movimientos: Movimiento[]): 'entrada' | 'salida' | null => {
 	if (!movimientos.length) return null;
@@ -33,6 +26,8 @@ export default function GaleriaPage() {
 	const [animales, setAnimales] = useState<Animal[]>([]);
 	const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
 	const [busqueda, setBusqueda] = useState('');
+	const [deleteId, setDeleteId] = useState<string | null>(null);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	useEffect(() => {
 		AnimalsService.getAll().then(setAnimales);
@@ -44,12 +39,12 @@ export default function GaleriaPage() {
 		(animal.id_animal && animal.id_animal.toLowerCase().includes(busqueda.toLowerCase()))
 	);
 
-	const handleDelete = async (id_animal?: string) => {
-		if (!id_animal) return;
-		if (window.confirm('¿Estás seguro de eliminar este expediente?')) {
-			await AnimalsService.delete(id_animal);
-			setAnimales(animales => animales.filter(a => a.id_animal !== id_animal));
-		}
+	const handleDelete = async () => {
+		if (!deleteId) return;
+		await AnimalsService.delete(deleteId);
+		setAnimales(animales => animales.filter(a => a.id_animal !== deleteId));
+		setShowDeleteModal(false);
+		setDeleteId(null);
 	};
 
 	return (
@@ -93,10 +88,19 @@ export default function GaleriaPage() {
 							onClick={() => {
 								window.location.href = `/expediente/${animal.id_animal}`;
 							}}
-							onDelete={() => handleDelete(animal.id_animal)}
+							onDelete={() => {
+								setDeleteId(animal.id_animal ?? null);
+								setShowDeleteModal(true);
+							}}
 						/>
 					);
 				})}
+				<DeleteConfirmModal
+					isOpen={showDeleteModal}
+					onConfirm={handleDelete}
+					onCancel={() => { setShowDeleteModal(false); setDeleteId(null); }}
+					message="¿Estás seguro de eliminar este expediente?"
+				/>
 			</div>
 		</div>
 	);
