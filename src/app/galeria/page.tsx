@@ -44,33 +44,42 @@ export default function GaleriaPage() {
 		(animal.id_animal && animal.id_animal.toLowerCase().includes(busqueda.toLowerCase()))
 	);
 
+	const handleDelete = async (id_animal?: string) => {
+		if (!id_animal) return;
+		if (window.confirm('¿Estás seguro de eliminar este expediente?')) {
+			await AnimalsService.delete(id_animal);
+			setAnimales(animales => animales.filter(a => a.id_animal !== id_animal));
+		}
+	};
+
 	return (
-		<div className="p-8">
-			<div className="flex justify-between items-center mb-6">
-				<div className="flex items-center gap-2">
-					<Link href="/expediente">
-						<span className="flex items-center text-[#194566] font-semibold text-lg">
-							<Image src="/imagenes/flecha.svg" alt="volver" width={24} height={24} />
-							Galeria de expedientes
-						</span>
-					</Link>
-					<Link href="/expediente/nuevo">
-						<Button variant="primary" className="ml-2 flex items-center gap-1">
-							<Image src="/imagenes/galeria/addAnimal.svg" alt="nuevo" width={20} height={20} />
-						</Button>
-					</Link>
+		<div className="min-h-screen bg-[#F1F1F1] p-8">
+			<div className="flex justify-between items-center mb-10 h-[60px]">
+				<div className="flex-1 flex items-center">
+					<div className="bg-[#E9E9E9] flex items-center px-3 py-2 h-[45px] w-full max-w-xl" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
+						<Link href="/expediente" className="flex items-center">
+							<Image src="/imagenes/flecha.svg" alt="volver" width={32} height={32} />
+							<span className="ml-3 text-[#22345A] font-medium text-lg">Galeria de expedientes</span>
+						</Link>
+						<div className="flex-1" />
+						<Link href="/expediente/nuevo">
+							<button className="flex items-center justify-center hover:scale-105 transition-transform">
+								<Image src="/imagenes/galeria/addAnimal.svg" alt="nuevo" width={32} height={32} />
+							</button>
+						</Link>
+					</div>
 				</div>
-				<div className="w-96 relative">
-                    <Image src='/imagenes/galeria/buscar.svg' alt="buscar" width={20} height={20} className="absolute left-3 top-2.5" />
+				<div className="w-96 relative ml-8">
+					<Image src='/imagenes/galeria/buscar.svg' alt="buscar" width={20} height={20} className="absolute left-3 top-2.5" />
 					<Input
 						placeholder="Buscar paciente por nombre o ID"
 						value={busqueda}
 						onChange={e => setBusqueda(e.target.value)}
-						className="pl-10"
+						className="pl-10 h[60px] w-full"
 					/>
 				</div>
 			</div>
-			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+			<div className="bg-[#E8E8E8] rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 				{animalesFiltrados.map(animal => {
 					const movimientosAnimal = movimientos.filter(m => m.animal_id === animal.id_animal);
 					const tipoHuella = getTipoHuella(movimientosAnimal);
@@ -84,6 +93,7 @@ export default function GaleriaPage() {
 							onClick={() => {
 								window.location.href = `/expediente/${animal.id_animal}`;
 							}}
+							onDelete={() => handleDelete(animal.id_animal)}
 						/>
 					);
 				})}
