@@ -8,6 +8,7 @@ export const ENDPOINTS = {
   REFUGIOS: `${BASE_URL}/refugios`,
   ANIMALS: `${BASE_URL}/animals`,
   MOVEMENTS: `${BASE_URL}/movements`,
+  ROLES: `${BASE_URL}/roles`
 };
 
 export const getImageUrl = (path?: string | null): string | undefined => {

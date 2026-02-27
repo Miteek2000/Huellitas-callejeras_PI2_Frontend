@@ -1,21 +1,45 @@
 import { ENDPOINTS } from '../lib/endpoints';
 import { apiFetch } from '../lib/interceptors';
 import { RefugiosService } from './refugios.service';
-import type { 
-  RegisterDTO, 
-  LoginDTO, 
-  AuthResponse, 
-  RegistroCompletoData 
+import type {
+  RegisterDTO,
+  LoginDTO,
+  AuthResponse,
+  RegistroCompletoData,
 } from '@/schemas/auth.schema';
 
-const ROL_ADMIN_REFUGIO = 'bffc4012-45a4-44ca-8b25-03562ca3c85f';
 const TOKEN_KEY = 'access_token';
 
-export const AuthService = {
+interface CreateRolDTO {
+  nombre: string;
+  refugio_id: string;
+}
 
+interface RolResponse {
+  id_roles: string;
+  nombre: string;
+  refugio_id: string;
+}
+
+export const AuthService = {
   async registroCompleto(data: RegistroCompletoData): Promise<AuthResponse> {
+    // 1. Crear refugio
     const refugioCreado = await RefugiosService.create(data.refugio);
 
+    // 2. Crear rol "propietario" vinculado al refugio
+    const rolPayload: CreateRolDTO = {
+      nombre: 'propietario',
+      refugio_id: refugioCreado.id_refugio,
+    };
+
+    
+
+    const rolCreado = await apiFetch<RolResponse>(ENDPOINTS.ROLES, {
+      method: 'POST',
+      body: JSON.stringify(rolPayload),
+    });
+
+    // 3. Crear usuario con el refugio y rol creados
     const registerPayload: RegisterDTO = {
       nombre: data.usuario.nombre,
       apellido_p: data.usuario.apellido_p,
@@ -23,9 +47,12 @@ export const AuthService = {
       email: data.usuario.email,
       contrasena: data.usuario.contrasena,
       activo: true,
-      rol_id: ROL_ADMIN_REFUGIO,
+      rol_id: rolCreado.id_roles,
       refugio_id: refugioCreado.id_refugio,
     };
+
+    // auth.service.ts - línea antes del apiFetch de register
+    console.log('Payload register:', JSON.stringify(registerPayload, null, 2));
 
     const response = await apiFetch<AuthResponse>(ENDPOINTS.AUTH.REGISTER, {
       method: 'POST',
@@ -36,7 +63,6 @@ export const AuthService = {
 
     return response;
   },
-
 
   async login(credentials: LoginDTO): Promise<AuthResponse> {
     const response = await apiFetch<AuthResponse>(ENDPOINTS.AUTH.LOGIN, {

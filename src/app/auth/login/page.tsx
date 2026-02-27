@@ -9,29 +9,20 @@ import { AuthService } from '@/app/services/auth.service';
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (data: LoginFormData) => {
     try {
-      setIsLoading(true);
-      setError('');
-
-      const loginData = {
+      await AuthService.login({
         email: data.email,
-        contrasena: data.password, 
-      };
+        contrasena: data.password,
+      });
 
-
-      const response = await AuthService.login(loginData);
-      
-      console.log('Login exitoso:', response);
-      
       router.push('/expediente/nuevo');
-    } catch (error: any) {
+
+    } catch (error: unknown) {
       console.error('Error en el login:', error);
-      setError(error.response?.data?.message || 'Credenciales inválidas. Intenta de nuevo.');
-    } finally {
-      setIsLoading(false);
+      const message = error instanceof Error ? error.message : 'Credenciales inválidas. Intenta de nuevo.';
+      setError(message);
     }
   };
 

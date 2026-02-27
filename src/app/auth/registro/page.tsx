@@ -9,13 +9,9 @@ import { AuthService } from '@/app/services/auth.service';
 export default function RegistroPage() {
   const router = useRouter();
   const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async (data: RegisterFormData) => {
     try {
-      setIsLoading(true);
-      setError('');
-
       if (data.contrasena !== data.confirmarContrasena) {
         setError('Las contraseñas no coinciden');
         return;
@@ -41,16 +37,13 @@ export default function RegistroPage() {
         },
       };
 
-      const response = await AuthService.registroCompleto(registroData);
-      
-      console.log('Registro exitoso:', response);
-      
+      await AuthService.registroCompleto(registroData);
       router.push('/expediente/nuevo');
-    } catch (error: any) {
+
+    } catch (error: unknown) {
       console.error('Error en el registro:', error);
-      setError(error.response?.data?.message || 'Error al registrar. Intenta de nuevo.');
-    } finally {
-      setIsLoading(false);
+      const message = error instanceof Error ? error.message : 'Error al registrar. Intenta de nuevo.';
+      setError(message);
     }
   };
 

@@ -1,24 +1,34 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import type { Animal } from '@/schemas/animal.schema';
 import { AnimalsService } from '@/app/services/animals.service';
 import { MovementsService } from '@/app/services/movements.service';
+import { getRefugioId, getUsuarioId } from '@/app/lib/auth';
 import Image from 'next/image';
-
-const REFUGIO_ID = 'f16dc945-a56f-48b4-a459-334dd53e8d5b';
-const USUARIO_ID = '6e5d65e0-3b84-4fc9-93b9-fe6f54fce60e';
 
 export default function ExpedientePage() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
-  const pendingMovimientoRef = useRef<Omit<Movimiento, 'id_movimiento' | 'animal_id'> | null>(null);
 
-  const handleSaveAnimal = async (data: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => {
+  const handleSaveAnimal = async (
+    data: Animal,
+    fotoFile?: File | null,
+    movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
+  ) => {
+    const refugioId = getRefugioId();
+    const usuarioId = getUsuarioId();
+
+    if (!refugioId || !usuarioId) {
+      console.error('No hay sesión activa');
+      router.push('/auth/login');
+      return;
+    }
+
     const form = new FormData();
     form.append('nombre', data.nombre);
     form.append('estado', data.estado);
@@ -33,8 +43,8 @@ export default function ExpedientePage() {
     form.append('es_agresivo', String(data.es_agresivo));
     form.append('enfermedad_no_tratable', String(data.enfermedad_no_tratable));
     form.append('discapacidad', String(data.discapacidad));
-    form.append('refugio_id', REFUGIO_ID);
-    form.append('usuario_id', USUARIO_ID);
+    form.append('refugio_id', refugioId);
+    form.append('usuario_id', usuarioId);
 
     if (fotoFile) {
       form.append('imagen', fotoFile);
@@ -42,23 +52,20 @@ export default function ExpedientePage() {
 
     const animalCreado = await AnimalsService.createWithForm(form);
 
-  if (movimiento && animalCreado.id_animal) {
-    await MovementsService.create({
-      ...movimiento,
-      animal_id: animalCreado.id_animal,
-    });
-  }
+    if (movimiento && animalCreado.id_animal) {
+      await MovementsService.create({
+        ...movimiento,
+        animal_id: animalCreado.id_animal,
+      });
+    }
 
-  console.log('movimiento recibido en handleSaveAnimal:', movimiento);
-  console.log('animal creado:', animalCreado);
-    
     router.push(`/expediente/${animalCreado.id_animal}`);
   };
 
   const handleSaveMovimiento = (
     movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
   ) => {
-   setMovimientos(prev => [{ ...movimiento, animal_id: '' }, ...prev]);
+    setMovimientos(prev => [{ ...movimiento, animal_id: '' }, ...prev]);
   };
 
   return (

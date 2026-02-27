@@ -6,9 +6,9 @@ export async function apiFetch<T>(
     throw new Error('apiFetch solo puede ejecutarse en el cliente');
   }
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('access_token'); // ← fix: era 'token'
 
-  const isFormData = options.body instanceof FormData; 
+  const isFormData = options.body instanceof FormData;
 
   const response = await fetch(url, {
     ...options,
@@ -20,15 +20,16 @@ export async function apiFetch<T>(
   });
 
   if (response.status === 401) {
-    localStorage.removeItem('token');
+    localStorage.removeItem('access_token'); // ← fix: era 'token'
     window.location.href = '/';
     throw new Error('No autorizado');
   }
 
-  const data = await response.json();
+  const data: unknown = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || 'Error en la petición');
+    const errorData = data as { message?: string };
+    throw new Error(errorData.message || 'Error en la petición');
   }
 
   return data as T;
