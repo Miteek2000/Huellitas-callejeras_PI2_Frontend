@@ -77,6 +77,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     { value: 'adopcion', label: 'Adopción' },
     { value: 'defuncion', label: 'Defunción' },
     { value: 'retorno', label: 'Retorno' },
+    {value: 'extravio', label: 'Extravío'}
   ];
 
   const fileInputRef = useRef<HTMLInputElement>(null);
