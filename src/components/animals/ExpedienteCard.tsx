@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import { getImageUrl } from '@/app/lib/endpoints';
 
 interface Props {
   nombre: string;
@@ -17,14 +18,18 @@ const pawIcons = {
 
 const fondoEliminar = '/imagenes/galeria/fondoEliminar.svg';
 const iconoDelete = '/imagenes/galeria/Delete.png';
+const DEFAULT_IMAGE = '/imagenes/galeria/default.png'; 
 
 export const ExpedienteCard: React.FC<Props> = ({ nombre, raza, imagen, tipoHuella, onClick, onDelete }) => {
+  console.log('imagen prop:', imagen);
+  console.log('getImageUrl result:', getImageUrl(imagen));
   return (
      <div className="relative bg-[#F3F3F3] shadow-lg p-4 flex flex-col items-center cursor-pointer hover:shadow-xl transition-shadow h-80 w-56" onClick={onClick}>
       <div className="w-45 h-45 relative mb-2">
-        <Image src='/imagenes/galeria/ejemploAnimal.png' alt={nombre}     
-        fill
-        className="object-cover"/>
+          <Image src={getImageUrl(imagen) ?? DEFAULT_IMAGE}
+            alt={nombre}
+            fill
+            className="object-cover" />
       </div>
         <div className="flex items-center gap-1 mb-1 w-full self-start">
         <span className="font-semibold text-lg text-[#000000]">
