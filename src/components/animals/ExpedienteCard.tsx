@@ -19,7 +19,6 @@ const fondoEliminar = '/imagenes/galeria/fondoEliminar.svg';
 const iconoDelete = '/imagenes/galeria/Delete.png';
 
 export const ExpedienteCard: React.FC<Props> = ({ nombre, raza, imagen, tipoHuella, onClick, onDelete }) => {
-  const srcImagen = typeof imagen === 'string' && imagen.length > 0 ? imagen : '/imagenes/galeria/ejemploAnimal.png';
   return (
      <div className="relative bg-[#F3F3F3] shadow-lg p-4 flex flex-col items-center cursor-pointer hover:shadow-xl transition-shadow h-80 w-56" onClick={onClick}>
       <div className="w-45 h-45 relative mb-2">

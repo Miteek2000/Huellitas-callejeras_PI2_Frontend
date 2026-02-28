@@ -74,7 +74,7 @@ export default function GaleriaPage() {
 					/>
 				</div>
 			</div>
-			<div className="bg-[#E8E8E8] rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+			<div className="bg-[#E8E8E8] rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
 				{animalesFiltrados.map(animal => {
 					const movimientosAnimal = movimientos.filter(m => m.animal_id === animal.id_animal);
 					const tipoHuella = getTipoHuella(movimientosAnimal);
