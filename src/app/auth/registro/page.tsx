@@ -38,7 +38,7 @@ export default function RegistroPage() {
       };
 
       await AuthService.registroCompleto(registroData);
-      router.push('/expediente/nuevo');
+      router.push('/galeria');
 
     } catch (error: unknown) {
       console.error('Error en el registro:', error);

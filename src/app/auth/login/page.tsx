@@ -17,7 +17,7 @@ export default function LoginPage() {
         contrasena: data.password,
       });
 
-      router.push('/expediente/nuevo');
+      router.push('/galeria');
 
     } catch (error: unknown) {
       console.error('Error en el login:', error);

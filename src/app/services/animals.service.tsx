@@ -7,8 +7,8 @@ export type UpdateAnimalDTO = Partial<CreateAnimalDTO>;
 
 export const AnimalsService = {
 
-  getAll: (): Promise<Animal[]> =>
-    apiFetch<Animal[]>(ENDPOINTS.ANIMALS),
+  getAll: (id: string): Promise<Animal[]> =>
+    apiFetch<Animal[]>(`${ENDPOINTS.ANIMALS}/refugio/${id}`),
 
   getById: (id: string): Promise<Animal> =>
     apiFetch<Animal>(`${ENDPOINTS.ANIMALS}/${id}`),
