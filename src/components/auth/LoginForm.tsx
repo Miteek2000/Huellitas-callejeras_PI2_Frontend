@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui';
 import type { LoginFormData } from '@/schemas/auth.schema';
 
-export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void }> = ({ onSubmit }) => {
+export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void; error?: string }> = ({ onSubmit, error }) => {
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -54,6 +54,12 @@ export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void }> =
               placeholder="Ingrese su contraseña"
               className="bg-[#D9D9D9] border-none placeholder:text-gray-600"
             />
+
+            {error && (
+              <div className=" text-red-700 px-4 rounded-lg text-sm text-center">
+                {error}
+              </div>
+            )}
 
             <div className="pt-4">
               <button

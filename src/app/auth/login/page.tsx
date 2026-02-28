@@ -12,6 +12,7 @@ export default function LoginPage() {
 
   const handleLogin = async (data: LoginFormData) => {
     try {
+      setError('');
       await AuthService.login({
         email: data.email,
         contrasena: data.password,
@@ -27,13 +28,6 @@ export default function LoginPage() {
   };
 
   return (
-    <>
-      <LoginForm onSubmit={handleLogin} />
-      {error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
-          {error}
-        </div>
-      )}
-    </>
+    <LoginForm onSubmit={handleLogin} error={error} />
   );
 }

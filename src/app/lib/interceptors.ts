@@ -6,7 +6,7 @@ export async function apiFetch<T>(
     throw new Error('apiFetch solo puede ejecutarse en el cliente');
   }
 
-  const token = localStorage.getItem('access_token'); // ← fix: era 'token'
+  const token = localStorage.getItem('access_token'); 
 
   const isFormData = options.body instanceof FormData;
 
@@ -20,9 +20,16 @@ export async function apiFetch<T>(
   });
 
   if (response.status === 401) {
-    localStorage.removeItem('access_token'); // ← fix: era 'token'
-    window.location.href = '/';
-    throw new Error('No autorizado');
+    const data: unknown = await response.json();
+    const errorData = data as { message?: string };
+    const isLoginPage = window.location.pathname === '/' || window.location.pathname.includes('login');
+    
+    if (!isLoginPage) {
+      localStorage.removeItem('access_token');
+      window.location.href = '/';
+    }
+    
+    throw new Error(errorData.message || 'Credenciales inválidas');
   }
 
   const data: unknown = await response.json();
