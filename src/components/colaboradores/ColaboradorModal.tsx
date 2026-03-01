@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
+import { Input } from '@/components/ui';
+import type { Rol } from '@/app/services/roles.service';
 
 interface ColaboradorModalProps {
   colaborador?: any;
+  roles: Rol[];
   onClose: () => void;
   onSave: (data: any) => void;
 }
 
-const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, onClose, onSave }) => {
+const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles = [], onClose, onSave }) => {
   const [form, setForm] = useState({
     nombre: colaborador?.nombre || '',
     apellidoPaterno: colaborador?.apellidoPaterno || '',
@@ -14,9 +17,10 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, onClos
     email: colaborador?.email || '',
     contrasena: '',
     confirmarContrasena: '',
+    rol_id: colaborador?.rol_id || '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -28,21 +32,58 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, onClos
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-gray-100 rounded-lg p-8 w-[400px] relative">
-        <button className="absolute top-2 right-2" onClick={onClose}>✖</button>
-        <h2 className="text-lg font-semibold text-blue-900 mb-4">
-          {colaborador ? 'Editar usuario' : 'Agregar usuario'}
-        </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre" className="p-2 rounded" required />
-          <input name="apellidoPaterno" value={form.apellidoPaterno} onChange={handleChange} placeholder="Apellido Paterno" className="p-2 rounded" required />
-          <input name="apellidoMaterno" value={form.apellidoMaterno} onChange={handleChange} placeholder="Apellido Materno" className="p-2 rounded" required />
-          <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="email" className="p-2 rounded" required />
-          <input name="contrasena" type="password" value={form.contrasena} onChange={handleChange} placeholder="Contraseña" className="p-2 rounded" required />
-          <input name="confirmarContrasena" type="password" value={form.confirmarContrasena} onChange={handleChange} placeholder="Confirmar contraseña" className="p-2 rounded" required />
-          <button type="submit" className="bg-indigo-900 text-white py-2 rounded-full font-semibold mt-2">Guardar</button>
-        </form>
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50"
+      onClick={onClose}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+
+      <div
+        className="bg-[#E8E8E8] rounded-3xl shadow-2xl w-full max-w-md mx-4"
+        onClick={(e) => e.stopPropagation()}>
+
+        <div className="bg-[#194566] text-white px-6 py-4 rounded-t-3xl relative">
+          <h2 className="text-lg font-semibold text-center">
+            {colaborador ? 'Editar colaborador' : 'Agregar colaborador'}</h2>
+          <button
+            onClick={onClose}
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="p-8">
+          <form onSubmit={handleSubmit} className="space-y-1">
+            <Input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
+            <Input name="apellidoPaterno" value={form.apellidoPaterno} onChange={handleChange} placeholder="Apellido Paterno" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
+            <Input name="apellidoMaterno" value={form.apellidoMaterno} onChange={handleChange} placeholder="Apellido Materno" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
+            <Input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
+            <Input name="contrasena" type="password" value={form.contrasena} onChange={handleChange} placeholder="Contraseña" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
+            <Input name="confirmarContrasena" type="password" value={form.confirmarContrasena} onChange={handleChange} placeholder="Confirmar contraseña" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
+
+            <div className="mb-4">
+              <select
+                name="rol_id"
+                value={form.rol_id}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg bg-[#D9D9D9] border-none text-black focus:outline-none focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20"
+              >
+                <option value="" disabled>Seleccionar rol</option>
+                {roles.map((rol) => (
+                  <option key={rol.id_roles} value={rol.id_roles}>{rol.nombre}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-[#194566] text-white py-2 rounded-3xl font-semibold hover:bg-[#15374f] transition-colors mt-2"
+            >
+              Guardar
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

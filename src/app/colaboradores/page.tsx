@@ -1,14 +1,16 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { ColaboradoresService } from '../services/colaboradores.service';
+import { RefugiosService, type Refugio } from '../services/refugios.service';
+import { AnimalsService } from '../services/animals.service';
+import { RolesService } from '../services/roles.service';
+import { getRefugioId, getUsuarioId } from '../lib/auth';
 import ColaboradorModal from '../../components/colaboradores/ColaboradorModal';
 import RolModal from '../../components/colaboradores/RolModal';
 import ConfirmModal from '../../components/colaboradores/ConfirmModal';
 import AdminTable from '../../components/colaboradores/AdminTable';
 import DomicilioTable from '../../components/colaboradores/DomicilioTable';
-
-
-
+import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTable';
 
 export default function ColaboradoresPage() {
   const [showColaboradorModal, setShowColaboradorModal] = useState(false);
@@ -16,12 +18,39 @@ export default function ColaboradoresPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedColaborador, setSelectedColaborador] = useState<any>(null);
   const [colaboradores, setColaboradores] = useState<any[]>([]);
+  const [adminData, setAdminData] = useState<any>(null);
+  const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refugio, setRefugio] = useState<Refugio | null>(null);
+  const [espaciosEnUso, setEspaciosEnUso] = useState<number>(0);
+
+  const cargarRoles = async () => {
+    const refugioId = getRefugioId();
+    if (refugioId) {
+      const data = await RolesService.getByRefugio(refugioId).catch(() => []);
+      setRoles(data);
+    }
+  };
 
   useEffect(() => {
-    ColaboradoresService.findAll()
-      .then((data) => setColaboradores(data))
-      .finally(() => setLoading(false));
+    const refugioId = getRefugioId();
+    const usuarioId = getUsuarioId();
+
+    Promise.all([
+      ColaboradoresService.findAll(),
+      refugioId ? RefugiosService.getById(refugioId) : Promise.resolve(null),
+      AnimalsService.getAll(),
+    ]).then(([todosUsuarios, refugioData, animalesData]) => {
+      const admin = todosUsuarios.find((u: any) => u.id_usuario === usuarioId) ?? null;
+      const soloColaboradores = todosUsuarios.filter((u: any) => u.id_usuario !== usuarioId);
+      setAdminData(admin);
+      setColaboradores(soloColaboradores);
+      if (refugioData) setRefugio(refugioData);
+      const enUso = animalesData.filter((a) => a.refugio_id === refugioId).length;
+      setEspaciosEnUso(enUso);
+    }).finally(() => setLoading(false));
+
+    cargarRoles();
   }, []);
 
   // Simulación de permisos (esto se debe obtener del contexto de autenticación)
@@ -48,23 +77,24 @@ export default function ColaboradoresPage() {
   };
 
 
-  const visibleColaboradores = isAdmin ? colaboradores : colaboradores.filter((col) => col.id_usuario === user.id);
+  const visibleColaboradores = colaboradores;
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
 
       {showColaboradorModal && (
         <ColaboradorModal
           colaborador={selectedColaborador}
+          roles={roles}
           onClose={() => setShowColaboradorModal(false)}
           onSave={handleSaveColaborador}
         />
       )}
 
               <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold text-blue-900">Huellitas-callejeras</h1>
-                <span className="text-blue-900 ml-4">Espacios maximos: 30</span>
-                <span className="text-blue-900 ml-4">Espacios en uso: 14</span>
+                <h1 className="text-2xl font-semibold text-[#194566]">{refugio?.nombre ?? 'Cargando...'}</h1>
+                <span className="text-[#194566] ml-4 font-bold">Espacios maximos: {refugio?.capacidad_max ?? '-'}</span>
+                <span className="text-[#194566] ml-4 font-bold">Espacios en uso: {espaciosEnUso}</span>
                 {isAdmin && (
                   <button
                     className="bg-[#2B264F] text-white px-6 py-2 rounded-full font-semibold"
@@ -75,82 +105,28 @@ export default function ColaboradoresPage() {
                 )}
               </div>
 
-              <AdminTable admin={{
-                nombre: 'Dato',
-                apellidoPaterno: 'Dato',
-                apellidoMaterno: 'Dato',
-                email: 'Dato',
-                contrasena: 'Dato',
-              }} />
+              <AdminTable admin={adminData ? {
+                nombre: adminData.nombre,
+                apellidoPaterno: adminData.apellido_p,
+                apellidoMaterno: adminData.apellido_m,
+                email: adminData.email,
+                contrasena: '********',
+              } : undefined} />
 
-              <DomicilioTable domicilio={{
-                estado: 'Dato',
-                municipio: 'Dato',
-                colonia: 'Dato',
-                calle: 'Dato',
-                numeroInterior: 'Dato',
-                numeroExterior: 'Dato',
-              }} />
+              <DomicilioTable refugio={refugio} />
 
-              <h2 className="text-xl font-bold text-blue-900 mb-4">Colaboradores</h2>
-              <table className="w-full mb-4">
-                <thead>
-                  <tr className="bg-slate-600 text-white">
-                    <th className="px-4 py-2">Nombres</th>
-                    <th className="px-4 py-2">Apellido Paterno</th>
-                    <th className="px-4 py-2">Apellido Materno</th>
-                    <th className="px-4 py-2">email</th>
-                    <th className="px-4 py-2">Contraseña</th>
-                    {isAdmin && <th className="px-4 py-2">Acciones</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleColaboradores.map((col) => (
-                    <tr key={col.id_usuario} className="bg-gray-300">
-                      <td className="px-4 py-2">{col.nombre}</td>
-                      <td className="px-4 py-2">{col.apellido_p}</td>
-                      <td className="px-4 py-2">{col.apellido_m}</td>
-                      <td className="px-4 py-2">{col.email}</td>
-                      <td className="px-4 py-2">{col.contrasena || '********'}</td>
-                      {isAdmin && (
-                        <td className="px-4 py-2 flex gap-2">
-                          <button
-                            className="bg-indigo-900 text-white px-4 py-1 rounded-full"
-                            onClick={() => {
-                              setSelectedColaborador(col);
-                              setShowColaboradorModal(true);
-                            }}
-                          >Editar</button>
-                          <button
-                            className="bg-gray-400 text-white px-4 py-1 rounded-full"
-                            onClick={() => {
-                              setSelectedColaborador(col);
-                              setShowConfirmModal(true);
-                            }}
-                          >Eliminar</button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {isAdmin && (
-                <div className="flex gap-4 mb-4">
-                  <button
-                    className="bg-indigo-900 text-white px-6 py-2 rounded-full font-semibold"
-                    onClick={() => {
-                      setSelectedColaborador(null);
-                      setShowColaboradorModal(true);
-                    }}
-                  >Agregar</button>
-                  <button className="bg-blue-900 text-white px-6 py-2 rounded-full font-semibold">Editar</button>
-                  <button className="bg-gray-400 text-white px-6 py-2 rounded-full font-semibold">Eliminar</button>
-                </div>
-              )}
+              <ColaboradoresTable
+                colaboradores={visibleColaboradores}
+                isAdmin={isAdmin}
+                onEditar={(col) => { setSelectedColaborador(col); setShowColaboradorModal(true); }}
+                onEliminar={(col) => { setSelectedColaborador(col); setShowConfirmModal(true); }}
+                onAgregar={() => { setSelectedColaborador(null); setShowColaboradorModal(true); }}
+              />
 
               {showColaboradorModal && (
                 <ColaboradorModal
                   colaborador={selectedColaborador}
+                  roles={roles}
                   onClose={() => setShowColaboradorModal(false)}
                   onSave={handleSaveColaborador}
                 />
@@ -158,7 +134,12 @@ export default function ColaboradoresPage() {
               {showRolModal && (
                 <RolModal
                   onClose={() => setShowRolModal(false)}
-                  onSave={(data) => {/* lógica para guardar rol */ setShowRolModal(false); }}
+                  onSave={async (data) => {
+                    const refugioId = getRefugioId();
+                    await RolesService.create({ ...data, refugio_id: refugioId });
+                    await cargarRoles();
+                    setShowRolModal(false);
+                  }}
                 />
               )}
               {showConfirmModal && (

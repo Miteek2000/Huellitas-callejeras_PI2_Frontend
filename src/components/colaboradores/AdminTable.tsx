@@ -13,7 +13,7 @@ interface AdminTableProps {
 const AdminTable: React.FC<AdminTableProps> = ({ admin }) => {
   return (
     <div className="mb-8">
-      <h3 className="text-lg font-bold text-blue-900 mb-2">Administrador</h3>
+      <h3 className="text-lg font-bold text-[#2B264F] mb-2 text-left">Administrador</h3>
       <table className="w-full mb-2">
         <thead>
           <tr className="bg-slate-600 text-white">

@@ -1,41 +1,32 @@
 import { ENDPOINTS } from '../lib/endpoints';
 import { apiFetch } from '../lib/interceptors';
-import type { RegisterDTO } from '@/schemas/auth.schema';
+import type { RegisterDTO, Usuario } from '@/schemas/auth.schema';
 
-export interface ColaboradorResponse {
-  id_usuario: string;
-  nombre: string;
-  apellido_p: string;
-  apellido_m: string;
-  email: string;
-  activo: boolean;
-  rol_id: string;
-  refugio_id: string;
-}
+export type { Usuario as ColaboradorResponse };
 
 export const ColaboradoresService = {
-  async findAll(): Promise<ColaboradorResponse[]> {
-    return apiFetch<ColaboradorResponse[]>(`${ENDPOINTS.BASE_URL}/users`, {
+  async findAll(): Promise<Usuario[]> {
+    return apiFetch<Usuario[]>(ENDPOINTS.USERS, {
       method: 'GET',
     });
   },
 
-  async create(data: RegisterDTO): Promise<ColaboradorResponse> {
-    return apiFetch<ColaboradorResponse>(`${ENDPOINTS.BASE_URL}/users`, {
+  async create(data: RegisterDTO): Promise<Usuario> {
+    return apiFetch<Usuario>(ENDPOINTS.USERS, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
-  async update(id: string, data: Partial<RegisterDTO>): Promise<ColaboradorResponse> {
-    return apiFetch<ColaboradorResponse>(`${ENDPOINTS.BASE_URL}/users/${id}`, {
+  async update(id: string, data: Partial<RegisterDTO>): Promise<Usuario> {
+    return apiFetch<Usuario>(`${ENDPOINTS.USERS}/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   },
 
   async delete(id: string): Promise<{ message: string; id: string }> {
-    return apiFetch<{ message: string; id: string }>(`${ENDPOINTS.BASE_URL}/users/${id}`, {
+    return apiFetch<{ message: string; id: string }>(`${ENDPOINTS.USERS}/${id}`, {
       method: 'DELETE',
     });
   },
