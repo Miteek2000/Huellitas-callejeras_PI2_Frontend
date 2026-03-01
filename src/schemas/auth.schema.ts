@@ -33,6 +33,11 @@ export interface RegisterDTO {
   refugio_id: string;
 }
 
+export interface Usuario extends RegisterDTO {
+  id_usuario: string;
+  rol?: { id_roles: string; nombre: string };
+}
+
 export interface LoginDTO {
   email: string;
   contrasena: string;
