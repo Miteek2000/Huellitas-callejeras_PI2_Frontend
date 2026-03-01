@@ -28,8 +28,9 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.contrasena !== form.confirmarContrasena) return alert('Las contraseñas no coinciden');
-    
+    if (form.contrasena || form.confirmarContrasena) {
+      if (form.contrasena !== form.confirmarContrasena) return alert('Las contraseñas no coinciden');
+    }
     onSave({
       nombre: form.nombre,
       apellido_p: form.apellidoPaterno,
@@ -39,9 +40,8 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles 
       confirmarContrasena: form.confirmarContrasena,
       rol_id: form.rol_id,
       activo: true,
-      refugio_id: '', 
+      refugio_id: '',
     });
-    
     onClose();
   };
 
@@ -74,8 +74,8 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles 
             <Input name="apellidoPaterno" value={form.apellidoPaterno} onChange={handleChange} placeholder="Apellido Paterno" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
             <Input name="apellidoMaterno" value={form.apellidoMaterno} onChange={handleChange} placeholder="Apellido Materno" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
             <Input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
-            <Input name="contrasena" type="password" value={form.contrasena} onChange={handleChange} placeholder="Contraseña" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
-            <Input name="confirmarContrasena" type="password" value={form.confirmarContrasena} onChange={handleChange} placeholder="Confirmar contraseña" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
+            <Input name="contrasena" type="password" value={form.contrasena} onChange={handleChange} placeholder={colaborador ? "Nueva contraseña (dejar vacío para no cambiar)" : "Contraseña"} className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required={!colaborador}/>
+            <Input name="confirmarContrasena" type="password" value={form.confirmarContrasena} onChange={handleChange} placeholder={colaborador ? "Confirmar nueva contraseña" : "Confirmar contraseña"} className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required={!colaborador}/>
 
             <div className="mb-4">
               <select
