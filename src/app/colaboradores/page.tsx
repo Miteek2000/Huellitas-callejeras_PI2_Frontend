@@ -67,7 +67,7 @@ export default function ColaboradoresPage() {
                 <span className="text-blue-900 ml-4">Espacios en uso: 14</span>
                 {isAdmin && (
                   <button
-                    className="bg-indigo-900 text-white px-6 py-2 rounded-full font-semibold"
+                    className="bg-[#2B264F] text-white px-6 py-2 rounded-full font-semibold"
                     onClick={() => setShowRolModal(true)}
                   >
                     Agregar rol
