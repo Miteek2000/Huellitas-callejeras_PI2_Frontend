@@ -1,14 +1,26 @@
 import React from 'react';
+import TableActionButtons from './TableActionButtons';
 import type { Refugio } from '@/app/services/refugios.service';
 
 interface DomicilioTableProps {
   refugio?: Refugio | null;
+  isAdmin?: boolean;
+  onEditar?: () => void;
 }
 
-const DomicilioTable: React.FC<DomicilioTableProps> = ({ refugio }) => {
+const DomicilioTable: React.FC<DomicilioTableProps> = ({ refugio, isAdmin, onEditar }) => {
   return (
     <div className="mb-8">
-      <h3 className="text-lg font-bold text-[#2B264F] mb-2 text-left">Datos del refugio</h3>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-lg font-bold text-[#2B264F] text-left">Datos del refugio</h3>
+        {isAdmin && (
+          <TableActionButtons
+            buttons={[
+              { label: 'Editar', onClick: () => onEditar?.() },
+            ]}
+          />
+        )}
+      </div>
       <table className="w-full mb-2">
         <thead>
           <tr className="bg-slate-600 text-white">

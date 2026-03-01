@@ -6,6 +6,7 @@ import { AnimalsService } from '../services/animals.service';
 import { RolesService } from '../services/roles.service';
 import { getRefugioId, getUsuarioId } from '../lib/auth';
 import ColaboradorModal from '../../components/colaboradores/ColaboradorModal';
+import DomicilioModal from '../../components/colaboradores/DomicilioModal';
 import ConfirmModal from '../../components/colaboradores/ConfirmModal';
 import AdminTable from '../../components/colaboradores/AdminTable';
 import DomicilioTable from '../../components/colaboradores/DomicilioTable';
@@ -13,6 +14,7 @@ import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTabl
 
 export default function ColaboradoresPage() {
   const [showColaboradorModal, setShowColaboradorModal] = useState(false);
+  const [showDomicilioModal, setShowDomicilioModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [esPropietario, setEsPropietario] = useState(false);
   const [selectedColaborador, setSelectedColaborador] = useState<any>(null);
@@ -58,6 +60,13 @@ export default function ColaboradoresPage() {
   const isAdmin = user.rol === 'admin';
 
 
+  const handleSaveDomicilio = async (data: Partial<Refugio>) => {
+    const refugioId = getRefugioId();
+    if (!refugioId) return;
+    const updated = await RefugiosService.update(refugioId, data);
+    setRefugio(updated);
+  };
+
   const handleSaveColaborador = async (data: any) => {
     if (selectedColaborador) {
       const updated = await ColaboradoresService.update(selectedColaborador.id_usuario, data);
@@ -81,16 +90,6 @@ export default function ColaboradoresPage() {
   return (
     <div className="p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
 
-      {showColaboradorModal && (
-        <ColaboradorModal
-          colaborador={selectedColaborador}
-          roles={roles}
-          esPropietario={esPropietario}
-          onClose={() => setShowColaboradorModal(false)}
-          onSave={handleSaveColaborador}
-        />
-      )}
-
               <div className="flex items-center gap-15 mb-6">
                 <h1 className="text-2xl font-semibold text-[#194566]">{refugio?.nombre ?? 'Cargando...'}</h1>
                 <span className="text-[#194566] font-bold">Espacios máximos: {refugio?.capacidad_max ?? '-'}</span>
@@ -110,7 +109,11 @@ export default function ColaboradoresPage() {
                 onEliminar={() => { setSelectedColaborador(adminData); setShowConfirmModal(true); }}
               />
 
-              <DomicilioTable refugio={refugio} />
+              <DomicilioTable
+                refugio={refugio}
+                isAdmin={isAdmin}
+                onEditar={() => setShowDomicilioModal(true)}
+              />
 
               <ColaboradoresTable
                 colaboradores={visibleColaboradores}
@@ -120,10 +123,19 @@ export default function ColaboradoresPage() {
                 onAgregar={() => { setSelectedColaborador(null); setEsPropietario(false); setShowColaboradorModal(true); }}
               />
 
+              {showDomicilioModal && (
+                <DomicilioModal
+                  refugio={refugio}
+                  onClose={() => setShowDomicilioModal(false)}
+                  onSave={handleSaveDomicilio}
+                />
+              )}
+
               {showColaboradorModal && (
                 <ColaboradorModal
                   colaborador={selectedColaborador}
                   roles={roles}
+                  esPropietario={esPropietario}
                   onClose={() => setShowColaboradorModal(false)}
                   onSave={handleSaveColaborador}
                 />
