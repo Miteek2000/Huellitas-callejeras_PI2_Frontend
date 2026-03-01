@@ -5,8 +5,8 @@ import type { RegisterDTO, Usuario } from '@/schemas/auth.schema';
 export type { Usuario as ColaboradorResponse };
 
 export const ColaboradoresService = {
-  async findAll(): Promise<Usuario[]> {
-    return apiFetch<Usuario[]>(ENDPOINTS.USERS, {
+  async findAll(refugioId: string): Promise<Usuario[]> {
+    return apiFetch<Usuario[]>(`${ENDPOINTS.USERS}/refugio/${refugioId}`, {
       method: 'GET',
     });
   },

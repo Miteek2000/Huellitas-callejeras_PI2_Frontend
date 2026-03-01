@@ -65,7 +65,7 @@ const ColaboradoresTable: React.FC<ColaboradoresTableProps> = ({
                 <td className="px-4 py-2 text-center">{col.apellido_m}</td>
                 <td className="px-4 py-2 text-center">{col.email}</td>
                 <td className="px-4 py-2 text-center">{'********'}</td>
-                <td className="px-4 py-2 text-center">{(col as any).rol?.nombre ?? col.rol_id ?? '-'}</td>
+                <td className="px-4 py-2 text-center">{col.rol?.nombre ?? col.rol_id ?? '-'}</td>
               </tr>
             ))
           )}

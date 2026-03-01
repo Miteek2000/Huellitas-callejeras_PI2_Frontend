@@ -11,7 +11,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Animal } from '@/schemas/animal.schema';
 import type { Movimiento } from '@/schemas/movimiento.schema';
-
+import { getRefugioId} from '../lib/auth';
 
 const getTipoHuella = (movimientos: Movimiento[]): 'entrada' | 'salida' | null => {
 	if (!movimientos.length) return null;
@@ -21,6 +21,7 @@ const getTipoHuella = (movimientos: Movimiento[]): 'entrada' | 'salida' | null =
 	if (entrada) return 'entrada';
 	return null;
 };
+const refugioId = getRefugioId();
 
 export default function GaleriaPage() {
 	const [animales, setAnimales] = useState<Animal[]>([]);
@@ -30,7 +31,7 @@ export default function GaleriaPage() {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	useEffect(() => {
-		AnimalsService.getAll().then(setAnimales);
+		AnimalsService.getAll(refugioId).then(setAnimales);
 		MovementsService.getAll().then(setMovimientos);
 	}, []);
 

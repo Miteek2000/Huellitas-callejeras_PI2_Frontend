@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui';
 import type { Rol } from '@/app/services/roles.service';
+import type { Usuario } from '@/schemas/auth.schema';
 
 interface ColaboradorModalProps {
-  colaborador?: any;
+  colaborador?: Usuario | null;
   roles: Rol[];
   esPropietario?: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => void;
 }
 
 const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles = [], esPropietario, onClose, onSave }) => {
   const [form, setForm] = useState({
     nombre: colaborador?.nombre || '',
-    apellidoPaterno: colaborador?.apellido_p || colaborador?.apellidoPaterno || '',
-    apellidoMaterno: colaborador?.apellido_m || colaborador?.apellidoMaterno || '',
+    apellidoPaterno: colaborador?.apellido_p || colaborador?.apellido_p || '',
+    apellidoMaterno: colaborador?.apellido_m || colaborador?.apellido_m|| '',
     email: colaborador?.email || '',
     contrasena: '',
     confirmarContrasena: '',
@@ -28,7 +29,19 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (form.contrasena !== form.confirmarContrasena) return alert('Las contraseñas no coinciden');
-    onSave(form);
+    
+    onSave({
+      nombre: form.nombre,
+      apellido_p: form.apellidoPaterno,
+      apellido_m: form.apellidoMaterno,
+      email: form.email,
+      contrasena: form.contrasena,
+      confirmarContrasena: form.confirmarContrasena,
+      rol_id: form.rol_id,
+      activo: true,
+      refugio_id: '', 
+    });
+    
     onClose();
   };
 
