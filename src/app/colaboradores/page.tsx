@@ -6,7 +6,6 @@ import { AnimalsService } from '../services/animals.service';
 import { RolesService } from '../services/roles.service';
 import { getRefugioId, getUsuarioId } from '../lib/auth';
 import ColaboradorModal from '../../components/colaboradores/ColaboradorModal';
-import RolModal from '../../components/colaboradores/RolModal';
 import ConfirmModal from '../../components/colaboradores/ConfirmModal';
 import AdminTable from '../../components/colaboradores/AdminTable';
 import DomicilioTable from '../../components/colaboradores/DomicilioTable';
@@ -14,8 +13,8 @@ import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTabl
 
 export default function ColaboradoresPage() {
   const [showColaboradorModal, setShowColaboradorModal] = useState(false);
-  const [showRolModal, setShowRolModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [esPropietario, setEsPropietario] = useState(false);
   const [selectedColaborador, setSelectedColaborador] = useState<any>(null);
   const [colaboradores, setColaboradores] = useState<any[]>([]);
   const [adminData, setAdminData] = useState<any>(null);
@@ -53,9 +52,9 @@ export default function ColaboradoresPage() {
     cargarRoles();
   }, []);
 
-  // Simulación de permisos (esto se debe obtener del contexto de autenticación)
+  // Simulación de permisos 
   // isAdmin: puede agregar/editar/eliminar, colaborador: solo observa su registro
-  const user = { id: 1, rol: 'admin' }; // Simulación, reemplazar por contexto real
+  const user = { id: 1, rol: 'admin' }; 
   const isAdmin = user.rol === 'admin';
 
 
@@ -86,41 +85,39 @@ export default function ColaboradoresPage() {
         <ColaboradorModal
           colaborador={selectedColaborador}
           roles={roles}
+          esPropietario={esPropietario}
           onClose={() => setShowColaboradorModal(false)}
           onSave={handleSaveColaborador}
         />
       )}
 
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-15 mb-6">
                 <h1 className="text-2xl font-semibold text-[#194566]">{refugio?.nombre ?? 'Cargando...'}</h1>
-                <span className="text-[#194566] ml-4 font-bold">Espacios maximos: {refugio?.capacidad_max ?? '-'}</span>
-                <span className="text-[#194566] ml-4 font-bold">Espacios en uso: {espaciosEnUso}</span>
-                {isAdmin && (
-                  <button
-                    className="bg-[#2B264F] text-white px-6 py-2 rounded-full font-semibold"
-                    onClick={() => setShowRolModal(true)}
-                  >
-                    Agregar rol
-                  </button>
-                )}
+                <span className="text-[#194566] font-bold">Espacios máximos: {refugio?.capacidad_max ?? '-'}</span>
+                <span className="text-[#194566] font-bold">Espacios en uso: {espaciosEnUso}</span>
               </div>
 
-              <AdminTable admin={adminData ? {
-                nombre: adminData.nombre,
-                apellidoPaterno: adminData.apellido_p,
-                apellidoMaterno: adminData.apellido_m,
-                email: adminData.email,
-                contrasena: '********',
-              } : undefined} />
+              <AdminTable
+                admin={adminData ? {
+                  nombre: adminData.nombre,
+                  apellidoPaterno: adminData.apellido_p,
+                  apellidoMaterno: adminData.apellido_m,
+                  email: adminData.email,
+                  contrasena: '********',
+                } : undefined}
+                isAdmin={isAdmin}
+                onEditar={() => { setSelectedColaborador(adminData); setEsPropietario(true); setShowColaboradorModal(true); }}
+                onEliminar={() => { setSelectedColaborador(adminData); setShowConfirmModal(true); }}
+              />
 
               <DomicilioTable refugio={refugio} />
 
               <ColaboradoresTable
                 colaboradores={visibleColaboradores}
                 isAdmin={isAdmin}
-                onEditar={(col) => { setSelectedColaborador(col); setShowColaboradorModal(true); }}
+                onEditar={(col) => { setSelectedColaborador(col); setEsPropietario(false); setShowColaboradorModal(true); }}
                 onEliminar={(col) => { setSelectedColaborador(col); setShowConfirmModal(true); }}
-                onAgregar={() => { setSelectedColaborador(null); setShowColaboradorModal(true); }}
+                onAgregar={() => { setSelectedColaborador(null); setEsPropietario(false); setShowColaboradorModal(true); }}
               />
 
               {showColaboradorModal && (
@@ -131,17 +128,7 @@ export default function ColaboradoresPage() {
                   onSave={handleSaveColaborador}
                 />
               )}
-              {showRolModal && (
-                <RolModal
-                  onClose={() => setShowRolModal(false)}
-                  onSave={async (data) => {
-                    const refugioId = getRefugioId();
-                    await RolesService.create({ ...data, refugio_id: refugioId });
-                    await cargarRoles();
-                    setShowRolModal(false);
-                  }}
-                />
-              )}
+              
               {showConfirmModal && (
                 <ConfirmModal
                   message="¿Seguro que deseas eliminar este colaborador?"

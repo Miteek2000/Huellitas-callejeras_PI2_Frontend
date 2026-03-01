@@ -5,15 +5,16 @@ import type { Rol } from '@/app/services/roles.service';
 interface ColaboradorModalProps {
   colaborador?: any;
   roles: Rol[];
+  esPropietario?: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
 }
 
-const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles = [], onClose, onSave }) => {
+const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles = [], esPropietario, onClose, onSave }) => {
   const [form, setForm] = useState({
     nombre: colaborador?.nombre || '',
-    apellidoPaterno: colaborador?.apellidoPaterno || '',
-    apellidoMaterno: colaborador?.apellidoMaterno || '',
+    apellidoPaterno: colaborador?.apellido_p || colaborador?.apellidoPaterno || '',
+    apellidoMaterno: colaborador?.apellido_m || colaborador?.apellidoMaterno || '',
     email: colaborador?.email || '',
     contrasena: '',
     confirmarContrasena: '',
@@ -38,12 +39,13 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles 
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
 
       <div
-        className="bg-[#E8E8E8] rounded-3xl shadow-2xl w-full max-w-md mx-4"
+        className="bg-[#C8D1D7] rounded-lg shadow-2xl w-full max-w-md mx-4"
         onClick={(e) => e.stopPropagation()}>
 
-        <div className="bg-[#194566] text-white px-6 py-4 rounded-t-3xl relative">
+        <div className="bg-[#194566] text-white px-6 py-4 relative">
           <h2 className="text-lg font-semibold text-center">
-            {colaborador ? 'Editar colaborador' : 'Agregar colaborador'}</h2>
+            {esPropietario ? 'Editar propietario' : colaborador ? 'Editar colaborador' : 'Agregar colaborador'}
+          </h2>
           <button
             onClick={onClose}
             className="absolute right-6 top-1/2 -translate-y-1/2 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors">
@@ -55,12 +57,12 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles 
 
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-1">
-            <Input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
-            <Input name="apellidoPaterno" value={form.apellidoPaterno} onChange={handleChange} placeholder="Apellido Paterno" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
-            <Input name="apellidoMaterno" value={form.apellidoMaterno} onChange={handleChange} placeholder="Apellido Materno" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
-            <Input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
-            <Input name="contrasena" type="password" value={form.contrasena} onChange={handleChange} placeholder="Contraseña" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
-            <Input name="confirmarContrasena" type="password" value={form.confirmarContrasena} onChange={handleChange} placeholder="Confirmar contraseña" className="bg-[#D9D9D9] border-none placeholder:text-gray-500" required />
+            <Input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
+            <Input name="apellidoPaterno" value={form.apellidoPaterno} onChange={handleChange} placeholder="Apellido Paterno" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
+            <Input name="apellidoMaterno" value={form.apellidoMaterno} onChange={handleChange} placeholder="Apellido Materno" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
+            <Input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
+            <Input name="contrasena" type="password" value={form.contrasena} onChange={handleChange} placeholder="Contraseña" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
+            <Input name="confirmarContrasena" type="password" value={form.confirmarContrasena} onChange={handleChange} placeholder="Confirmar contraseña" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
 
             <div className="mb-4">
               <select
@@ -68,7 +70,7 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles 
                 value={form.rol_id}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg bg-[#D9D9D9] border-none text-black focus:outline-none focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20"
+                className="w-full px-4 py-2 rounded-lg bg-[#FFFFFF] border-none text-black focus:outline-none focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20"
               >
                 <option value="" disabled>Seleccionar rol</option>
                 {roles.map((rol) => (

@@ -35,6 +35,7 @@ export interface RegisterDTO {
 
 export interface Usuario extends RegisterDTO {
   id_usuario: string;
+  rol?: { id_roles: string; nombre: string };
 }
 
 export interface LoginDTO {
