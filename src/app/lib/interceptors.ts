@@ -31,6 +31,10 @@ export async function apiFetch<T>(
     
     throw new Error(errorData.message || 'Credenciales inválidas');
   }
+  
+  if (response.status === 204 || response.headers.get('content-length') === '0') {
+    return undefined as T;
+  }
 
   const data: unknown = await response.json();
 

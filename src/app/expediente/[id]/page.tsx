@@ -110,6 +110,7 @@ export default function EditarExpedientePage() {
         isOpen={showHistorial}
         onClose={() => setShowHistorial(false)}
         movimientos={movimientos}
+        onMovimientosChange={setMovimientos}
       />
     </div>
   );

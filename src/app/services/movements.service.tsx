@@ -8,10 +8,6 @@ export const MovementsService = {
     return await apiFetch<Movimiento[]>(ENDPOINTS.MOVEMENTS);
   },
 
-  async getById(id: string): Promise<Movimiento> {
-    return await apiFetch<Movimiento>(`${ENDPOINTS.MOVEMENTS}/${id}`);
-  },
-
   async getByAnimalId(animalId: string): Promise<Movimiento[]> {
     const movements = await apiFetch<Movimiento[]>(ENDPOINTS.MOVEMENTS);
     return movements.filter(
@@ -22,13 +18,6 @@ export const MovementsService = {
   async create(data: Omit<Movimiento, 'id_movimiento'>): Promise<Movimiento> {
     return await apiFetch<Movimiento>(ENDPOINTS.MOVEMENTS, {
       method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-
-  async update(id: string, data: Partial<Movimiento>): Promise<Movimiento> {
-    return await apiFetch<Movimiento>(`${ENDPOINTS.MOVEMENTS}/${id}`, {
-      method: 'PATCH',
       body: JSON.stringify(data),
     });
   },
