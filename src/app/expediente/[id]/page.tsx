@@ -44,17 +44,24 @@ export default function EditarExpedientePage() {
   const handleUpdateAnimal = async (data: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => {
     try {
       const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
-      await AnimalsService.update(animalId, {
-        ...payload
+      const formData = new FormData();
+      if (fotoFile) formData.append('imagen', fotoFile);
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
       });
-    if (movimiento) {
-      const nuevoMovimiento = await MovementsService.create({
-        ...movimiento,
-        animal_id: animalId,
-      });
-      setMovimientos(prev => [nuevoMovimiento, ...prev]);
-    }
-    
+
+      await AnimalsService.updateWithForm(animalId, formData); 
+
+      if (movimiento) {
+        const nuevoMovimiento = await MovementsService.create({
+          ...movimiento,
+          animal_id: animalId,
+        });
+        setMovimientos(prev => [nuevoMovimiento, ...prev]);
+      }
+
       await loadData();
       setIsEditing(false);
     } catch (error) {

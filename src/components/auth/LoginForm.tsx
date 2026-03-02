@@ -42,7 +42,7 @@ export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void; err
               type="email"
               value={formData.email}
               onChange={handleInputChange}
-              placeholder="Ingrese su usuario"
+              placeholder="Ingrese su email"
               className="bg-[#D9D9D9] border-none placeholder:text-gray-600"
             />
             

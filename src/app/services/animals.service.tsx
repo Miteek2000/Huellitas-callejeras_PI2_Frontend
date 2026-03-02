@@ -25,10 +25,10 @@ export const AnimalsService = {
     body: formData,
   }),
 
-  update: (id: string, data: UpdateAnimalDTO): Promise<Animal> =>
+  updateWithForm: (id: string, formData: FormData): Promise<Animal> =>
     apiFetch<Animal>(`${ENDPOINTS.ANIMALS}/${id}`, {
       method: 'PATCH',
-      body: JSON.stringify(data),
+      body: formData,
     }),
 
   delete: (id: string): Promise<void> =>
