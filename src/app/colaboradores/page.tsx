@@ -62,22 +62,31 @@ export default function ColaboradoresPage() {
     setRefugio(updated);
   };
 
-  const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => {
-    const { confirmarContrasena: _, ...payload } = data;
+const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => {
+  const { confirmarContrasena: _, contrasena, ...rest } = data;
 
-    if (selectedColaborador) {
-      const updated = await ColaboradoresService.update(selectedColaborador.id_usuario, payload);
-      setColaboradores(colaboradores.map((col) =>
-        col.id_usuario === updated.id_usuario ? updated : col
-      ));
-    } else {
-      const nuevo = await ColaboradoresService.create({
-        ...payload,
-        refugio_id: getRefugioId(),
-      });
-      setColaboradores([...colaboradores, nuevo]);
-    }
-  };
+  const payload: Partial<Usuario> = { ...rest };
+
+  if (contrasena && contrasena.trim() !== '') {
+    payload.contrasena = contrasena;
+  }
+
+  if (selectedColaborador) {
+    const { refugio_id, ...updatePayload } = payload;
+    const updated = await ColaboradoresService.update(selectedColaborador.id_usuario, updatePayload);
+    setColaboradores(colaboradores.map((col) =>
+      col.id_usuario === updated.id_usuario ? updated : col
+    ));
+  } else {
+    const nuevo = await ColaboradoresService.create({
+      ...payload,
+      contrasena: contrasena,
+      refugio_id: getRefugioId(),
+      activo: true,
+    } as Omit<Usuario, 'id_usuario'>);
+    setColaboradores([...colaboradores, nuevo]);
+  }
+};
 
   const handleDeleteColaborador = async () => {
     if (!selectedColaborador) return;
