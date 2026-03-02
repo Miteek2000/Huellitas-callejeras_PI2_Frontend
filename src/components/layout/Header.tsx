@@ -10,7 +10,7 @@ export const Header: React.FC = () => {
       <div className="max-w-full mx-auto flex items-center justify-between">
 
         <div className="flex items-center space-x-6">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
+          <Link href="/galeria" className="hover:opacity-80 transition-opacity">
             <Image src="/imagenes/Hogar.svg" alt="Inicio" width={24} height={24} />
           </Link>
           
@@ -19,9 +19,10 @@ export const Header: React.FC = () => {
             <Image src="/imagenes/Estadisticas.svg" alt="Estadísticas" width={24} height={24} />
           </button>
           
-          <button className="hover:opacity-80 transition-opacity">
+          <Link href="/colaboradores" className="hover:opacity-80 transition-opacity">
             <Image src="/imagenes/Configuracion.svg" alt="Configuración" width={24} height={24} />
-          </button>
+          </Link>
+          
         </div>
 
         <h1 className="text-lg font-semibold text-[#DCD6D7] text-2xl">Huellitas Callejeras</h1>
