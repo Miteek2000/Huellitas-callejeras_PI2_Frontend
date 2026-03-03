@@ -20,9 +20,9 @@ export const Header: React.FC = () => {
           <Link href="/galeria" className="hover:opacity-80 transition-opacity">
             <Image src="/imagenes/Hogar.svg" alt="Inicio" width={24} height={24} />
           </Link>
-          <button className="hover:opacity-80 transition-opacity">
+          <Link href="/estadisticas" className="hover:opacity-80 transition-opacity">
             <Image src="/imagenes/Estadisticas.svg" alt="Estadísticas" width={24} height={24} />
-          </button>
+          </Link>
           
           {!isColaborador && (
             <Link href="/colaboradores" className="hover:opacity-80 transition-opacity">
