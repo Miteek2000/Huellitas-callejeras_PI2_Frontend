@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui';
 import type { LoginFormData } from '@/schemas/auth.schema';
 
 export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void; error?: string }> = ({ onSubmit, error }) => {
+  const router = useRouter();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -69,6 +71,17 @@ export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void; err
                 Iniciar
               </button>
             </div>
+
+            <p className="text-center text-sm text-[#182F51]">
+              ¿No tienes una cuenta?{' '}
+              <button
+                type="button"
+                onClick={() => router.push('/auth/registro')}
+                className="font-bold hover:underline transition-colors"
+              >
+                Regístrate
+              </button>
+            </p>
           </form>
         </div>
       </div>
