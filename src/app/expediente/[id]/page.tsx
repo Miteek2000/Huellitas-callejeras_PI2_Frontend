@@ -11,7 +11,6 @@ import { MovementsService } from '@/app/services/movements.service';
 import { getImageUrl } from '@/app/lib/endpoints';
 import { getUserRole, ROLES } from '@/app/lib/auth';
 
-
 export default function EditarExpedientePage() {
   const router = useRouter();
   const params = useParams();
@@ -37,7 +36,20 @@ export default function EditarExpedientePage() {
     try {
       setLoading(true);
       const animal = await AnimalsService.getById(animalId);
-      const animalMovements = await MovementsService.getByAnimalId(animalId); 
+      const animalMovements = await MovementsService.getByAnimalId(animalId);
+
+      console.log('[loadData] animal cargado del backend:', animal);
+      console.log('[loadData] booleanos del backend:', {
+        es_agresivo: animal.es_agresivo,
+        enfermedad_no_tratable: animal.enfermedad_no_tratable,
+        discapacidad: animal.discapacidad,
+      });
+      console.log('[loadData] tipos:', {
+        es_agresivo: typeof animal.es_agresivo,
+        enfermedad_no_tratable: typeof animal.enfermedad_no_tratable,
+        discapacidad: typeof animal.discapacidad,
+      });
+
       setExpediente(animal);
       setMovimientos(animalMovements);
     } catch (error) {
@@ -47,31 +59,82 @@ export default function EditarExpedientePage() {
     }
   };
 
-  const handleUpdateAnimal = async (data: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => {
+  const handleUpdateAnimal = async (
+    data: Animal,
+    fotoFile?: File | null,
+    movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
+  ) => {
+    console.log('======= [handleUpdateAnimal] INICIO =======');
+    console.log('[handleUpdateAnimal] data recibida completa:', data);
+    console.log('[handleUpdateAnimal] booleanos recibidos:', {
+      es_agresivo: data.es_agresivo,
+      enfermedad_no_tratable: data.enfermedad_no_tratable,
+      discapacidad: data.discapacidad,
+    });
+    console.log('[handleUpdateAnimal] tipos recibidos:', {
+      es_agresivo: typeof data.es_agresivo,
+      enfermedad_no_tratable: typeof data.enfermedad_no_tratable,
+      discapacidad: typeof data.discapacidad,
+    });
+
     try {
       const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
+
+      console.log('[handleUpdateAnimal] payload después de desestructurar:', payload);
+      console.log('[handleUpdateAnimal] booleanos en payload:', {
+        es_agresivo: payload.es_agresivo,
+        enfermedad_no_tratable: payload.enfermedad_no_tratable,
+        discapacidad: payload.discapacidad,
+      });
+
       const formData = new FormData();
       if (fotoFile) formData.append('imagen', fotoFile);
+
+      const booleanFields = ['es_agresivo', 'enfermedad_no_tratable', 'discapacidad'];
+
+      console.log('[handleUpdateAnimal] construyendo FormData:');
       Object.entries(payload).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          formData.append(key, String(value));
+          if (booleanFields.includes(key)) {
+            const serialized = value ? '1' : '0';
+            console.log(`  [BOOLEAN] ${key}: ${value} (${typeof value}) → "${serialized}"`);
+            formData.append(key, serialized);
+          } else {
+            console.log(`  [STRING]  ${key}: ${value} (${typeof value}) → "${String(value)}"`);
+            formData.append(key, String(value));
+          }
         }
       });
 
-      await AnimalsService.updateWithForm(animalId, formData); 
+      console.log('[handleUpdateAnimal] FormData final:');
+      formData.forEach((value, key) => {
+        console.log(`  ${key}: "${value}"`);
+      });
+
+      console.log('[handleUpdateAnimal] llamando AnimalsService.updateWithForm...');
+      const response = await AnimalsService.updateWithForm(animalId, formData);
+      console.log('[handleUpdateAnimal] respuesta del backend:', response);
+      console.log('[handleUpdateAnimal] booleanos en respuesta:', {
+        es_agresivo: response?.es_agresivo,
+        enfermedad_no_tratable: response?.enfermedad_no_tratable,
+        discapacidad: response?.discapacidad,
+      });
 
       if (movimiento) {
+        console.log('[handleUpdateAnimal] creando movimiento:', movimiento);
         const nuevoMovimiento = await MovementsService.create({
           ...movimiento,
           animal_id: animalId,
         });
         setMovimientos(prev => [nuevoMovimiento, ...prev]);
+        console.log('[handleUpdateAnimal] movimiento creado OK');
       }
 
       await loadData();
       setIsEditing(false);
+      console.log('======= [handleUpdateAnimal] FIN =======');
     } catch (error) {
-      console.error('Error actualizando animal:', error);
+      console.error('[handleUpdateAnimal] ERROR:', error);
     }
   };
 
@@ -81,7 +144,7 @@ export default function EditarExpedientePage() {
     try {
       const nuevoMovimiento = await MovementsService.create({
         ...movimiento,
-        animal_id: animalId, 
+        animal_id: animalId,
       });
       setMovimientos(prev => [nuevoMovimiento, ...prev]);
     } catch (error) {
@@ -103,9 +166,9 @@ export default function EditarExpedientePage() {
             <span className="ml-2 text-[#182F51]">Editar expediente</span>
           </div>
           {!isColaborador && (
-          <button type="button" onClick={() => setIsEditing(true)} className="hover:opacity-80 transition-opacity">
-            <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
-          </button>
+            <button type="button" onClick={() => setIsEditing(true)} className="hover:opacity-80 transition-opacity">
+              <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
+            </button>
           )}
         </div>
       </div>

@@ -2,47 +2,105 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui';
 import type { Rol } from '@/app/services/roles.service';
 import type { Usuario } from '@/schemas/auth.schema';
+import { validatePassword } from '@/utils/password.utils';
 
 interface ColaboradorModalProps {
   colaborador?: Usuario | null;
   roles: Rol[];
   esPropietario?: boolean;
   onClose: () => void;
-  onSave: (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => void;
+  onSave: (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => Promise<void>;
+  error?: string;
 }
 
-const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles = [], esPropietario, onClose, onSave }) => {
+interface PasswordRequirementsProps {
+  password: string;
+  touched: boolean;
+}
+
+const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({ password, touched }) => {
+  if (!touched || !password) return null;
+  const { isValid } = validatePassword(password);
+  if (isValid) return null;
+
+  const checks = [
+    { check: password.length >= 8, label: 'Mínimo 8 caracteres' },
+    { check: /[A-Z]/.test(password), label: 'Una letra mayúscula' },
+    { check: /[a-z]/.test(password), label: 'Una letra minúscula' },
+    { check: /[0-9]/.test(password), label: 'Un número' },
+    { check: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password), label: 'Un carácter especial (!@#$...)' },
+  ];
+
+  return (
+    <ul className="mt-1 space-y-1">
+      {checks.map(({ check, label }) => (
+        <li key={label} className={`text-xs flex items-center gap-1 ${check ? 'text-green-600' : 'text-red-500'}`}>
+          <span>{check ? '✓' : '✗'}</span>
+          {label}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles = [], esPropietario, onClose, onSave, error }) => {
   const [form, setForm] = useState({
     nombre: colaborador?.nombre || '',
-    apellidoPaterno: colaborador?.apellido_p || colaborador?.apellido_p || '',
-    apellidoMaterno: colaborador?.apellido_m || colaborador?.apellido_m|| '',
+    apellidoPaterno: colaborador?.apellido_p || '',
+    apellidoMaterno: colaborador?.apellido_m || '',
     email: colaborador?.email || '',
     contrasena: '',
     confirmarContrasena: '',
     rol_id: colaborador?.rol_id || '',
   });
 
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [showErrors, setShowErrors] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setTouched({ ...touched, [e.target.name]: true });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const passwordValidation = validatePassword(form.contrasena);
+  const isEditMode = !!colaborador;
+
+  const getPasswordError = (): string => {
+    if (!showErrors && !touched['contrasena']) return '';
+    if (!isEditMode && !form.contrasena) return 'La contraseña es obligatoria';
+    if (form.contrasena && !passwordValidation.isValid) return passwordValidation.errors[0];
+    return '';
+  };
+
+  const getConfirmError = (): string => {
+    if (!showErrors && !touched['confirmarContrasena']) return '';
+    if (form.contrasena && form.contrasena !== form.confirmarContrasena) return 'Las contraseñas no coinciden';
+    return '';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.contrasena || form.confirmarContrasena) {
-      if (form.contrasena !== form.confirmarContrasena) return alert('Las contraseñas no coinciden');
+    setShowErrors(true);
+
+    if (form.contrasena && !passwordValidation.isValid) return;
+    if (!isEditMode && !form.contrasena) return;
+    if (form.contrasena && form.contrasena !== form.confirmarContrasena) return;
+
+    try {
+      await onSave({
+        nombre: form.nombre,
+        apellido_p: form.apellidoPaterno,
+        apellido_m: form.apellidoMaterno,
+        email: form.email,
+        contrasena: form.contrasena,
+        confirmarContrasena: form.confirmarContrasena,
+        rol_id: esPropietario ? (colaborador?.rol_id ?? '') : form.rol_id, 
+        activo: true,
+        refugio_id: '',
+      });
+      onClose();
+    } catch {
     }
-    onSave({
-      nombre: form.nombre,
-      apellido_p: form.apellidoPaterno,
-      apellido_m: form.apellidoMaterno,
-      email: form.email,
-      contrasena: form.contrasena,
-      confirmarContrasena: form.confirmarContrasena,
-      rol_id: form.rol_id,
-      activo: true,
-      refugio_id: '',
-    });
-    onClose();
   };
 
   return (
@@ -74,27 +132,56 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({ colaborador, roles 
             <Input name="apellidoPaterno" value={form.apellidoPaterno} onChange={handleChange} placeholder="Apellido Paterno" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
             <Input name="apellidoMaterno" value={form.apellidoMaterno} onChange={handleChange} placeholder="Apellido Materno" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
             <Input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
-            <Input name="contrasena" type="password" value={form.contrasena} onChange={handleChange} placeholder={colaborador ? "Nueva contraseña (dejar vacío para no cambiar)" : "Contraseña"} className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required={!colaborador}/>
-            <Input name="confirmarContrasena" type="password" value={form.confirmarContrasena} onChange={handleChange} placeholder={colaborador ? "Confirmar nueva contraseña" : "Confirmar contraseña"} className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required={!colaborador}/>
 
-            <div className="mb-4">
-              <select
-                name="rol_id"
-                value={form.rol_id}
+            <div>
+              <Input
+                name="contrasena"
+                type="password"
+                value={form.contrasena}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 rounded-lg bg-[#FFFFFF] border-none text-black focus:outline-none focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20"
-              >
-                <option value="" disabled>Seleccionar rol</option>
-                {roles.map((rol) => (
-                  <option key={rol.id_roles} value={rol.id_roles}>{rol.nombre.toLowerCase()}</option>
-                ))}
-              </select>
+                placeholder={colaborador ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
+                className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+                required={!colaborador}
+                error={getPasswordError()}
+              />
+              <PasswordRequirements password={form.contrasena} touched={!!touched['contrasena']} />
             </div>
-            <button
-              type="submit"
-              className="w-full bg-[#194566] text-white py-2 rounded-3xl font-semibold hover:bg-[#15374f] transition-colors mt-2"
-            >
+
+            <Input
+              name="confirmarContrasena"
+              type="password"
+              value={form.confirmarContrasena}
+              onChange={handleChange}
+              placeholder={colaborador ? 'Confirmar nueva contraseña' : 'Confirmar contraseña'}
+              className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
+              required={!colaborador}
+              error={getConfirmError()}
+            />
+
+            {!esPropietario && (
+              <div className="mb-4">
+                <select
+                  name="rol_id"
+                  value={form.rol_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 rounded-lg bg-[#FFFFFF] border-none text-black focus:outline-none focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20"
+                >
+                  <option value="" disabled>Seleccionar rol</option>
+                  {roles.map((rol) => (
+                    <option key={rol.id_roles} value={rol.id_roles}>{rol.nombre.toLowerCase()}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {error && (
+              <div className="text-red-600 text-sm text-center bg-red-50 border border-red-300 rounded-lg px-4 py-2">
+                {error}
+              </div>
+            )}
+
+            <button type="submit" className="w-full bg-[#194566] text-white py-2 rounded-3xl font-semibold hover:bg-[#15374f] transition-colors mt-2">
               Guardar
             </button>
           </form>

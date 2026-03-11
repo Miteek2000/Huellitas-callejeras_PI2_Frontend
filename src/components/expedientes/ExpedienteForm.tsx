@@ -46,6 +46,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     showCancelConfirm,
     showSaveSuccess,
     handleInputChange,
+    handleBooleanChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
@@ -61,12 +62,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     onSaveMovimiento,
     onSaveAnimal,
   });
-
-  const handleToggle = (field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad') =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (readOnly) return;
-      setFormData(prev => ({ ...prev, [field]: !e.target.checked }));
-    };
 
   return (
     <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-8">
@@ -85,7 +80,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 <>
                   <img src={fotoPreviewUrl} alt="Foto del paciente" className="w-full h-full object-cover" />
                   {!readOnly && (
-                    <div className="absolute inset-0bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
                       <Image
                         src="/imagenes/agregarImagen.svg"
                         alt="Cambiar foto"
@@ -132,27 +127,31 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
               <div className="space-y-3">
+
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta comportamientos agresivos?</p>
                   <div className="flex space-x-4">
-                    <Checkbox label="Si" name="es_agresivo" checked={formData.es_agresivo} disabled={readOnly} onChange={handleInputChange} />
-                    <Checkbox label="No" name="es_agresivo" checked={!formData.es_agresivo} disabled={readOnly} onChange={handleToggle('es_agresivo')} />
+                    <Checkbox label="Si" checked={formData.es_agresivo} disabled={readOnly} onChange={() => handleBooleanChange('es_agresivo', true)} />
+                    <Checkbox label="No" checked={!formData.es_agresivo} disabled={readOnly} onChange={() => handleBooleanChange('es_agresivo', false)} />
                   </div>
                 </div>
+
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta alguna enfermedad degenerativa o sin cura?</p>
                   <div className="flex space-x-4">
-                    <Checkbox label="Si" name="enfermedad_no_tratable" checked={formData.enfermedad_no_tratable} disabled={readOnly} onChange={handleInputChange} />
-                    <Checkbox label="No" name="enfermedad_no_tratable" checked={!formData.enfermedad_no_tratable} disabled={readOnly} onChange={handleToggle('enfermedad_no_tratable')} />
+                    <Checkbox label="Si" checked={formData.enfermedad_no_tratable} disabled={readOnly} onChange={() => handleBooleanChange('enfermedad_no_tratable', true)} />
+                    <Checkbox label="No" checked={!formData.enfermedad_no_tratable} disabled={readOnly} onChange={() => handleBooleanChange('enfermedad_no_tratable', false)} />
                   </div>
                 </div>
+
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta discapacidades?</p>
                   <div className="flex space-x-4">
-                    <Checkbox label="Si" name="discapacidad" checked={formData.discapacidad} disabled={readOnly} onChange={handleInputChange} />
-                    <Checkbox label="No" name="discapacidad" checked={!formData.discapacidad} disabled={readOnly} onChange={handleToggle('discapacidad')} />
+                    <Checkbox label="Si" checked={formData.discapacidad} disabled={readOnly} onChange={() => handleBooleanChange('discapacidad', true)} />
+                    <Checkbox label="No" checked={!formData.discapacidad} disabled={readOnly} onChange={() => handleBooleanChange('discapacidad', false)} />
                   </div>
                 </div>
+
               </div>
             </div>
           </div>

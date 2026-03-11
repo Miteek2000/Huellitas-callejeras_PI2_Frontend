@@ -30,7 +30,6 @@ export default function ExpedientePage() {
     const usuarioId = getUsuarioId();
 
     if (!refugioId || !usuarioId) {
-      console.error('No hay sesión activa');
       router.push('/auth/login');
       return;
     }
@@ -46,9 +45,9 @@ export default function ExpedientePage() {
     form.append('tamano', data.tamano);
     form.append('lugar', data.lugar);
     form.append('descripcion', data.descripcion);
-    form.append('es_agresivo', String(data.es_agresivo));
-    form.append('enfermedad_no_tratable', String(data.enfermedad_no_tratable));
-    form.append('discapacidad', String(data.discapacidad));
+    form.append('es_agresivo', data.es_agresivo ? '1' : '0');
+    form.append('enfermedad_no_tratable', data.enfermedad_no_tratable ? '1' : '0');
+    form.append('discapacidad', data.discapacidad ? '1' : '0');
     form.append('refugio_id', refugioId);
     form.append('usuario_id', usuarioId);
 
@@ -56,16 +55,20 @@ export default function ExpedientePage() {
       form.append('imagen', fotoFile);
     }
 
-    const animalCreado = await AnimalsService.createWithForm(form);
+    try {
+      const animalCreado = await AnimalsService.createWithForm(form);
 
-    if (movimiento && animalCreado.id_animal) {
-      await MovementsService.create({
-        ...movimiento,
-        animal_id: animalCreado.id_animal,
-      });
+      if (movimiento && animalCreado.id_animal) {
+        await MovementsService.create({
+          ...movimiento,
+          animal_id: animalCreado.id_animal,
+        });
+      }
+
+      router.push(`/expediente/${animalCreado.id_animal}`);
+    } catch (error) {
+      throw error;
     }
-
-    router.push(`/expediente/${animalCreado.id_animal}`);
   };
 
   const handleSaveMovimiento = (
