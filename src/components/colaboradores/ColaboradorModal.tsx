@@ -40,7 +40,7 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ColaboradorFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -69,7 +69,6 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({
         activo: true,
         refugio_id: '',
       });
-      onClose();
     } catch {
     }
   };
@@ -191,9 +190,10 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({
 
             <button
               type="submit"
-              className="w-full bg-[#194566] text-white py-2 rounded-3xl font-semibold hover:bg-[#15374f] transition-colors mt-2"
+              disabled={isSubmitting}
+              className="w-full bg-[#194566] text-white py-2 rounded-3xl font-semibold hover:bg-[#15374f] transition-colors mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Guardar
+              {isSubmitting ? 'Guardando...' : 'Guardar'}
             </button>
           </form>
         </div>
