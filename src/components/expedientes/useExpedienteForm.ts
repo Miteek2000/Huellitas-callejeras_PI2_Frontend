@@ -9,6 +9,7 @@ interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
   onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
+  onSaveSuccess?: () => void;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
 }
@@ -43,7 +44,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const especiesOptions = [
     { value: '', label: 'Seleccione...' },
@@ -169,7 +169,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       if (options?.onSaveAnimal) {
         await options.onSaveAnimal(formData, fotoFile, movimiento);
       }
-      setShowSaveSuccess(true);
+      options?.onSaveSuccess?.();
     } catch (error) {
       throw error;
     }
@@ -182,7 +182,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     options?.onCancelConfirmed?.();
   };
 
-  const handleCloseSaveSuccess = () => setShowSaveSuccess(false);
   const handleFotoClick = () => fileInputRef.current?.click();
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,14 +211,12 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     fotoFile,
     fotoPreviewUrl,
     showCancelConfirm,
-    showSaveSuccess,
     handleInputChange,
     handleBooleanChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,
-    handleCloseSaveSuccess,
     handleFotoClick,
     handleFotoChange,
     setShowCancelConfirm,

@@ -1,26 +1,19 @@
-export interface PasswordValidation {
+import { passwordSchema } from '@/schemas/password.schema';
+
+export interface PasswordValidationResult {
   isValid: boolean;
   errors: string[];
 }
 
-export function validatePassword(password: string): PasswordValidation {
-  const errors: string[] = [];
+export const validatePassword = (password: string): PasswordValidationResult => {
+  const result = passwordSchema.safeParse(password);
 
-  if (password.length < 8) {
-    errors.push('Mínimo 8 caracteres');
-  }
-  if (!/[A-Z]/.test(password)) {
-    errors.push('Al menos una letra mayúscula');
-  }
-  if (!/[a-z]/.test(password)) {
-    errors.push('Al menos una letra minúscula');
-  }
-  if (!/[0-9]/.test(password)) {
-    errors.push('Al menos un número');
-  }
-  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-    errors.push('Al menos un carácter especial (!@#$%^&*...)');
+  if (result.success) {
+    return { isValid: true, errors: [] };
   }
 
-  return { isValid: errors.length === 0, errors };
-}
+  return {
+    isValid: false,
+    errors: result.error.issues.map((issue) => issue.message),
+  };
+};

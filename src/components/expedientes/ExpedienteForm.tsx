@@ -13,6 +13,7 @@ interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
   onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
+  onSaveSuccess?: () => void;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
   readOnly?: boolean;
@@ -24,6 +25,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   onOpenHistorial,
   onSaveMovimiento,
   onSaveAnimal,
+  onSaveSuccess,
   initialData,
   initialPhotoUrl,
   readOnly = false,
@@ -44,14 +46,11 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     fotoFile,
     fotoPreviewUrl,
     showCancelConfirm,
-    showSaveSuccess,
     handleInputChange,
-    handleBooleanChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,
-    handleCloseSaveSuccess,
     handleFotoClick,
     handleFotoChange,
     setShowCancelConfirm,
@@ -61,7 +60,14 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     onCancelConfirmed,
     onSaveMovimiento,
     onSaveAnimal,
+    onSaveSuccess,
   });
+
+  const handleToggle = (field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad') =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (readOnly) return;
+      setFormData(prev => ({ ...prev, [field]: !e.target.checked }));
+    };
 
   return (
     <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-8">
@@ -127,31 +133,27 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
               <div className="space-y-3">
-
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta comportamientos agresivos?</p>
                   <div className="flex space-x-4">
-                    <Checkbox label="Si" checked={formData.es_agresivo} disabled={readOnly} onChange={() => handleBooleanChange('es_agresivo', true)} />
-                    <Checkbox label="No" checked={!formData.es_agresivo} disabled={readOnly} onChange={() => handleBooleanChange('es_agresivo', false)} />
+                    <Checkbox label="Si" name="es_agresivo" checked={formData.es_agresivo} disabled={readOnly} onChange={handleInputChange} />
+                    <Checkbox label="No" name="es_agresivo" checked={!formData.es_agresivo} disabled={readOnly} onChange={handleToggle('es_agresivo')} />
                   </div>
                 </div>
-
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta alguna enfermedad degenerativa o sin cura?</p>
                   <div className="flex space-x-4">
-                    <Checkbox label="Si" checked={formData.enfermedad_no_tratable} disabled={readOnly} onChange={() => handleBooleanChange('enfermedad_no_tratable', true)} />
-                    <Checkbox label="No" checked={!formData.enfermedad_no_tratable} disabled={readOnly} onChange={() => handleBooleanChange('enfermedad_no_tratable', false)} />
+                    <Checkbox label="Si" name="enfermedad_no_tratable" checked={formData.enfermedad_no_tratable} disabled={readOnly} onChange={handleInputChange} />
+                    <Checkbox label="No" name="enfermedad_no_tratable" checked={!formData.enfermedad_no_tratable} disabled={readOnly} onChange={handleToggle('enfermedad_no_tratable')} />
                   </div>
                 </div>
-
                 <div>
                   <p className="text-sm text-gray-700 mb-2">¿Presenta discapacidades?</p>
                   <div className="flex space-x-4">
-                    <Checkbox label="Si" checked={formData.discapacidad} disabled={readOnly} onChange={() => handleBooleanChange('discapacidad', true)} />
-                    <Checkbox label="No" checked={!formData.discapacidad} disabled={readOnly} onChange={() => handleBooleanChange('discapacidad', false)} />
+                    <Checkbox label="Si" name="discapacidad" checked={formData.discapacidad} disabled={readOnly} onChange={handleInputChange} />
+                    <Checkbox label="No" name="discapacidad" checked={!formData.discapacidad} disabled={readOnly} onChange={handleToggle('discapacidad')} />
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -164,38 +166,10 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
-              <Select
-                label="Tipo de movimiento"
-                name="tipo_movimiento"
-                value={movimientoData.tipo_movimiento}
-                onChange={handleInputChange}
-                options={tipoMovimientoOptions}
-                disabled={readOnly}
-                className={errors.tipo_movimiento ? 'border-red-500' : ''}
-              />
-              <Input
-                label="Fecha"
-                name="fecha_movimiento"
-                type="date"
-                value={movimientoData.fecha_movimiento}
-                onChange={handleInputChange}
-                placeholder=""
-                disabled={readOnly}
-                className={errors.fecha_movimiento ? 'border-red-500' : ''}
-              />
-              <Select
-                label="Motivo"
-                name="motivo_movimiento"
-                value={movimientoData.motivo}
-                onChange={handleInputChange}
-                options={motivoOptions}
-                disabled={readOnly}
-                className={errors.motivo ? 'border-red-500' : ''}
-              />
-              <MovimientoValidationError
-                tipo_movimiento={movimientoData.tipo_movimiento}
-                motivo={movimientoData.motivo}
-              />
+              <Select label="Tipo de movimiento" name="tipo_movimiento" value={movimientoData.tipo_movimiento} onChange={handleInputChange} options={tipoMovimientoOptions} disabled={readOnly} className={errors.tipo_movimiento ? 'border-red-500' : ''} />
+              <Input label="Fecha" name="fecha_movimiento" type="date" value={movimientoData.fecha_movimiento} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.fecha_movimiento ? 'border-red-500' : ''} />
+              <Select label="Motivo" name="motivo_movimiento" value={movimientoData.motivo} onChange={handleInputChange} options={motivoOptions} disabled={readOnly} className={errors.motivo ? 'border-red-500' : ''} />
+              <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
             </div>
 
             <div className="mt-4">
@@ -221,8 +195,14 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
         </div>
       </form>
 
-      <ConfirmModal isOpen={showCancelConfirm} message={cancelMessage} confirmLabel="aceptar" cancelLabel="cancelar" onConfirm={handleConfirmCancel} onCancel={() => setShowCancelConfirm(false)} />
-      <ConfirmModal isOpen={showSaveSuccess} message="Expediente guardado correctamente" confirmLabel="aceptar" onConfirm={handleCloseSaveSuccess} />
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        message={cancelMessage}
+        confirmLabel="aceptar"
+        cancelLabel="cancelar"
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
     </div>
   );
 };

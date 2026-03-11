@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
+import { ConfirmModal } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
@@ -18,14 +19,11 @@ export default function EditarExpedientePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showHistorial, setShowHistorial] = useState(false);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [expediente, setExpediente] = useState<Animal | null>(null);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isColaborador, setIsColaborador] = useState(false);
-
-  useEffect(() => {
-    setIsColaborador(getUserRole() === ROLES.COLABORADOR);
-  }, []);
+  const [isColaborador] = useState<boolean>(() => getUserRole() === ROLES.COLABORADOR);
 
   useEffect(() => {
     if (!animalId) return;
@@ -37,19 +35,6 @@ export default function EditarExpedientePage() {
       setLoading(true);
       const animal = await AnimalsService.getById(animalId);
       const animalMovements = await MovementsService.getByAnimalId(animalId);
-
-      console.log('[loadData] animal cargado del backend:', animal);
-      console.log('[loadData] booleanos del backend:', {
-        es_agresivo: animal.es_agresivo,
-        enfermedad_no_tratable: animal.enfermedad_no_tratable,
-        discapacidad: animal.discapacidad,
-      });
-      console.log('[loadData] tipos:', {
-        es_agresivo: typeof animal.es_agresivo,
-        enfermedad_no_tratable: typeof animal.enfermedad_no_tratable,
-        discapacidad: typeof animal.discapacidad,
-      });
-
       setExpediente(animal);
       setMovimientos(animalMovements);
     } catch (error) {
@@ -64,78 +49,34 @@ export default function EditarExpedientePage() {
     fotoFile?: File | null,
     movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
   ) => {
-    console.log('======= [handleUpdateAnimal] INICIO =======');
-    console.log('[handleUpdateAnimal] data recibida completa:', data);
-    console.log('[handleUpdateAnimal] booleanos recibidos:', {
-      es_agresivo: data.es_agresivo,
-      enfermedad_no_tratable: data.enfermedad_no_tratable,
-      discapacidad: data.discapacidad,
-    });
-    console.log('[handleUpdateAnimal] tipos recibidos:', {
-      es_agresivo: typeof data.es_agresivo,
-      enfermedad_no_tratable: typeof data.enfermedad_no_tratable,
-      discapacidad: typeof data.discapacidad,
-    });
+    const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
 
-    try {
-      const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
+    const formData = new FormData();
+    if (fotoFile) formData.append('imagen', fotoFile);
 
-      console.log('[handleUpdateAnimal] payload después de desestructurar:', payload);
-      console.log('[handleUpdateAnimal] booleanos en payload:', {
-        es_agresivo: payload.es_agresivo,
-        enfermedad_no_tratable: payload.enfermedad_no_tratable,
-        discapacidad: payload.discapacidad,
-      });
-
-      const formData = new FormData();
-      if (fotoFile) formData.append('imagen', fotoFile);
-
-      const booleanFields = ['es_agresivo', 'enfermedad_no_tratable', 'discapacidad'];
-
-      console.log('[handleUpdateAnimal] construyendo FormData:');
-      Object.entries(payload).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (booleanFields.includes(key)) {
-            const serialized = value ? '1' : '0';
-            console.log(`  [BOOLEAN] ${key}: ${value} (${typeof value}) → "${serialized}"`);
-            formData.append(key, serialized);
-          } else {
-            console.log(`  [STRING]  ${key}: ${value} (${typeof value}) → "${String(value)}"`);
-            formData.append(key, String(value));
-          }
-        }
-      });
-
-      console.log('[handleUpdateAnimal] FormData final:');
-      formData.forEach((value, key) => {
-        console.log(`  ${key}: "${value}"`);
-      });
-
-      console.log('[handleUpdateAnimal] llamando AnimalsService.updateWithForm...');
-      const response = await AnimalsService.updateWithForm(animalId, formData);
-      console.log('[handleUpdateAnimal] respuesta del backend:', response);
-      console.log('[handleUpdateAnimal] booleanos en respuesta:', {
-        es_agresivo: response?.es_agresivo,
-        enfermedad_no_tratable: response?.enfermedad_no_tratable,
-        discapacidad: response?.discapacidad,
-      });
-
-      if (movimiento) {
-        console.log('[handleUpdateAnimal] creando movimiento:', movimiento);
-        const nuevoMovimiento = await MovementsService.create({
-          ...movimiento,
-          animal_id: animalId,
-        });
-        setMovimientos(prev => [nuevoMovimiento, ...prev]);
-        console.log('[handleUpdateAnimal] movimiento creado OK');
+    const booleanFields = ['es_agresivo', 'enfermedad_no_tratable', 'discapacidad'];
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, booleanFields.includes(key) ? (value ? '1' : '0') : String(value));
       }
+    });
 
-      await loadData();
-      setIsEditing(false);
-      console.log('======= [handleUpdateAnimal] FIN =======');
-    } catch (error) {
-      console.error('[handleUpdateAnimal] ERROR:', error);
+    await AnimalsService.updateWithForm(animalId, formData);
+
+    if (movimiento) {
+      const nuevoMovimiento = await MovementsService.create({
+        ...movimiento,
+        animal_id: animalId,
+      });
+      setMovimientos(prev => [nuevoMovimiento, ...prev]);
     }
+
+    await loadData();
+    setIsEditing(false);
+  };
+
+  const handleSaveSuccess = () => {
+    setShowSaveSuccess(true);
   };
 
   const handleSaveMovimiento = async (
@@ -182,6 +123,14 @@ export default function EditarExpedientePage() {
         onOpenHistorial={() => setShowHistorial(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleUpdateAnimal}
+        onSaveSuccess={handleSaveSuccess}
+      />
+
+      <ConfirmModal
+        isOpen={showSaveSuccess}
+        message="Expediente guardado correctamente"
+        confirmLabel="aceptar"
+        onConfirm={() => setShowSaveSuccess(false)}
       />
 
       <HistorialMovimientosModal

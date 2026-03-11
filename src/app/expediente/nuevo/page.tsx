@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
+import { ConfirmModal } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import type { Animal } from '@/schemas/animal.schema';
 import { AnimalsService } from '@/app/services/animals.service';
@@ -14,12 +15,12 @@ export default function ExpedientePage() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [animalCreadoId, setAnimalCreadoId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (getUserRole() === ROLES.COLABORADOR) {
-      router.replace('/galeria');
-    }
-  }, []);
+  if (typeof window !== 'undefined' && getUserRole() === ROLES.COLABORADOR) {
+    router.replace('/galeria');
+  }
 
   const handleSaveAnimal = async (
     data: Animal,
@@ -50,24 +51,28 @@ export default function ExpedientePage() {
     form.append('discapacidad', data.discapacidad ? '1' : '0');
     form.append('refugio_id', refugioId);
     form.append('usuario_id', usuarioId);
+    if (fotoFile) form.append('imagen', fotoFile);
 
-    if (fotoFile) {
-      form.append('imagen', fotoFile);
+    const animalCreado = await AnimalsService.createWithForm(form);
+
+    if (movimiento && animalCreado.id_animal) {
+      await MovementsService.create({
+        ...movimiento,
+        animal_id: animalCreado.id_animal,
+      });
     }
 
-    try {
-      const animalCreado = await AnimalsService.createWithForm(form);
+    setAnimalCreadoId(animalCreado.id_animal ?? null);
+  };
 
-      if (movimiento && animalCreado.id_animal) {
-        await MovementsService.create({
-          ...movimiento,
-          animal_id: animalCreado.id_animal,
-        });
-      }
+  const handleSaveSuccess = () => {
+    setShowSaveSuccess(true);
+  };
 
-      router.push(`/expediente/${animalCreado.id_animal}`);
-    } catch (error) {
-      throw error;
+  const handleConfirmSuccess = () => {
+    setShowSaveSuccess(false);
+    if (animalCreadoId) {
+      router.push(`/expediente/${animalCreadoId}`);
     }
   };
 
@@ -97,6 +102,14 @@ export default function ExpedientePage() {
         onOpenHistorial={() => setIsModalOpen(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleSaveAnimal}
+        onSaveSuccess={handleSaveSuccess}
+      />
+
+      <ConfirmModal
+        isOpen={showSaveSuccess}
+        message="Expediente guardado correctamente"
+        confirmLabel="aceptar"
+        onConfirm={handleConfirmSuccess}
       />
 
       <HistorialMovimientosModal
