@@ -13,6 +13,7 @@ interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
   onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
+  onSaveSuccess?: () => void;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
   readOnly?: boolean;
@@ -24,6 +25,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   onOpenHistorial,
   onSaveMovimiento,
   onSaveAnimal,
+  onSaveSuccess,
   initialData,
   initialPhotoUrl,
   readOnly = false,
@@ -44,13 +46,11 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     fotoFile,
     fotoPreviewUrl,
     showCancelConfirm,
-    showSaveSuccess,
     handleInputChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,
-    handleCloseSaveSuccess,
     handleFotoClick,
     handleFotoChange,
     setShowCancelConfirm,
@@ -60,6 +60,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     onCancelConfirmed,
     onSaveMovimiento,
     onSaveAnimal,
+    onSaveSuccess,
   });
 
   const handleToggle = (field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad') =>
@@ -85,7 +86,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 <>
                   <img src={fotoPreviewUrl} alt="Foto del paciente" className="w-full h-full object-cover" />
                   {!readOnly && (
-                    <div className="absolute inset-0bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
                       <Image
                         src="/imagenes/agregarImagen.svg"
                         alt="Cambiar foto"
@@ -165,38 +166,10 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
-              <Select
-                label="Tipo de movimiento"
-                name="tipo_movimiento"
-                value={movimientoData.tipo_movimiento}
-                onChange={handleInputChange}
-                options={tipoMovimientoOptions}
-                disabled={readOnly}
-                className={errors.tipo_movimiento ? 'border-red-500' : ''}
-              />
-              <Input
-                label="Fecha"
-                name="fecha_movimiento"
-                type="date"
-                value={movimientoData.fecha_movimiento}
-                onChange={handleInputChange}
-                placeholder=""
-                disabled={readOnly}
-                className={errors.fecha_movimiento ? 'border-red-500' : ''}
-              />
-              <Select
-                label="Motivo"
-                name="motivo_movimiento"
-                value={movimientoData.motivo}
-                onChange={handleInputChange}
-                options={motivoOptions}
-                disabled={readOnly}
-                className={errors.motivo ? 'border-red-500' : ''}
-              />
-              <MovimientoValidationError
-                tipo_movimiento={movimientoData.tipo_movimiento}
-                motivo={movimientoData.motivo}
-              />
+              <Select label="Tipo de movimiento" name="tipo_movimiento" value={movimientoData.tipo_movimiento} onChange={handleInputChange} options={tipoMovimientoOptions} disabled={readOnly} className={errors.tipo_movimiento ? 'border-red-500' : ''} />
+              <Input label="Fecha" name="fecha_movimiento" type="date" value={movimientoData.fecha_movimiento} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.fecha_movimiento ? 'border-red-500' : ''} />
+              <Select label="Motivo" name="motivo_movimiento" value={movimientoData.motivo} onChange={handleInputChange} options={motivoOptions} disabled={readOnly} className={errors.motivo ? 'border-red-500' : ''} />
+              <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
             </div>
 
             <div className="mt-4">
@@ -222,8 +195,14 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
         </div>
       </form>
 
-      <ConfirmModal isOpen={showCancelConfirm} message={cancelMessage} confirmLabel="aceptar" cancelLabel="cancelar" onConfirm={handleConfirmCancel} onCancel={() => setShowCancelConfirm(false)} />
-      <ConfirmModal isOpen={showSaveSuccess} message="Expediente guardado correctamente" confirmLabel="aceptar" onConfirm={handleCloseSaveSuccess} />
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        message={cancelMessage}
+        confirmLabel="aceptar"
+        cancelLabel="cancelar"
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
     </div>
   );
 };

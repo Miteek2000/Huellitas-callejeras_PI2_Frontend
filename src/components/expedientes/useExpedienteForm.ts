@@ -9,6 +9,7 @@ interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
   onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
+  onSaveSuccess?: () => void;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
 }
@@ -43,7 +44,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const especiesOptions = [
     { value: '', label: 'Seleccione...' },
@@ -94,6 +94,13 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     options?.initialPhotoUrl ?? null
   );
 
+  const handleBooleanChange = (
+    field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad',
+    value: boolean
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleEstadoChange = (apiValue: string) => {
     setFormData(prev => ({ ...prev, estado: apiValue }));
     if (errors.estado) {
@@ -104,28 +111,22 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
-    } else {
-      if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
-        const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
-        // Al cambiar el tipo de movimiento, resetear el motivo si no es válido para el nuevo tipo
-        if (name === 'tipo_movimiento') {
-          const permitidos = getMotivosPermitidos(value);
-          setMovimientoData(prev => ({
-            ...prev,
-            tipo_movimiento: value,
-            motivo: permitidos.includes(prev.motivo) ? prev.motivo : '',
-          }));
-        } else {
-          setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
-        }
+    if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
+      const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
+      if (name === 'tipo_movimiento') {
+        const permitidos = getMotivosPermitidos(value);
+        setMovimientoData(prev => ({
+          ...prev,
+          tipo_movimiento: value,
+          motivo: permitidos.includes(prev.motivo) ? prev.motivo : '',
+        }));
       } else {
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
       }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
 
     if (errors[name]) {
@@ -159,21 +160,18 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       return;
     }
 
-
-    const movimiento = movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo ? movimientoData : undefined;
-
-
-     console.log('movimientoData:', movimientoData);
-    console.log('movimiento a enviar:', movimientoData);
+    const movimiento =
+      movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo
+        ? movimientoData
+        : undefined;
 
     try {
       if (options?.onSaveAnimal) {
         await options.onSaveAnimal(formData, fotoFile, movimiento);
       }
-
-      setShowSaveSuccess(true);
+      options?.onSaveSuccess?.();
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   };
 
@@ -184,7 +182,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     options?.onCancelConfirmed?.();
   };
 
-  const handleCloseSaveSuccess = () => setShowSaveSuccess(false);
   const handleFotoClick = () => fileInputRef.current?.click();
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,13 +211,12 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     fotoFile,
     fotoPreviewUrl,
     showCancelConfirm,
-    showSaveSuccess,
     handleInputChange,
+    handleBooleanChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,
-    handleCloseSaveSuccess,
     handleFotoClick,
     handleFotoChange,
     setShowCancelConfirm,
