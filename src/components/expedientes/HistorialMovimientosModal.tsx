@@ -83,7 +83,7 @@ export const HistorialMovimientosModal: React.FC<HistorialMovimientosModalProps>
                         selectedId === mov.id_movimiento ? 'bg-indigo-200' : 'bg-gray-50 hover:bg-gray-100'
                       }`}
                     >
-                      <td className="px-4 py-3 text-sm text-gray-800">{mov.fecha_movimiento}</td>
+                      <td className="px-4 py-3 text-sm text-gray-800"> {mov.fecha_movimiento ? new Date(mov.fecha_movimiento).toLocaleDateString('es-MX', {day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'} </td>
                       <td className="px-4 py-3 text-sm text-gray-800 capitalize">{mov.tipo_movimiento}</td>
                       <td className="px-4 py-3 text-sm text-gray-800 capitalize">{mov.motivo}</td>
                     </tr>

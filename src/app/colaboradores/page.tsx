@@ -29,21 +29,18 @@ export default function ColaboradoresPage() {
   const [loading, setLoading] = useState(true);
   const [refugio, setRefugio] = useState<Refugio | null>(null);
   const [espaciosEnUso, setEspaciosEnUso] = useState<number>(0);
-  const [rol, setRol] = useState<string>('');
+  const [rol] = useState<string>(() => getUserRole()); // ← inicialización directa, sin setRol
+  const [errorModal, setErrorModal] = useState<string>('');
 
   const isPropietario = rol === ROLES.PROPIETARIO;
   const isAdminOrPropietario = rol === ROLES.ADMIN || isPropietario;
 
   useEffect(() => {
-    const rolActual = getUserRole();
-    setRol(rolActual);
-    if (rolActual === ROLES.COLABORADOR) {
+    if (rol === ROLES.COLABORADOR) {
       router.replace('/galeria');
+      return;
     }
-  }, []);
 
-
-  useEffect(() => {
     const refugioId = getRefugioId();
     const usuarioId = getUsuarioId();
 
@@ -53,7 +50,6 @@ export default function ColaboradoresPage() {
       AnimalsService.getAll(refugioId),
       refugioId ? RolesService.getByRefugio(refugioId).catch(() => []) : Promise.resolve([]),
     ]).then(([todosUsuarios, refugioData, animalesData, rolesData]: [Usuario[], Refugio | null, Animal[], Rol[]]) => {
-
 
       const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
       const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
@@ -77,37 +73,43 @@ export default function ColaboradoresPage() {
     setRefugio(updated);
   };
 
-const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => {
-  const { confirmarContrasena: _, contrasena, ...rest } = data;
+  const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => {
+    try {                                                         
+      const { confirmarContrasena: _, contrasena, ...rest } = data;
 
-  const payload: Partial<Usuario> = { ...rest };
+      const payload: Partial<Usuario> = { ...rest };
 
-  if (contrasena && contrasena.trim() !== '') {
-    payload.contrasena = contrasena;
-  }
+      if (contrasena && contrasena.trim() !== '') {
+        payload.contrasena = contrasena;
+      }
 
-  if (selectedColaborador) {
-    const { refugio_id, ...updatePayload } = payload;
-    const updated = await ColaboradoresService.update(selectedColaborador.id_usuario, updatePayload);
-    setColaboradores(colaboradores.map((col) =>
-      col.id_usuario === updated.id_usuario ? updated : col
-    ));
-  } else {
-    const nuevo = await ColaboradoresService.create({
-      ...payload,
-      contrasena: contrasena,
-      refugio_id: getRefugioId(),
-      activo: true,
-    } as Omit<Usuario, 'id_usuario'>);
+      if (selectedColaborador) {
+        const { refugio_id, ...updatePayload } = payload;
+        const updated = await ColaboradoresService.update(selectedColaborador.id_usuario, updatePayload);
+        setColaboradores(colaboradores.map((col) =>
+          col.id_usuario === updated.id_usuario ? updated : col
+        ));
+      } else {
+        const nuevo = await ColaboradoresService.create({
+          ...payload,
+          contrasena: contrasena,
+          refugio_id: getRefugioId(),
+          activo: true,
+        } as Omit<Usuario, 'id_usuario'>);
 
-    const rolEncontrado = roles.find((r) => r.id_roles === nuevo.rol_id);
-    const nuevoConRol: Usuario = {
-      ...nuevo,
-      rol: nuevo.rol ?? (rolEncontrado ? { id_roles: rolEncontrado.id_roles, nombre: rolEncontrado.nombre } : undefined),
-    };
-    setColaboradores([...colaboradores, nuevoConRol]);
-  }
-};
+        const rolEncontrado = roles.find((r) => r.id_roles === nuevo.rol_id);
+        const nuevoConRol: Usuario = {
+          ...nuevo,
+          rol: nuevo.rol ?? (rolEncontrado ? { id_roles: rolEncontrado.id_roles, nombre: rolEncontrado.nombre } : undefined),
+        };
+        setColaboradores([...colaboradores, nuevoConRol]);
+      }
+    } catch (error: unknown) {                                   
+      const message = error instanceof Error ? error.message : 'Error al guardar colaborador';
+      setErrorModal(message);
+      throw error;
+    }
+  };
 
   const handleDeleteColaborador = async () => {
     if (!selectedColaborador) return;
@@ -136,7 +138,7 @@ const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confi
           contrasena: '********',
         } : undefined}
         isAdmin={isPropietario}
-        onEditar={() => { setSelectedColaborador(adminData); setEsPropietario(true); setShowColaboradorModal(true); }}
+        onEditar={() => { setSelectedColaborador(adminData); setEsPropietario(true); setErrorModal(''); setShowColaboradorModal(true); }}
         onEliminar={() => { setSelectedColaborador(adminData); setShowConfirmModal(true); }}
       />
 
@@ -150,9 +152,9 @@ const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confi
         colaboradores={colaboradores}
         isAdmin={isAdminOrPropietario}
         canAgregar={isPropietario}
-        onEditar={(col) => { setSelectedColaborador(col); setEsPropietario(false); setShowColaboradorModal(true); }}
+        onEditar={(col) => { setSelectedColaborador(col); setEsPropietario(false); setErrorModal(''); setShowColaboradorModal(true); }}
         onEliminar={(col) => { setSelectedColaborador(col); setShowConfirmModal(true); }}
-        onAgregar={() => { setSelectedColaborador(null); setEsPropietario(false); setShowColaboradorModal(true); }}
+        onAgregar={() => { setSelectedColaborador(null); setEsPropietario(false); setErrorModal(''); setShowColaboradorModal(true); }}
       />
 
       {showDomicilioModal && (
@@ -168,7 +170,8 @@ const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confi
           colaborador={selectedColaborador}
           roles={roles}
           esPropietario={esPropietario}
-          onClose={() => setShowColaboradorModal(false)}
+          error={errorModal}
+          onClose={() => { setShowColaboradorModal(false); setErrorModal(''); }}
           onSave={handleSaveColaborador}
         />
       )}
@@ -180,6 +183,8 @@ const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confi
           onClose={() => setShowConfirmModal(false)}
         />
       )}
+
+
     </div>
   );
 }

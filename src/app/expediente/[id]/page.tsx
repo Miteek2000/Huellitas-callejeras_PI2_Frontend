@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
+import { ConfirmModal } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
@@ -11,7 +12,6 @@ import { MovementsService } from '@/app/services/movements.service';
 import { getImageUrl } from '@/app/lib/endpoints';
 import { getUserRole, ROLES } from '@/app/lib/auth';
 
-
 export default function EditarExpedientePage() {
   const router = useRouter();
   const params = useParams();
@@ -19,14 +19,11 @@ export default function EditarExpedientePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showHistorial, setShowHistorial] = useState(false);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [expediente, setExpediente] = useState<Animal | null>(null);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isColaborador, setIsColaborador] = useState(false);
-
-  useEffect(() => {
-    setIsColaborador(getUserRole() === ROLES.COLABORADOR);
-  }, []);
+  const [isColaborador] = useState<boolean>(() => getUserRole() === ROLES.COLABORADOR);
 
   useEffect(() => {
     if (!animalId) return;
@@ -37,7 +34,7 @@ export default function EditarExpedientePage() {
     try {
       setLoading(true);
       const animal = await AnimalsService.getById(animalId);
-      const animalMovements = await MovementsService.getByAnimalId(animalId); 
+      const animalMovements = await MovementsService.getByAnimalId(animalId);
       setExpediente(animal);
       setMovimientos(animalMovements);
     } catch (error) {
@@ -47,32 +44,39 @@ export default function EditarExpedientePage() {
     }
   };
 
-  const handleUpdateAnimal = async (data: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => {
-    try {
-      const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
-      const formData = new FormData();
-      if (fotoFile) formData.append('imagen', fotoFile);
-      Object.entries(payload).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, String(value));
-        }
-      });
+  const handleUpdateAnimal = async (
+    data: Animal,
+    fotoFile?: File | null,
+    movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
+  ) => {
+    const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
 
-      await AnimalsService.updateWithForm(animalId, formData); 
+    const formData = new FormData();
+    if (fotoFile) formData.append('imagen', fotoFile);
 
-      if (movimiento) {
-        const nuevoMovimiento = await MovementsService.create({
-          ...movimiento,
-          animal_id: animalId,
-        });
-        setMovimientos(prev => [nuevoMovimiento, ...prev]);
+    const booleanFields = ['es_agresivo', 'enfermedad_no_tratable', 'discapacidad'];
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, booleanFields.includes(key) ? (value ? '1' : '0') : String(value));
       }
+    });
 
-      await loadData();
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error actualizando animal:', error);
+    await AnimalsService.updateWithForm(animalId, formData);
+
+    if (movimiento) {
+      const nuevoMovimiento = await MovementsService.create({
+        ...movimiento,
+        animal_id: animalId,
+      });
+      setMovimientos(prev => [nuevoMovimiento, ...prev]);
     }
+
+    await loadData();
+    setIsEditing(false);
+  };
+
+  const handleSaveSuccess = () => {
+    setShowSaveSuccess(true);
   };
 
   const handleSaveMovimiento = async (
@@ -81,7 +85,7 @@ export default function EditarExpedientePage() {
     try {
       const nuevoMovimiento = await MovementsService.create({
         ...movimiento,
-        animal_id: animalId, 
+        animal_id: animalId,
       });
       setMovimientos(prev => [nuevoMovimiento, ...prev]);
     } catch (error) {
@@ -103,9 +107,9 @@ export default function EditarExpedientePage() {
             <span className="ml-2 text-[#182F51]">Editar expediente</span>
           </div>
           {!isColaborador && (
-          <button type="button" onClick={() => setIsEditing(true)} className="hover:opacity-80 transition-opacity">
-            <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
-          </button>
+            <button type="button" onClick={() => setIsEditing(true)} className="hover:opacity-80 transition-opacity">
+              <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
+            </button>
           )}
         </div>
       </div>
@@ -119,6 +123,14 @@ export default function EditarExpedientePage() {
         onOpenHistorial={() => setShowHistorial(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleUpdateAnimal}
+        onSaveSuccess={handleSaveSuccess}
+      />
+
+      <ConfirmModal
+        isOpen={showSaveSuccess}
+        message="Expediente guardado correctamente"
+        confirmLabel="aceptar"
+        onConfirm={() => setShowSaveSuccess(false)}
       />
 
       <HistorialMovimientosModal
