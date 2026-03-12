@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
-import { ConfirmModal } from '@/components/ui';
+import { ConfirmModal, Spinner } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
@@ -93,7 +93,7 @@ export default function EditarExpedientePage() {
     }
   };
 
-  if (loading) return <div className="p-6">Cargando expediente...</div>;
+  if (loading) return <Spinner message="Cargando expediente..." />;
   if (!expediente) return <div className="p-6">Expediente no encontrado</div>;
 
   return (

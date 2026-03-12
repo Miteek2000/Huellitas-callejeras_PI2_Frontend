@@ -4,3 +4,4 @@ export { Select } from './Select';
 export { Checkbox } from './Checkbox';
 export { Textarea } from './Textarea';
 export { ConfirmModal } from './ConfirmModal';
+export { Spinner } from './Spinner';

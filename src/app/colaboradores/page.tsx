@@ -12,6 +12,7 @@ import ConfirmModal from '../../components/colaboradores/ConfirmModal';
 import AdminTable from '../../components/colaboradores/AdminTable';
 import DomicilioTable from '../../components/colaboradores/DomicilioTable';
 import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTable';
+import { Spinner } from '@/components/ui';
 import type { Usuario } from '@/schemas/auth.schema';
 import type { Rol } from '../services/roles.service';
 import type { Animal } from '@/schemas/animal.schema';
@@ -114,7 +115,7 @@ export default function ColaboradoresPage() {
     setSelectedColaborador(null);
   };
 
-  if (loading) return <div className="p-8">Cargando...</div>;
+  if (loading) return <Spinner />;
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
