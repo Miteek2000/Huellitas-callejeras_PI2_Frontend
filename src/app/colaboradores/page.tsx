@@ -117,8 +117,8 @@ export default function ColaboradoresPage() {
   if (loading) return <div className="p-8">Cargando...</div>;
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
-      <div className="flex items-center gap-15 mb-6">
+    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 mb-6 text-left">
         <h1 className="text-2xl font-semibold text-[#194566]">{refugio?.nombre ?? 'Cargando...'}</h1>
         <span className="text-[#194566] font-bold">Espacios máximos: {refugio?.capacidad_max ?? '-'}</span>
         <span className="text-[#194566] font-bold">Espacios en uso: {espaciosEnUso}</span>

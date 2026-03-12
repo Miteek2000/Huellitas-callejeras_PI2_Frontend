@@ -21,6 +21,7 @@ const DomicilioTable: React.FC<DomicilioTableProps> = ({ refugio, isAdmin, onEdi
           />
         )}
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full mb-2">
         <thead>
           <tr className="bg-slate-600 text-white">
@@ -43,6 +44,7 @@ const DomicilioTable: React.FC<DomicilioTableProps> = ({ refugio, isAdmin, onEdi
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

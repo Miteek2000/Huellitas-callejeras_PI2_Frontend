@@ -70,10 +70,10 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     };
 
   return (
-    <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-8">
+    <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-4 sm:p-8">
       <form onSubmit={handleSubmit}>
-        <div className="flex items-center space-x-6 mb-8">
-          <div className="relative w-60 h-60 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start sm:space-x-6 space-y-4 sm:space-y-0 mb-8">
+          <div className="relative w-40 h-40 sm:w-60 sm:h-60 flex-shrink-0">
             <div className="absolute inset-0 bg-[#5F7A91] rounded-full"></div>
             <div className="absolute inset-2 bg-white rounded-full"></div>
             <div
@@ -105,7 +105,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
           </div>
 
           <div>
-            <h1 className="text-2xl font-semibold text-[#194566] mb-4">Expediente de paciente</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-[#194566] mb-4 text-center sm:text-left">Expediente de paciente</h1>
             <ExpedienteActionButtons
               onHistorialClick={onOpenHistorial}
               onStateChange={handleEstadoChange}
@@ -115,7 +115,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
           </div>
         </div>
 
-        <div className="text-[#2B264F] grid grid-cols-2 gap-8">
+        <div className="text-[#2B264F] grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
             <Input label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.nombre ? 'border-red-500' : ''} />
             <Select label="Especie" name="especie" value={formData.especie} onChange={handleInputChange} options={especiesOptions} disabled={readOnly} className={errors.especie ? 'border-red-500' : ''} />
@@ -185,7 +185,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-center space-x-4 mt-16">
+        <div className="flex flex-wrap justify-center gap-4 mt-16">
           <Button type="submit" variant="primary" disabled={readOnly} className="!bg-[#2B264F] !text-white hover:bg-[#7BB75A] px-54 h-10 flex items-center justify-center font-semibold">
             Guardar
           </Button>

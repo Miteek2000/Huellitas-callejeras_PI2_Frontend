@@ -83,7 +83,7 @@ export default function ExpedientePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] p-6">
+    <div className="min-h-screen bg-[#FFFFFF] px-2 py-4 sm:p-6">
       <div className="max-w-7xl mx-auto mb-6 mt-6">
         <div className="w-full md:w-1/2 bg-[#E8E8E8] rounded-lg shadow-sm p-2 flex items-center justify-between">
           <div className="flex items-center text-gray-700">
