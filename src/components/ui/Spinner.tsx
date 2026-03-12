@@ -1,10 +1,5 @@
 import React from 'react';
 
-interface SpinnerProps {
-  message?: string;
-  fullScreen?: boolean;
-}
-
 export const Spinner: React.FC<SpinnerProps> = ({
   message = 'Cargando...',
   fullScreen = true,

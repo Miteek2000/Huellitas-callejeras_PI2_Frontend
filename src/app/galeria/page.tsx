@@ -79,7 +79,13 @@ export default function GaleriaPage() {
 				</div>
 			</div>
 			<div className="bg-[#E8E8E8] rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-8 justify-items-center" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
-				{animalesFiltrados.map(animal => {
+				{animalesFiltrados.length === 0 && busqueda.trim() !== '' ? (
+					<div className="col-span-full flex flex-col items-center justify-center py-16 gap-4">
+						<p className="text-[#194566] font-semibold text-lg">No se encontró ningún paciente</p>
+						<p className="text-gray-400 text-sm">Intenta buscar por otro nombre</p>
+					</div>
+				) : (
+				animalesFiltrados.map(animal => {
 					const movimientosAnimal = movimientos.filter(m => m.animal_id === animal.id_animal);
 					const tipoHuella = getTipoHuella(movimientosAnimal);
 					return (
@@ -99,7 +105,8 @@ export default function GaleriaPage() {
 							}}
 						/>
 					);
-				})}
+				})
+				)}
 				<DeleteConfirmModal
 					isOpen={showDeleteModal}
 					onConfirm={handleDelete}
