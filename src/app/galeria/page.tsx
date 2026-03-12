@@ -50,17 +50,17 @@ export default function GaleriaPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-[#F1F1F1] p-8">
-			<div className="flex justify-between items-center mb-10 h-[60px]">
+		<div className="min-h-screen bg-[#F1F1F1] p-4 sm:p-8">
+			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-10 gap-3">
 				<div className="flex-1 flex items-center">
-					<div className="bg-[#E9E9E9] flex items-center px-3 py-2 h-[45px] w-full max-w-xl" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
-						<Link href="/auth/login" className="flex items-center">
-							<Image src="/imagenes/flecha.svg" alt="volver" width={32} height={32} />
-							<span className="ml-3 text-[#22345A] font-medium text-lg">Galeria de expedientes</span>
+					<div className="bg-[#E9E9E9] flex items-center px-3 py-2 min-h-[45px] w-full max-w-xl" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
+						<Link href="/auth/login" className="flex items-center min-w-0">
+							<Image src="/imagenes/flecha.svg" alt="volver" width={32} height={32} className="flex-shrink-0" />
+							<span className="ml-3 text-[#22345A] font-medium text-base sm:text-lg truncate">Galeria de expedientes</span>
 						</Link>
 						<div className="flex-1" />
 						{!isColaborador && (
-						<Link href="/expediente/nuevo">
+						<Link href="/expediente/nuevo" className="flex-shrink-0 ml-2">
 							<button className="flex items-center justify-center hover:scale-105 transition-transform">
 								<Image src="/imagenes/galeria/addAnimal.svg" alt="nuevo" width={32} height={32} />
 							</button>
@@ -68,7 +68,7 @@ export default function GaleriaPage() {
 						)}
 					</div>
 				</div>
-				<div className="w-96 relative ml-8">
+				<div className="w-full sm:w-96 relative sm:ml-8">
 					<Image src='/imagenes/galeria/buscar.svg' alt="buscar" width={20} height={20} className="absolute left-3 top-2.5" />
 					<Input
 						placeholder="Buscar paciente por nombre o ID"
