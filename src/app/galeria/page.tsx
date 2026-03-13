@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 
 import { AnimalsService } from '@/app/services/animals.service';
 import { MovementsService } from '@/app/services/movements.service';
-import { AuthService } from '@/app/services/auth.service';
 import { ExpedienteCard } from '@/components/animals/ExpedienteCard';
 import { LogoutConfirmModal } from '@/components/auth';
 import { Button } from '@/components/ui/Button';
@@ -24,7 +23,7 @@ const getTipoHuella = (movimientos: Movimiento[]): 'entrada' | 'salida' | null =
 	if (entrada) return 'entrada';
 	return null;
 };
- const refugioId = getRefugioId();
+
 export default function GaleriaPage() {
 	const router = useRouter();
 	const [animales, setAnimales] = useState<Animal[]>([]);
@@ -36,6 +35,7 @@ export default function GaleriaPage() {
 	const [isColaborador, setIsColaborador] = useState(false);
 
 	useEffect(() => {
+		const refugioId = getRefugioId();
 		setIsColaborador(getUserRole() === ROLES.COLABORADOR);
 		AnimalsService.getAll(refugioId).then(setAnimales);
 		MovementsService.getAll().then(setMovimientos);
@@ -55,7 +55,6 @@ export default function GaleriaPage() {
 	};
 
 	const handleLogoutConfirm = () => {
-		AuthService.logout();
 		setShowLogoutConfirm(false);
 		router.push('/auth/login');
 	};

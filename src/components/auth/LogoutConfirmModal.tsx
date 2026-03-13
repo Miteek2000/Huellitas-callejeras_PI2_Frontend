@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ConfirmModal } from '@/components/ui';
+import { AuthService } from '@/app/services/auth.service';
 
 interface LogoutConfirmModalProps {
   isOpen: boolean;
@@ -14,13 +15,18 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const handleConfirm = () => {
+    AuthService.logout();
+    onConfirm();
+  };
+
   return (
     <ConfirmModal
       isOpen={isOpen}
       message="¿Deseas cerrar sesion?"
       confirmLabel="aceptar"
       cancelLabel="cancelar"
-      onConfirm={onConfirm}
+      onConfirm={handleConfirm}
       onCancel={onCancel}
     />
   );
