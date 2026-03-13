@@ -3,7 +3,7 @@ import type { Animal } from '@/schemas/animal.schema';
 export const EXPEDIENTE_REQUIRED_FIELD_MESSAGE = 'Este campo es obligatorio';
 
 export const EXPEDIENTE_AGE_LIMITS = {
-  MIN: 0,
+  MIN: 1,
   MAX: 100,
 } as const;
 

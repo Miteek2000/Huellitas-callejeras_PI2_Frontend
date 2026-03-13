@@ -86,6 +86,10 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     }
   };
 
+  const handleNumberWheel = (e: React.WheelEvent<HTMLInputElement>) => {
+    e.currentTarget.blur();
+  };
+
   const hasError = (field: string) => Boolean(errors[field]);
 
   const getFieldError = (field: ExpedienteFieldErrorKey) =>
@@ -93,7 +97,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-4 sm:p-8">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col sm:flex-row items-center sm:items-start sm:space-x-6 space-y-4 sm:space-y-0 mb-8">
           <div className="relative w-40 h-40 sm:w-60 sm:h-60 flex-shrink-0">
             <div className="absolute inset-0 bg-[#5F7A91] rounded-full"></div>
@@ -153,13 +157,14 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               value={formData.edad}
               onChange={handleInputChange}
               onKeyDown={handleEdadKeyDown}
+              onWheel={handleNumberWheel}
               placeholder=""
               disabled={readOnly}
               className={hasError('edad') ? 'border-red-500' : ''}
               error={getFieldError('edad')}
             />
             <Select label="Sexo" name="sexo" value={formData.sexo} onChange={handleInputChange} options={sexoOptions} disabled={readOnly} className={hasError('sexo') ? 'border-red-500' : ''} error={getFieldError('sexo')} />
-            <Input label="Peso" name="peso" type="number" min={0} value={formData.peso} onChange={handleInputChange} onKeyDown={handlePesoKeyDown} placeholder="" disabled={readOnly} className={hasError('peso') ? 'border-red-500' : ''} error={getFieldError('peso')} />
+            <Input label="Peso" name="peso" type="number" min={0} value={formData.peso} onChange={handleInputChange} onKeyDown={handlePesoKeyDown} onWheel={handleNumberWheel} placeholder="" disabled={readOnly} className={hasError('peso') ? 'border-red-500' : ''} error={getFieldError('peso')} />
             <Select label="Tamaño" name="tamano" value={formData.tamano} onChange={handleInputChange} options={tamanoOptions} disabled={readOnly} className={hasError('tamano') ? 'border-red-500' : ''} error={getFieldError('tamano')} />
 
             <div className="mt-8">
