@@ -97,7 +97,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     hasError(field) ? EXPEDIENTE_FIELD_ERROR_MESSAGES[field] : undefined;
 
   return (
-    <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-4 sm:p-8">
+    <div className={`max-w-7xl mx-auto rounded-lg shadow-lg p-4 sm:p-8 transition-all ${readOnly ? 'bg-[#DCDCDC] opacity-85 saturate-50' : 'bg-[#E8E8E8]'}`}>
       <form onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col sm:flex-row items-center sm:items-start sm:space-x-6 space-y-4 sm:space-y-0 mb-8">
           <div className="relative w-40 h-40 sm:w-60 sm:h-60 flex-shrink-0">

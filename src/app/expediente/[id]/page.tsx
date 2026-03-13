@@ -107,7 +107,11 @@ export default function EditarExpedientePage() {
             <span className="ml-2 text-[#182F51]">Editar expediente</span>
           </div>
           {!isColaborador && (
-            <button type="button" onClick={() => setIsEditing(true)} className="hover:opacity-80 transition-opacity">
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className={isEditing ? 'hover:opacity-80 transition-opacity' : 'rounded-full p-1 bg-[#D7E8CB] shadow-sm hover:bg-[#C7DDB6] transition-all'}
+            >
               <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
             </button>
           )}
