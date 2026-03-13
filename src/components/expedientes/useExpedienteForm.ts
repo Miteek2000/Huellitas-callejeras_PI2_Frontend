@@ -44,6 +44,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   }));
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [isSaving, setIsSaving] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const especiesOptions = [
@@ -155,6 +156,8 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isSaving) return;
+
     const nextErrors = validateExpedienteForm(formData, Boolean(fotoFile || fotoPreviewUrl));
 
     if (Object.keys(nextErrors).length > 0) {
@@ -168,12 +171,15 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
         : undefined;
 
     try {
+      setIsSaving(true);
       if (options?.onSaveAnimal) {
         await options.onSaveAnimal(formData, fotoFile, movimiento);
       }
       options?.onSaveSuccess?.();
     } catch (error) {
       throw error;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -204,6 +210,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     setFormData,
     movimientoData,
     errors,
+    isSaving,
     especiesOptions,
     sexoOptions,
     tamanoOptions,

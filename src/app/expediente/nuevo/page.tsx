@@ -87,7 +87,7 @@ export default function ExpedientePage() {
       <div className="max-w-7xl mx-auto mb-6 mt-6">
         <div className="w-full md:w-1/2 bg-[#E8E8E8] rounded-lg shadow-sm p-2 flex items-center justify-between">
           <div className="flex items-center text-gray-700">
-            <button onClick={() => router.back()} className="flex items-center hover:text-gray-900">
+            <button onClick={() => router.push('/galeria')} className="flex items-center hover:text-gray-900">
               <Image src="/imagenes/flecha.svg" alt="Volver" width={34} height={34} />
             </button>
             <span className="ml-2 text-[#182F51]">Expediente del paciente</span>

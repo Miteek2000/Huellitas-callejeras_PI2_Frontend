@@ -1,9 +1,12 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { AnimalsService } from '@/app/services/animals.service';
 import { MovementsService } from '@/app/services/movements.service';
+import { AuthService } from '@/app/services/auth.service';
 import { ExpedienteCard } from '@/components/animals/ExpedienteCard';
+import { LogoutConfirmModal } from '@/components/auth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DeleteConfirmModal } from '@/components/animals/DeleteConfirmModal';
@@ -23,11 +26,13 @@ const getTipoHuella = (movimientos: Movimiento[]): 'entrada' | 'salida' | null =
 };
  const refugioId = getRefugioId();
 export default function GaleriaPage() {
+	const router = useRouter();
 	const [animales, setAnimales] = useState<Animal[]>([]);
 	const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
 	const [busqueda, setBusqueda] = useState('');
 	const [deleteId, setDeleteId] = useState<string | null>(null);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 	const [isColaborador, setIsColaborador] = useState(false);
 
 	useEffect(() => {
@@ -49,15 +54,21 @@ export default function GaleriaPage() {
 		setDeleteId(null);
 	};
 
+	const handleLogoutConfirm = () => {
+		AuthService.logout();
+		setShowLogoutConfirm(false);
+		router.push('/auth/login');
+	};
+
 	return (
 		<div className="min-h-screen bg-[#F1F1F1] p-4 sm:p-8">
 			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-10 gap-3">
 				<div className="flex-1 flex items-center">
 					<div className="bg-[#E9E9E9] flex items-center px-3 py-2 min-h-[45px] w-full max-w-xl" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
-						<Link href="/auth/login" className="flex items-center min-w-0">
+						<button type="button" onClick={() => setShowLogoutConfirm(true)} className="flex items-center min-w-0">
 							<Image src="/imagenes/flecha.svg" alt="volver" width={32} height={32} className="flex-shrink-0" />
 							<span className="ml-3 text-[#22345A] font-medium text-base sm:text-lg truncate">Galeria de expedientes</span>
-						</Link>
+						</button>
 						<div className="flex-1" />
 						{!isColaborador && (
 						<Link href="/expediente/nuevo" className="flex-shrink-0 ml-2">
@@ -112,6 +123,11 @@ export default function GaleriaPage() {
 					onConfirm={handleDelete}
 					onCancel={() => { setShowDeleteModal(false); setDeleteId(null); }}
 					message="¿Estás seguro de eliminar este expediente?"
+				/>
+				<LogoutConfirmModal
+					isOpen={showLogoutConfirm}
+					onConfirm={handleLogoutConfirm}
+					onCancel={() => setShowLogoutConfirm(false)}
 				/>
 			</div>
 		</div>
