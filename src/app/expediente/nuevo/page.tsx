@@ -99,6 +99,8 @@ export default function ExpedientePage() {
       </div>
 
       <ExpedienteForm
+        cancelMessage="¿Deseas cancelar este expediente?"
+        onCancelConfirmed={() => router.push('/galeria')}
         onOpenHistorial={() => setIsModalOpen(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleSaveAnimal}

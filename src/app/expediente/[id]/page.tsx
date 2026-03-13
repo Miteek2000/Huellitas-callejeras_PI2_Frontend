@@ -119,7 +119,7 @@ export default function EditarExpedientePage() {
         initialPhotoUrl={getImageUrl(expediente.imagen)}
         readOnly={!isEditing}
         cancelMessage="¿Deseas cancelar los cambios?"
-        onCancelConfirmed={() => router.push('/')}
+        onCancelConfirmed={() => router.push('/galeria')}
         onOpenHistorial={() => setShowHistorial(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleUpdateAnimal}
