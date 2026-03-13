@@ -5,6 +5,11 @@ import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/compo
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
 import { useExpedienteForm } from './useExpedienteForm';
 import { MovimientoValidationError } from './MovimientoValidationError';
+import {
+  EXPEDIENTE_AGE_LIMITS,
+  EXPEDIENTE_FIELD_ERROR_MESSAGES,
+  type ExpedienteFieldErrorKey,
+} from './expedienteValidation';
 import type { Animal } from '@/schemas/animal.schema';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import Image from 'next/image';
@@ -69,6 +74,23 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
       setFormData(prev => ({ ...prev, [field]: !e.target.checked }));
     };
 
+  const handleEdadKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const handlePesoKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === '-') {
+      e.preventDefault();
+    }
+  };
+
+  const hasError = (field: string) => Boolean(errors[field]);
+
+  const getFieldError = (field: ExpedienteFieldErrorKey) =>
+    hasError(field) ? EXPEDIENTE_FIELD_ERROR_MESSAGES[field] : undefined;
+
   return (
     <div className="max-w-7xl mx-auto bg-[#E8E8E8] rounded-lg shadow-lg p-4 sm:p-8">
       <form onSubmit={handleSubmit}>
@@ -78,7 +100,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
             <div className="absolute inset-2 bg-white rounded-full"></div>
             <div
               className={`absolute inset-4 bg-[#2B5278] rounded-full overflow-hidden flex items-center justify-center ${
-                errors.foto ? 'ring-2 ring-red-500' : ''
+                hasError('foto') ? 'ring-2 ring-red-500' : ''
               } ${!readOnly ? 'cursor-pointer group' : ''}`}
               onClick={readOnly ? undefined : handleFotoClick}
             >
@@ -117,13 +139,28 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
 
         <div className="text-[#2B264F] grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <Input label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.nombre ? 'border-red-500' : ''} />
-            <Select label="Especie" name="especie" value={formData.especie} onChange={handleInputChange} options={especiesOptions} disabled={readOnly} className={errors.especie ? 'border-red-500' : ''} />
-            <Input label="Raza" name="raza" value={formData.raza} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.raza ? 'border-red-500' : ''} />
-            <Input label="Edad" name="edad" type="number" value={formData.edad} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.edad ? 'border-red-500' : ''} />
-            <Select label="Sexo" name="sexo" value={formData.sexo} onChange={handleInputChange} options={sexoOptions} disabled={readOnly} className={errors.sexo ? 'border-red-500' : ''} />
-            <Input label="Peso" name="peso" type="number" value={formData.peso} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.peso ? 'border-red-500' : ''} />
-            <Select label="Tamaño" name="tamano" value={formData.tamano} onChange={handleInputChange} options={tamanoOptions} disabled={readOnly} className={errors.tamano ? 'border-red-500' : ''} />
+            <Input label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('nombre') ? 'border-red-500' : ''} error={getFieldError('nombre')} />
+            <Select label="Especie" name="especie" value={formData.especie} onChange={handleInputChange} options={especiesOptions} disabled={readOnly} className={hasError('especie') ? 'border-red-500' : ''} error={getFieldError('especie')} />
+            <Input label="Raza" name="raza" value={formData.raza} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('raza') ? 'border-red-500' : ''} error={getFieldError('raza')} />
+            <Input
+              label="Edad"
+              name="edad"
+              type="number"
+              min={EXPEDIENTE_AGE_LIMITS.MIN}
+              max={EXPEDIENTE_AGE_LIMITS.MAX}
+              step={1}
+              inputMode="numeric"
+              value={formData.edad}
+              onChange={handleInputChange}
+              onKeyDown={handleEdadKeyDown}
+              placeholder=""
+              disabled={readOnly}
+              className={hasError('edad') ? 'border-red-500' : ''}
+              error={getFieldError('edad')}
+            />
+            <Select label="Sexo" name="sexo" value={formData.sexo} onChange={handleInputChange} options={sexoOptions} disabled={readOnly} className={hasError('sexo') ? 'border-red-500' : ''} error={getFieldError('sexo')} />
+            <Input label="Peso" name="peso" type="number" min={0} value={formData.peso} onChange={handleInputChange} onKeyDown={handlePesoKeyDown} placeholder="" disabled={readOnly} className={hasError('peso') ? 'border-red-500' : ''} error={getFieldError('peso')} />
+            <Select label="Tamaño" name="tamano" value={formData.tamano} onChange={handleInputChange} options={tamanoOptions} disabled={readOnly} className={hasError('tamano') ? 'border-red-500' : ''} error={getFieldError('tamano')} />
 
             <div className="mt-8">
               <div className="flex items-center mb-4">
@@ -166,9 +203,9 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
-              <Select label="Tipo de movimiento" name="tipo_movimiento" value={movimientoData.tipo_movimiento} onChange={handleInputChange} options={tipoMovimientoOptions} disabled={readOnly} className={errors.tipo_movimiento ? 'border-red-500' : ''} />
-              <Input label="Fecha" name="fecha_movimiento" type="date" value={movimientoData.fecha_movimiento} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.fecha_movimiento ? 'border-red-500' : ''} />
-              <Select label="Motivo" name="motivo_movimiento" value={movimientoData.motivo} onChange={handleInputChange} options={motivoOptions} disabled={readOnly} className={errors.motivo ? 'border-red-500' : ''} />
+              <Select label="Tipo de movimiento" name="tipo_movimiento" value={movimientoData.tipo_movimiento} onChange={handleInputChange} options={tipoMovimientoOptions} disabled={readOnly} className={hasError('tipo_movimiento') ? 'border-red-500' : ''} />
+              <Input label="Fecha" name="fecha_movimiento" type="date" value={movimientoData.fecha_movimiento} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('fecha_movimiento') ? 'border-red-500' : ''} />
+              <Select label="Motivo" name="motivo_movimiento" value={movimientoData.motivo} onChange={handleInputChange} options={motivoOptions} disabled={readOnly} className={hasError('motivo') ? 'border-red-500' : ''} />
               <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
             </div>
 
@@ -179,8 +216,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]"></div>
               </div>
-              <Input label="Lugar" name="lugar" value={formData.lugar} onChange={handleInputChange} placeholder="" disabled={readOnly} className={errors.lugar ? 'border-red-500' : ''} />
-              <Textarea label="Descripción" name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows={4} placeholder="" disabled={readOnly} className={errors.descripcion ? 'border-red-500' : ''} />
+              <Input label="Lugar" name="lugar" value={formData.lugar} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('lugar') ? 'border-red-500' : ''} error={getFieldError('lugar')} />
+              <Textarea label="Descripción" name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows={4} placeholder="" disabled={readOnly} className={hasError('descripcion') ? 'border-red-500' : ''} error={getFieldError('descripcion')} />
             </div>
           </div>
         </div>
