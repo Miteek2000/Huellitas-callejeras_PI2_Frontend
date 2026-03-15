@@ -37,7 +37,6 @@ const ColaboradoresTable: React.FC<ColaboradoresTableProps> = ({
           />
         )}
       </div>
-      <div className="overflow-x-auto">
       <table className="w-full mb-2">
         <thead>
           <tr className="bg-slate-600 text-white">
@@ -74,7 +73,6 @@ const ColaboradoresTable: React.FC<ColaboradoresTableProps> = ({
           )}
         </tbody>
       </table>
-      </div>
     </div>
   );
 };

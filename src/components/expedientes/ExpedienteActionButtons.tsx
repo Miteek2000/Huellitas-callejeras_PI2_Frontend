@@ -73,7 +73,7 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex space-x-4">
       <div className="relative">
         <Button
           type="button"

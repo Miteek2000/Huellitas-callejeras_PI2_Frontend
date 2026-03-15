@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui';
@@ -12,7 +11,6 @@ export const RegisterForm: React.FC<{
   onSubmit?: (data: RegisterFormData) => void;
   error?: string;
 }> = ({ onSubmit, error }) => {
-  const router = useRouter();
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [pendingData, setPendingData] = useState<RegisterFormData | null>(null);
 
@@ -203,17 +201,6 @@ export const RegisterForm: React.FC<{
                   Registrarse
                 </button>
               </div>
-
-              <p className="text-center text-sm text-[#182F51] pt-2">
-                ¿Ya tienes una cuenta?{' '}
-                <button
-                  type="button"
-                  onClick={() => router.push('/auth/login')}
-                  className="font-bold hover:underline transition-colors"
-                >
-                  Inicia sesión
-                </button>
-              </p>
             </form>
           </div>
         </div>

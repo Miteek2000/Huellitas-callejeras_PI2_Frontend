@@ -5,24 +5,10 @@ import type { Animal } from '@/schemas/animal.schema';
 export type CreateAnimalDTO = Omit<Animal, 'id_animal'>;
 export type UpdateAnimalDTO = Partial<CreateAnimalDTO>;
 
-export interface PaginatedAnimals {
-  data: Animal[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
-}
-
 export const AnimalsService = {
 
-  getAll: (refugioId: string, page = 1, limit = 12): Promise<PaginatedAnimals> =>
-    apiFetch<PaginatedAnimals>(
-      `${ENDPOINTS.ANIMALS}/refugio/${refugioId}?page=${page}&limit=${limit}`
-    ),
+  getAll: (refugioId: string): Promise<Animal[]> =>
+    apiFetch<Animal[]>(`${ENDPOINTS.ANIMALS}/refugio/${refugioId}`),
 
   getById: (id: string): Promise<Animal> =>
     apiFetch<Animal>(`${ENDPOINTS.ANIMALS}/${id}`),
@@ -34,10 +20,10 @@ export const AnimalsService = {
     }),
 
   createWithForm: (formData: FormData): Promise<Animal> =>
-    apiFetch<Animal>(ENDPOINTS.ANIMALS, {
-      method: 'POST',
-      body: formData,
-    }),
+  apiFetch<Animal>(ENDPOINTS.ANIMALS, {
+    method: 'POST',
+    body: formData,
+  }),
 
   updateWithForm: (id: string, formData: FormData): Promise<Animal> =>
     apiFetch<Animal>(`${ENDPOINTS.ANIMALS}/${id}`, {
@@ -49,4 +35,5 @@ export const AnimalsService = {
     apiFetch<void>(`${ENDPOINTS.ANIMALS}/${id}`, {
       method: 'DELETE',
     }),
+
 };
