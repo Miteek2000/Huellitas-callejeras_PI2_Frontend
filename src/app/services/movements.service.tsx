@@ -5,12 +5,13 @@ import { Movimiento } from '@/schemas/movimiento.schema';
 export const MovementsService = {
 
   async getAll(): Promise<Movimiento[]> {
-    return await apiFetch<Movimiento[]>(ENDPOINTS.MOVEMENTS);
+    const data = await apiFetch<Movimiento[]>(ENDPOINTS.MOVEMENTS);
+    return data ?? [];
   },
 
   async getByAnimalId(animalId: string): Promise<Movimiento[]> {
     const movements = await apiFetch<Movimiento[]>(ENDPOINTS.MOVEMENTS);
-    return movements.filter(
+    return (movements ?? []).filter(
       (m) => String(m.animal_id) === String(animalId)
     );
   },
