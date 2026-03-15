@@ -44,7 +44,9 @@ export default function GaleriaPage() {
   const cargarAnimales = async (refugioId: string, page: number) => {
 	try {
 		setCargando(true);
+		console.log('refugioId:', refugioId);
 		const resultado = await AnimalsService.getAll(refugioId, page, LIMITE_POR_PAGINA);
+		console.log('resultado:', resultado); 
 		setAnimales(resultado?.data ?? []);
 		setTotalPaginas(resultado?.meta?.totalPages ?? 1);
 		setTotalAnimales(resultado?.meta?.total ?? 0);
