@@ -62,7 +62,7 @@ export default function ColaboradoresPage() {
       setAdminData(propietario);
       setColaboradores(soloColaboradores);
       if (refugioData) setRefugio(refugioData);
-      const enUso = animalesResult.data.filter((a) => a.refugio_id === refugioId).length;
+      const enUso = animalesResult?.data?.filter((a) => a.refugio_id === refugioId).length ?? 0;
       setEspaciosEnUso(enUso);
       setRoles(rolesData.filter((r) => ['admin', 'colaborador'].includes(r.nombre.toLowerCase())));
     }).finally(() => setLoading(false));

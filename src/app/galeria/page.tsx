@@ -45,9 +45,9 @@ export default function GaleriaPage() {
     try {
       setCargando(true);
       const resultado = await AnimalsService.getAll(refugioId, page, LIMITE_POR_PAGINA);
-      setAnimales(resultado.data);
-      setTotalPaginas(resultado.meta.totalPages);
-      setTotalAnimales(resultado.meta.total);
+      setAnimales(resultado?.data ?? []);
+      setTotalPaginas(resultado?.meta?.totalPages ?? 1);
+      setTotalAnimales(resultado?.meta?.total ?? 0);
     } finally {
       setCargando(false);
     }
@@ -57,7 +57,7 @@ export default function GaleriaPage() {
     const refugioId = getRefugioId();
     setIsColaborador(getUserRole() === ROLES.COLABORADOR);
     cargarAnimales(refugioId, paginaActual);
-    MovementsService.getAll().then(setMovimientos);
+    MovementsService.getAll().then(data => setMovimientos(data ?? []));
   }, [paginaActual]);
 
   const animalesFiltrados = animales.filter(animal =>
