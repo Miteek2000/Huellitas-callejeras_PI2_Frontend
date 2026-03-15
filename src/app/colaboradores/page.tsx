@@ -12,9 +12,10 @@ import ConfirmModal from '../../components/colaboradores/ConfirmModal';
 import AdminTable from '../../components/colaboradores/AdminTable';
 import DomicilioTable from '../../components/colaboradores/DomicilioTable';
 import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTable';
-import { Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui/Spinner';
 import type { Usuario } from '@/schemas/auth.schema';
 import type { Rol } from '../services/roles.service';
+import type { Animal } from '@/schemas/animal.schema';
 
 export default function ColaboradoresPage() {
   const router = useRouter();

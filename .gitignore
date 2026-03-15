@@ -32,7 +32,6 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-selenium-tests
 
 # vercel
 .vercel
@@ -40,3 +39,5 @@ selenium-tests
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+**.md

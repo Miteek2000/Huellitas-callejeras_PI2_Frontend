@@ -1,0 +1,21 @@
+services:
+  frontend: 
+    image: derekortiz/hc-frontend:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file: .env.production
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  frontend-data:
+
+  ##

@@ -49,4 +49,5 @@ export const AnimalsService = {
     apiFetch<void>(`${ENDPOINTS.ANIMALS}/${id}`, {
       method: 'DELETE',
     }),
+
 };

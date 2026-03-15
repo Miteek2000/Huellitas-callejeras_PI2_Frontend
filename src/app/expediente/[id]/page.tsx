@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
-import { ConfirmModal, Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui/Spinner';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';

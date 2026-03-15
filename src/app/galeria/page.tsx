@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AnimalsService } from '@/app/services/animals.service';
 import { MovementsService } from '@/app/services/movements.service';
 import { ExpedienteCard } from '@/components/animals/ExpedienteCard';
-import { LogoutConfirmModal } from '@/components/auth';
+import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DeleteConfirmModal } from '@/components/animals/DeleteConfirmModal';
