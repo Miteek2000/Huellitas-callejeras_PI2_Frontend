@@ -22,14 +22,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: '**',
-        port: '3001',
         pathname: '/uploads/**',
       },
       // Permitir también HTTPS si se configura en el futuro
       {
         protocol: 'https',
         hostname: '**',
-        port: '3001',
         pathname: '/uploads/**',
       },
     ],
