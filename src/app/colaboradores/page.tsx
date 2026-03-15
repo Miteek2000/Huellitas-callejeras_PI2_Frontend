@@ -12,9 +12,9 @@ import ConfirmModal from '../../components/colaboradores/ConfirmModal';
 import AdminTable from '../../components/colaboradores/AdminTable';
 import DomicilioTable from '../../components/colaboradores/DomicilioTable';
 import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTable';
+import { Spinner } from '@/components/ui';
 import type { Usuario } from '@/schemas/auth.schema';
 import type { Rol } from '../services/roles.service';
-import type { Animal } from '@/schemas/animal.schema';
 
 export default function ColaboradoresPage() {
   const router = useRouter();
@@ -54,15 +54,15 @@ export default function ColaboradoresPage() {
     Promise.all([
       ColaboradoresService.findAll(refugioId),
       refugioId ? RefugiosService.getById(refugioId) : Promise.resolve(null),
-      AnimalsService.getAll(refugioId),
+      AnimalsService.getAll(refugioId, 1, 1000),
       refugioId ? RolesService.getByRefugio(refugioId).catch(() => []) : Promise.resolve([]),
-    ]).then(([todosUsuarios, refugioData, animalesData, rolesData]: [Usuario[], Refugio | null, Animal[], Rol[]]) => {
+    ]).then(([todosUsuarios, refugioData, animalesResult, rolesData]: [Usuario[], Refugio | null, Awaited<ReturnType<typeof AnimalsService.getAll>>, Rol[]]) => {
       const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
       const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
       setAdminData(propietario);
       setColaboradores(soloColaboradores);
       if (refugioData) setRefugio(refugioData);
-      const enUso = animalesData.filter((a) => a.refugio_id === refugioId).length;
+      const enUso = animalesResult.data.filter((a) => a.refugio_id === refugioId).length;
       setEspaciosEnUso(enUso);
       setRoles(rolesData.filter((r) => ['admin', 'colaborador'].includes(r.nombre.toLowerCase())));
     }).finally(() => setLoading(false));
@@ -114,11 +114,11 @@ export default function ColaboradoresPage() {
     setSelectedColaborador(null);
   };
 
-  if (loading) return <div className="p-8">Cargando...</div>;
+  if (loading) return <Spinner />;
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
-      <div className="flex items-center gap-15 mb-6">
+    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 mb-6 text-left">
         <h1 className="text-2xl font-semibold text-[#194566]">{refugio?.nombre ?? 'Cargando...'}</h1>
         <span className="text-[#194566] font-bold">Espacios máximos: {refugio?.capacidad_max ?? '-'}</span>
         <span className="text-[#194566] font-bold">Espacios en uso: {espaciosEnUso}</span>

@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Animal } from '@/schemas/animal.schema';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { getMotivosPermitidos } from './MovimientoValidationError';
+import { EXPEDIENTE_AGE_LIMITS, validateExpedienteForm } from './expedienteValidation';
 
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
@@ -43,6 +44,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   }));
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [isSaving, setIsSaving] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const especiesOptions = [
@@ -126,7 +128,24 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
         setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
       }
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      if (name === 'edad') {
+        const soloDigitos = value.replace(/\D/g, '');
+
+        if (soloDigitos === '') {
+          setFormData(prev => ({ ...prev, edad: '' }));
+        } else {
+          const edadNormalizada = Math.min(
+            parseInt(soloDigitos, 10),
+            EXPEDIENTE_AGE_LIMITS.MAX
+          );
+          setFormData(prev => ({ ...prev, edad: edadNormalizada.toString() }));
+        }
+      } else if (name === 'peso') {
+        const pesoSinSignoNegativo = value.replace(/-/g, '');
+        setFormData(prev => ({ ...prev, peso: pesoSinSignoNegativo }));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
     }
 
     if (errors[name]) {
@@ -137,23 +156,9 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const nextErrors: Record<string, boolean> = {};
-    const isEmpty = (value: string) => !value || value.trim() === '';
+    if (isSaving) return;
 
-    const edadNum = Number(formData.edad);
-    const pesoNum = Number(formData.peso);
-
-    if (isEmpty(formData.nombre)) nextErrors.nombre = true;
-    if (isEmpty(formData.estado)) nextErrors.estado = true;
-    if (isEmpty(formData.especie)) nextErrors.especie = true;
-    if (isEmpty(formData.raza)) nextErrors.raza = true;
-    if (!edadNum || edadNum <= 0) nextErrors.edad = true;
-    if (isEmpty(formData.sexo)) nextErrors.sexo = true;
-    if (!pesoNum || pesoNum <= 0) nextErrors.peso = true;
-    if (isEmpty(formData.tamano)) nextErrors.tamano = true;
-    if (isEmpty(formData.lugar)) nextErrors.lugar = true;
-    if (isEmpty(formData.descripcion)) nextErrors.descripcion = true;
-    if (!fotoFile && !fotoPreviewUrl) nextErrors.foto = true;
+    const nextErrors = validateExpedienteForm(formData, Boolean(fotoFile || fotoPreviewUrl));
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -166,12 +171,15 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
         : undefined;
 
     try {
+      setIsSaving(true);
       if (options?.onSaveAnimal) {
         await options.onSaveAnimal(formData, fotoFile, movimiento);
       }
       options?.onSaveSuccess?.();
     } catch (error) {
       throw error;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -202,6 +210,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     setFormData,
     movimientoData,
     errors,
+    isSaving,
     especiesOptions,
     sexoOptions,
     tamanoOptions,

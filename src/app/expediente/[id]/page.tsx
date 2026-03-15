@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
-import { ConfirmModal } from '@/components/ui';
+import { ConfirmModal, Spinner } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
@@ -93,21 +93,25 @@ export default function EditarExpedientePage() {
     }
   };
 
-  if (loading) return <div className="p-6">Cargando expediente...</div>;
+  if (loading) return <Spinner message="Cargando expediente..." />;
   if (!expediente) return <div className="p-6">Expediente no encontrado</div>;
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] p-6">
+    <div className="min-h-screen bg-[#FFFFFF] px-2 py-4 sm:p-6">
       <div className="max-w-7xl mx-auto mb-6 mt-6">
         <div className="w-full md:w-1/2 bg-[#E8E8E8] rounded-lg shadow-sm p-2 flex items-center justify-between">
           <div className="flex items-center text-gray-700">
-            <button onClick={() => router.back()} className="flex items-center hover:text-gray-900">
+            <button onClick={() => router.push('/galeria')} className="flex items-center hover:text-gray-900">
               <Image src="/imagenes/flecha.svg" alt="Volver" width={34} height={34} />
             </button>
             <span className="ml-2 text-[#182F51]">Editar expediente</span>
           </div>
           {!isColaborador && (
-            <button type="button" onClick={() => setIsEditing(true)} className="hover:opacity-80 transition-opacity">
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className={isEditing ? 'hover:opacity-80 transition-opacity' : 'rounded-full p-1 bg-[#D7E8CB] shadow-sm hover:bg-[#C7DDB6] transition-all'}
+            >
               <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
             </button>
           )}
@@ -119,7 +123,7 @@ export default function EditarExpedientePage() {
         initialPhotoUrl={getImageUrl(expediente.imagen)}
         readOnly={!isEditing}
         cancelMessage="¿Deseas cancelar los cambios?"
-        onCancelConfirmed={() => router.push('/')}
+        onCancelConfirmed={() => router.push('/galeria')}
         onOpenHistorial={() => setShowHistorial(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleUpdateAnimal}
