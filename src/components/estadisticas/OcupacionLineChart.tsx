@@ -9,16 +9,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { OcupacionTimelinePoint } from '@/schemas/estadisticas.schema';
-
-interface OcupacionLineChartProps {
-  data: OcupacionTimelinePoint[];
-}
+import type { OcupacionTimelinePoint, OcupacionLineChartProps } from '@/schemas/estadisticas.schema';
 
 export function OcupacionLineChart({ data }: OcupacionLineChartProps) {
   if (!data.length) {
     return (
-      <div className="h-[420px] w-full lg:w-[420px] rounded-3xl bg-white p-6 shadow-lg">
+      <div className="bg-white rounded-3xl shadow-lg p-8 w-full lg:w-auto lg:min-w-[620px] h-fit">
         <p className="text-sm text-[#2B264F]">No hay movimientos suficientes para dibujar la grafica.</p>
       </div>
     );
@@ -30,39 +26,52 @@ export function OcupacionLineChart({ data }: OcupacionLineChartProps) {
   );
 
   return (
-    <div className="h-[420px] w-full lg:w-[420px] rounded-3xl bg-white p-6 shadow-lg">
-      <h2 className="mb-4 text-base font-semibold text-[#2B264F] text-center">Ocupacion del refugio en el tiempo</h2>
-      <ResponsiveContainer width="100%" height="90%">
-        <LineChart data={data} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="#E6E6E6" strokeDasharray="4 4" />
-          <XAxis dataKey="fecha" tick={{ fill: '#1C3557', fontSize: 12 }} />
-          <YAxis
-            domain={[0, Math.ceil(maxY * 1.1)]}
-            allowDecimals={false}
-            tick={{ fill: '#1C3557', fontSize: 12 }}
-          />
-          <Tooltip labelFormatter={(label) => `Fecha: ${label}`} />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="capacidadMax"
-            stroke="#D97706"
-            strokeWidth={2}
-            dot={false}
-            strokeDasharray="6 4"
-            name="capacidadMax"
-          />
-          <Line
-            type="monotone"
-            dataKey="ocupacion"
-            stroke="#1D4ED8"
-            strokeWidth={3}
-            dot={{ r: 3, fill: '#1D4ED8' }}
-            activeDot={{ r: 5 }}
-            name="ocupacion"
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <div className="bg-white rounded-3xl shadow-lg p-8 w-full lg:w-auto lg:min-w-[620px] h-fit border border-[#E8ECF3]">
+      <h2 className="mb-1 text-lg font-semibold text-[#1F2A56] text-center">Ocupacion del refugio en el tiempo</h2>
+      <div className="h-[380px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 8, right: 14, left: 2, bottom: 0 }}>
+            <CartesianGrid stroke="#E9EDF5" strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="fecha"
+              tick={{ fill: '#44506A', fontSize: 12 }}
+              tickLine={false}
+              axisLine={{ stroke: '#D4DCEB' }}
+              tickFormatter={(value: string) => value.slice(5)}
+            />
+            <YAxis
+              domain={[0, Math.ceil(maxY * 1.1)]}
+              allowDecimals={false}
+              tick={{ fill: '#44506A', fontSize: 12 }}
+              tickLine={false}
+              axisLine={{ stroke: '#D4DCEB' }}
+            />
+            <Tooltip
+              labelFormatter={(label) => `Fecha: ${label}`}
+              contentStyle={{ borderRadius: 12, border: '1px solid #D9E1EF', boxShadow: '0 8px 20px rgba(27, 45, 94, 0.12)' }}
+            />
+            <Legend wrapperStyle={{ paddingTop: 12 }} />
+            <Line
+              type="monotone"
+              dataKey="capacidadMax"
+              stroke="#D97706"
+              strokeWidth={2.5}
+              dot={false}
+              strokeDasharray="6 4"
+              name="Capacidad maxima"
+            />
+            <Line
+              type="monotone"
+              dataKey="ocupacion"
+              stroke="#2855CF"
+              strokeWidth={3}
+              dot={{ r: 4, fill: '#2855CF', stroke: '#FFFFFF', strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: '#2855CF', stroke: '#FFFFFF', strokeWidth: 2 }}
+              name="Ocupacion"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

@@ -5,10 +5,11 @@ import { getRefugioId } from '@/app/lib/auth';
 import { AnimalsService } from '@/app/services/animals.service';
 import { RefugiosService } from '@/app/services/refugios.service';
 import { OcupacionLineChart } from '@/components/estadisticas/OcupacionLineChart';
+import { PromediosTable } from '@/components/estadisticas/PromediosTable';
 import type { Animal } from '@/schemas/animal.schema';
-import type { OcupacionTimelinePoint } from '@/schemas/estadisticas.schema';
+import type { OcupacionTimelinePoint, PromediosStats } from '@/schemas/estadisticas.schema';
 
-// Datos de simulación para probar la gráfica (serán reemplazados por backend)
+// Datos de simulación para probar la gráfica
 const MOCK_TIMELINE: OcupacionTimelinePoint[] = [
   { fecha: '2026-03-01', ocupacion: 2, capacidadMax: 20, entradas: 2, salidas: 0 },
   { fecha: '2026-03-02', ocupacion: 3, capacidadMax: 20, entradas: 2, salidas: 1 },
@@ -38,15 +39,6 @@ function normalizeArray<T>(value: unknown): T[] {
   }
 
   return [];
-}
-
-interface PromediosStats {
-  edadPromedio: number;
-  sexoMasculino: number;
-  tamanoPromedio: string;
-  discapacidadPorcentaje: number;
-  agresividadPorcentaje: number;
-  enfermedadPorcentaje: number;
 }
 
 export default function EstadisticasPage() {
@@ -144,116 +136,9 @@ export default function EstadisticasPage() {
       </h1>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
-        {/* Tabla de promedios */}
-        <div className="bg-white rounded-3xl shadow-lg p-8 w-full lg:w-auto lg:min-w-[540px]">
-          <h2 className="text-lg font-semibold text-[#2B264F] text-center mb-8">
-            Promedios calculados del refugio
-          </h2>
-
-          <table className="w-full border-separate border-spacing-0">
-            <thead>
-              <tr>
-                <th className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-3 rounded-tl-lg text-left">
-                  Datos
-                </th>
-                <th className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-3 text-center">
-                  Histórico
-                </th>
-                <th className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-3 text-center">
-                  Actual
-                </th>
-                <th className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-3 rounded-tr-lg text-center">
-                  Resultado
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-4 text-left">
-                  Edad
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">2 años</td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.edadPromedio} años
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.edadPromedio > 2 ? '📈' : '📉'}
-                </td>
-              </tr>
-              <tr>
-                <td className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-4 text-left">
-                  Sexo
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">45%</td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.sexoMasculino}%
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.sexoMasculino > 45 ? '📈' : '📉'}
-                </td>
-              </tr>
-              <tr>
-                <td className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-4 text-left">
-                  Tamaño
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">Mediano</td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.tamanoPromedio}
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">—</td>
-              </tr>
-              <tr>
-                <td className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-4 text-left">
-                  Discapacidad
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">20%</td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.discapacidadPorcentaje}%
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.discapacidadPorcentaje > 20 ? '⚠️' : '✓'}
-                </td>
-              </tr>
-              <tr>
-                <td className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-4 text-left">
-                  Agresividad
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">15%</td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.agresividadPorcentaje}%
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.agresividadPorcentaje > 15 ? '⚠️' : '✓'}
-                </td>
-              </tr>
-              <tr>
-                <td className="bg-[#3D5A80] text-white text-sm font-medium px-6 py-4 rounded-bl-lg text-left">
-                  Enfermedades
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">10%</td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                  {promedios.enfermedadPorcentaje}%
-                </td>
-                <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 rounded-br-lg text-center">
-                  {promedios.enfermedadPorcentaje > 10 ? '⚠️' : '✓'}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <p className="mt-8 text-sm italic text-[#2B264F]">
-            La probabilidad de liberar espacio es mayor a la media
-          </p>
-        </div>
-
-        {/* Gráfico de línea */}
+        <PromediosTable promedios={promedios} />
         <OcupacionLineChart data={timeline} />
       </div>
-
-      <p className="mt-10 text-sm text-[#666] text-center italic">
-        <strong>Nota:</strong> Los datos de ocupación mostrados son simulados mientras se integra el
-        backend. Línea naranja = capacidad máxima | Línea azul = ocupación actual
-      </p>
     </div>
   );
 }
