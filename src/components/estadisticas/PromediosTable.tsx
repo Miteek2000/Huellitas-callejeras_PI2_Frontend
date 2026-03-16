@@ -29,7 +29,8 @@ export function PromediosTable({ promedios }: PromediosTableProps) {
   const nivelEnfermedades = getNivelDesdePorcentaje(promedios.enfermedadPorcentaje, 10);
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-8 w-full lg:w-auto lg:min-w-[540px] h-fit">
+    <div className="flex flex-col gap-4 w-full lg:w-auto lg:min-w-[540px]">
+    <div className="bg-white rounded-3xl shadow-lg p-8 w-full h-fit">
       <h2 className="text-lg font-semibold text-[#2B264F] text-center mb-8">
         Promedios calculados del refugio
       </h2>
@@ -127,7 +128,9 @@ export function PromediosTable({ promedios }: PromediosTableProps) {
         </tbody>
       </table>
 
-      <div className="mt-8 rounded-xl border border-[#D7DDEA] bg-[#F6F8FC] px-4 py-3">
+    </div>
+
+      <div className="rounded-xl border border-[#D7DDEA] bg-[#F6F8FC] px-4 py-3">
         <p className="text-sm italic text-[#2B264F]">
           La probabilidad de liberar espacio es mayor a la media
         </p>

@@ -43,7 +43,7 @@ function normalizeArray<T>(value: unknown): T[] {
 
 export default function EstadisticasPage() {
   const refugioId = getRefugioId();
-  const [loading, setLoading] = useState(Boolean(refugioId));
+  const [loading, setLoading] = useState(true);
   const [animales, setAnimales] = useState<Animal[]>([]);
   const [timeline, setTimeline] = useState<OcupacionTimelinePoint[]>(MOCK_TIMELINE);
   const [capacidadMax, setCapacidadMax] = useState(20);
