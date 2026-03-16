@@ -37,6 +37,7 @@ export const AuthService = {
     activo: true,
     rol_id: rolPropietario.id_roles,
     refugio_id: refugioCreado.id_refugio,
+    acepta_terminos: data.usuario.acepta_terminos,
   };
 
   const response = await apiFetch<AuthResponse>(ENDPOINTS.AUTH.REGISTER, {

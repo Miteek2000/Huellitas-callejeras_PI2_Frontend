@@ -29,6 +29,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ admin, isAdmin, onEditar, onEli
           />
         )}
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full mb-2">
         <thead>
           <tr className="bg-slate-600 text-white">
@@ -54,6 +55,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ admin, isAdmin, onEditar, onEli
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

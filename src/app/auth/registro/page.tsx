@@ -12,21 +12,16 @@ export default function RegistroPage() {
 
   const handleRegister = async (data: RegisterFormData) => {
     try {
-      if (data.contrasena !== data.confirmarContrasena) {
-        setError('Las contraseñas no coinciden');
-        return;
-      }
-
       const registroData: RegistroCompletoData = {
         refugio: {
           nombre: data.nombreRefugio,
-          capacidad_max: data.capacidad,
+          capacidad_max: Number(data.capacidad),
           estado: data.estado,
           municipio: data.municipio,
           colonia: data.colonia,
           calle: data.calle,
-          num_exterior: data.numeroExterior,
-          num_interior: data.numeroInterior,
+          num_exterior: data.numeroExterior ? Number(data.numeroExterior) : undefined,
+          num_interior: data.numeroInterior ? Number(data.numeroInterior) : undefined,
         },
         usuario: {
           nombre: data.nombres,
@@ -34,27 +29,19 @@ export default function RegistroPage() {
           apellido_m: data.apellidoMaterno,
           email: data.email,
           contrasena: data.contrasena,
+          acepta_terminos: data.acepta_terminos,
         },
       };
 
       await AuthService.registroCompleto(registroData);
       router.push('/galeria');
-
     } catch (error: unknown) {
-      console.error('Error en el registro:', error);
       const message = error instanceof Error ? error.message : 'Error al registrar. Intenta de nuevo.';
       setError(message);
     }
   };
 
   return (
-    <>
-      <RegisterForm onSubmit={handleRegister} />
-      {error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
-          {error}
-        </div>
-      )}
-    </>
+    <RegisterForm onSubmit={handleRegister} error={error} />
   );
 }

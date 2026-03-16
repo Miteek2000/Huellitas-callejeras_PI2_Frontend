@@ -5,16 +5,16 @@ import { ColaboradoresService } from '../services/colaboradores.service';
 import { RefugiosService, type Refugio } from '../services/refugios.service';
 import { AnimalsService } from '../services/animals.service';
 import { RolesService } from '../services/roles.service';
-import { getRefugioId, getUsuarioId, getUserRole, ROLES } from '../lib/auth';
+import { getRefugioId, getUserRole, ROLES } from '../lib/auth';
 import ColaboradorModal from '../../components/colaboradores/ColaboradorModal';
 import DomicilioModal from '../../components/colaboradores/DomicilioModal';
 import ConfirmModal from '../../components/colaboradores/ConfirmModal';
 import AdminTable from '../../components/colaboradores/AdminTable';
 import DomicilioTable from '../../components/colaboradores/DomicilioTable';
 import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTable';
+import { Spinner } from '@/components/ui';
 import type { Usuario } from '@/schemas/auth.schema';
 import type { Rol } from '../services/roles.service';
-import type { Animal } from '@/schemas/animal.schema';
 
 export default function ColaboradoresPage() {
   const router = useRouter();
@@ -29,44 +29,42 @@ export default function ColaboradoresPage() {
   const [loading, setLoading] = useState(true);
   const [refugio, setRefugio] = useState<Refugio | null>(null);
   const [espaciosEnUso, setEspaciosEnUso] = useState<number>(0);
-  const [rol, setRol] = useState<string>('');
+  const [rol] = useState<string>(() => getUserRole());
+  const [errorModal, setErrorModal] = useState<string>('');
 
   const isPropietario = rol === ROLES.PROPIETARIO;
   const isAdminOrPropietario = rol === ROLES.ADMIN || isPropietario;
 
+  const cargarColaboradores = async (refugioId: string) => {
+    const todosUsuarios = await ColaboradoresService.findAll(refugioId);
+    const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
+    const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
+    setAdminData(propietario);
+    setColaboradores(soloColaboradores);
+  };
+
   useEffect(() => {
-    const rolActual = getUserRole();
-    setRol(rolActual);
-    if (rolActual === ROLES.COLABORADOR) {
+    if (rol === ROLES.COLABORADOR) {
       router.replace('/galeria');
+      return;
     }
-  }, []);
 
-
-  useEffect(() => {
     const refugioId = getRefugioId();
-    const usuarioId = getUsuarioId();
 
     Promise.all([
       ColaboradoresService.findAll(refugioId),
       refugioId ? RefugiosService.getById(refugioId) : Promise.resolve(null),
-      AnimalsService.getAll(refugioId),
+      AnimalsService.getAll(refugioId, 1, 1000),
       refugioId ? RolesService.getByRefugio(refugioId).catch(() => []) : Promise.resolve([]),
-    ]).then(([todosUsuarios, refugioData, animalesData, rolesData]: [Usuario[], Refugio | null, Animal[], Rol[]]) => {
-
-
+    ]).then(([todosUsuarios, refugioData, animalesResult, rolesData]: [Usuario[], Refugio | null, Awaited<ReturnType<typeof AnimalsService.getAll>>, Rol[]]) => {
       const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
       const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
-
       setAdminData(propietario);
       setColaboradores(soloColaboradores);
       if (refugioData) setRefugio(refugioData);
-      const enUso = animalesData.filter((a) => a.refugio_id === refugioId).length;
+      const enUso = animalesResult.data.filter((a) => a.refugio_id === refugioId).length;
       setEspaciosEnUso(enUso);
-      const rolesFiltrados = rolesData.filter((r) =>
-        ['admin', 'colaborador'].includes(r.nombre.toLowerCase())
-      );
-      setRoles(rolesFiltrados);
+      setRoles(rolesData.filter((r) => ['admin', 'colaborador'].includes(r.nombre.toLowerCase())));
     }).finally(() => setLoading(false));
   }, []);
 
@@ -77,37 +75,36 @@ export default function ColaboradoresPage() {
     setRefugio(updated);
   };
 
-const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => {
-  const { confirmarContrasena: _, contrasena, ...rest } = data;
+  const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confirmarContrasena: string }) => {
+    try {
+      const { confirmarContrasena: _, contrasena, ...rest } = data;
+      const payload: Partial<Usuario> = { ...rest };
+      if (contrasena && contrasena.trim() !== '') {
+        payload.contrasena = contrasena;
+      }
 
-  const payload: Partial<Usuario> = { ...rest };
+      if (selectedColaborador) {
+        const { refugio_id, ...updatePayload } = payload;
+        await ColaboradoresService.update(selectedColaborador.id_usuario, updatePayload);
+      } else {
+        await ColaboradoresService.create({
+          ...payload,
+          contrasena: contrasena,
+          refugio_id: getRefugioId(),
+          activo: true,
+        } as Omit<Usuario, 'id_usuario'>);
+      }
 
-  if (contrasena && contrasena.trim() !== '') {
-    payload.contrasena = contrasena;
-  }
+      await cargarColaboradores(getRefugioId());
+      setShowColaboradorModal(false);
+      setErrorModal('');
 
-  if (selectedColaborador) {
-    const { refugio_id, ...updatePayload } = payload;
-    const updated = await ColaboradoresService.update(selectedColaborador.id_usuario, updatePayload);
-    setColaboradores(colaboradores.map((col) =>
-      col.id_usuario === updated.id_usuario ? updated : col
-    ));
-  } else {
-    const nuevo = await ColaboradoresService.create({
-      ...payload,
-      contrasena: contrasena,
-      refugio_id: getRefugioId(),
-      activo: true,
-    } as Omit<Usuario, 'id_usuario'>);
-
-    const rolEncontrado = roles.find((r) => r.id_roles === nuevo.rol_id);
-    const nuevoConRol: Usuario = {
-      ...nuevo,
-      rol: nuevo.rol ?? (rolEncontrado ? { id_roles: rolEncontrado.id_roles, nombre: rolEncontrado.nombre } : undefined),
-    };
-    setColaboradores([...colaboradores, nuevoConRol]);
-  }
-};
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al guardar colaborador';
+      setErrorModal(message);
+      throw error;
+    }
+  };
 
   const handleDeleteColaborador = async () => {
     if (!selectedColaborador) return;
@@ -117,11 +114,11 @@ const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confi
     setSelectedColaborador(null);
   };
 
-  if (loading) return <div className="p-8">Cargando...</div>;
+  if (loading) return <Spinner />;
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
-      <div className="flex items-center gap-15 mb-6">
+    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 mb-6 text-left">
         <h1 className="text-2xl font-semibold text-[#194566]">{refugio?.nombre ?? 'Cargando...'}</h1>
         <span className="text-[#194566] font-bold">Espacios máximos: {refugio?.capacidad_max ?? '-'}</span>
         <span className="text-[#194566] font-bold">Espacios en uso: {espaciosEnUso}</span>
@@ -136,7 +133,7 @@ const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confi
           contrasena: '********',
         } : undefined}
         isAdmin={isPropietario}
-        onEditar={() => { setSelectedColaborador(adminData); setEsPropietario(true); setShowColaboradorModal(true); }}
+        onEditar={() => { setSelectedColaborador(adminData); setEsPropietario(true); setErrorModal(''); setShowColaboradorModal(true); }}
         onEliminar={() => { setSelectedColaborador(adminData); setShowConfirmModal(true); }}
       />
 
@@ -150,9 +147,9 @@ const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confi
         colaboradores={colaboradores}
         isAdmin={isAdminOrPropietario}
         canAgregar={isPropietario}
-        onEditar={(col) => { setSelectedColaborador(col); setEsPropietario(false); setShowColaboradorModal(true); }}
+        onEditar={(col) => { setSelectedColaborador(col); setEsPropietario(false); setErrorModal(''); setShowColaboradorModal(true); }}
         onEliminar={(col) => { setSelectedColaborador(col); setShowConfirmModal(true); }}
-        onAgregar={() => { setSelectedColaborador(null); setEsPropietario(false); setShowColaboradorModal(true); }}
+        onAgregar={() => { setSelectedColaborador(null); setEsPropietario(false); setErrorModal(''); setShowColaboradorModal(true); }}
       />
 
       {showDomicilioModal && (
@@ -168,7 +165,8 @@ const handleSaveColaborador = async (data: Omit<Usuario, 'id_usuario'> & { confi
           colaborador={selectedColaborador}
           roles={roles}
           esPropietario={esPropietario}
-          onClose={() => setShowColaboradorModal(false)}
+          error={errorModal}
+          onClose={() => { setShowColaboradorModal(false); setErrorModal(''); }}
           onSave={handleSaveColaborador}
         />
       )}

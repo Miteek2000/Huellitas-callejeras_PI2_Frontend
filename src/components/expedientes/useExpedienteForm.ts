@@ -4,11 +4,13 @@ import { useRef, useState } from 'react';
 import { Animal } from '@/schemas/animal.schema';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { getMotivosPermitidos } from './MovimientoValidationError';
+import { EXPEDIENTE_AGE_LIMITS, validateExpedienteForm } from './expedienteValidation';
 
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
   onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
+  onSaveSuccess?: () => void;
   initialData?: Partial<Animal>;
   initialPhotoUrl?: string;
 }
@@ -42,8 +44,8 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   }));
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [isSaving, setIsSaving] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const especiesOptions = [
     { value: '', label: 'Seleccione...' },
@@ -94,6 +96,13 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     options?.initialPhotoUrl ?? null
   );
 
+  const handleBooleanChange = (
+    field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad',
+    value: boolean
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleEstadoChange = (apiValue: string) => {
     setFormData(prev => ({ ...prev, estado: apiValue }));
     if (errors.estado) {
@@ -104,25 +113,36 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
+    if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
+      const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
+      if (name === 'tipo_movimiento') {
+        const permitidos = getMotivosPermitidos(value);
+        setMovimientoData(prev => ({
+          ...prev,
+          tipo_movimiento: value,
+          motivo: permitidos.includes(prev.motivo) ? prev.motivo : '',
+        }));
+      } else {
+        setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
+      }
     } else {
-      if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
-        const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
-        // Al cambiar el tipo de movimiento, resetear el motivo si no es válido para el nuevo tipo
-        if (name === 'tipo_movimiento') {
-          const permitidos = getMotivosPermitidos(value);
-          setMovimientoData(prev => ({
-            ...prev,
-            tipo_movimiento: value,
-            motivo: permitidos.includes(prev.motivo) ? prev.motivo : '',
-          }));
+      if (name === 'edad') {
+        const soloDigitos = value.replace(/\D/g, '');
+
+        if (soloDigitos === '') {
+          setFormData(prev => ({ ...prev, edad: '' }));
         } else {
-          setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
+          const edadNormalizada = Math.min(
+            parseInt(soloDigitos, 10),
+            EXPEDIENTE_AGE_LIMITS.MAX
+          );
+          setFormData(prev => ({ ...prev, edad: edadNormalizada.toString() }));
         }
+      } else if (name === 'peso') {
+        const pesoSinSignoNegativo = value.replace(/-/g, '');
+        setFormData(prev => ({ ...prev, peso: pesoSinSignoNegativo }));
       } else {
         setFormData(prev => ({ ...prev, [name]: value }));
       }
@@ -136,44 +156,30 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const nextErrors: Record<string, boolean> = {};
-    const isEmpty = (value: string) => !value || value.trim() === '';
+    if (isSaving) return;
 
-    const edadNum = Number(formData.edad);
-    const pesoNum = Number(formData.peso);
-
-    if (isEmpty(formData.nombre)) nextErrors.nombre = true;
-    if (isEmpty(formData.estado)) nextErrors.estado = true;
-    if (isEmpty(formData.especie)) nextErrors.especie = true;
-    if (isEmpty(formData.raza)) nextErrors.raza = true;
-    if (!edadNum || edadNum <= 0) nextErrors.edad = true;
-    if (isEmpty(formData.sexo)) nextErrors.sexo = true;
-    if (!pesoNum || pesoNum <= 0) nextErrors.peso = true;
-    if (isEmpty(formData.tamano)) nextErrors.tamano = true;
-    if (isEmpty(formData.lugar)) nextErrors.lugar = true;
-    if (isEmpty(formData.descripcion)) nextErrors.descripcion = true;
-    if (!fotoFile && !fotoPreviewUrl) nextErrors.foto = true;
+    const nextErrors = validateExpedienteForm(formData, Boolean(fotoFile || fotoPreviewUrl));
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
     }
 
-
-    const movimiento = movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo ? movimientoData : undefined;
-
-
-     console.log('movimientoData:', movimientoData);
-    console.log('movimiento a enviar:', movimientoData);
+    const movimiento =
+      movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo
+        ? movimientoData
+        : undefined;
 
     try {
+      setIsSaving(true);
       if (options?.onSaveAnimal) {
         await options.onSaveAnimal(formData, fotoFile, movimiento);
       }
-
-      setShowSaveSuccess(true);
+      options?.onSaveSuccess?.();
     } catch (error) {
-      console.error(error);
+      throw error;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -184,7 +190,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     options?.onCancelConfirmed?.();
   };
 
-  const handleCloseSaveSuccess = () => setShowSaveSuccess(false);
   const handleFotoClick = () => fileInputRef.current?.click();
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,6 +210,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     setFormData,
     movimientoData,
     errors,
+    isSaving,
     especiesOptions,
     sexoOptions,
     tamanoOptions,
@@ -214,13 +220,12 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     fotoFile,
     fotoPreviewUrl,
     showCancelConfirm,
-    showSaveSuccess,
     handleInputChange,
+    handleBooleanChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,
-    handleCloseSaveSuccess,
     handleFotoClick,
     handleFotoChange,
     setShowCancelConfirm,

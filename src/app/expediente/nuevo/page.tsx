@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
+import { ConfirmModal } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import type { Animal } from '@/schemas/animal.schema';
 import { AnimalsService } from '@/app/services/animals.service';
@@ -14,12 +15,12 @@ export default function ExpedientePage() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [animalCreadoId, setAnimalCreadoId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (getUserRole() === ROLES.COLABORADOR) {
-      router.replace('/galeria');
-    }
-  }, []);
+  if (typeof window !== 'undefined' && getUserRole() === ROLES.COLABORADOR) {
+    router.replace('/galeria');
+  }
 
   const handleSaveAnimal = async (
     data: Animal,
@@ -30,7 +31,6 @@ export default function ExpedientePage() {
     const usuarioId = getUsuarioId();
 
     if (!refugioId || !usuarioId) {
-      console.error('No hay sesión activa');
       router.push('/auth/login');
       return;
     }
@@ -46,15 +46,12 @@ export default function ExpedientePage() {
     form.append('tamano', data.tamano);
     form.append('lugar', data.lugar);
     form.append('descripcion', data.descripcion);
-    form.append('es_agresivo', String(data.es_agresivo));
-    form.append('enfermedad_no_tratable', String(data.enfermedad_no_tratable));
-    form.append('discapacidad', String(data.discapacidad));
+    form.append('es_agresivo', data.es_agresivo ? '1' : '0');
+    form.append('enfermedad_no_tratable', data.enfermedad_no_tratable ? '1' : '0');
+    form.append('discapacidad', data.discapacidad ? '1' : '0');
     form.append('refugio_id', refugioId);
     form.append('usuario_id', usuarioId);
-
-    if (fotoFile) {
-      form.append('imagen', fotoFile);
-    }
+    if (fotoFile) form.append('imagen', fotoFile);
 
     const animalCreado = await AnimalsService.createWithForm(form);
 
@@ -65,7 +62,18 @@ export default function ExpedientePage() {
       });
     }
 
-    router.push(`/expediente/${animalCreado.id_animal}`);
+    setAnimalCreadoId(animalCreado.id_animal ?? null);
+  };
+
+  const handleSaveSuccess = () => {
+    setShowSaveSuccess(true);
+  };
+
+  const handleConfirmSuccess = () => {
+    setShowSaveSuccess(false);
+    if (animalCreadoId) {
+      router.push(`/expediente/${animalCreadoId}`);
+    }
   };
 
   const handleSaveMovimiento = (
@@ -75,11 +83,11 @@ export default function ExpedientePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] p-6">
+    <div className="min-h-screen bg-[#FFFFFF] px-2 py-4 sm:p-6">
       <div className="max-w-7xl mx-auto mb-6 mt-6">
         <div className="w-full md:w-1/2 bg-[#E8E8E8] rounded-lg shadow-sm p-2 flex items-center justify-between">
           <div className="flex items-center text-gray-700">
-            <button onClick={() => router.back()} className="flex items-center hover:text-gray-900">
+            <button onClick={() => router.push('/galeria')} className="flex items-center hover:text-gray-900">
               <Image src="/imagenes/flecha.svg" alt="Volver" width={34} height={34} />
             </button>
             <span className="ml-2 text-[#182F51]">Expediente del paciente</span>
@@ -91,9 +99,19 @@ export default function ExpedientePage() {
       </div>
 
       <ExpedienteForm
+        cancelMessage="¿Deseas cancelar este expediente?"
+        onCancelConfirmed={() => router.push('/galeria')}
         onOpenHistorial={() => setIsModalOpen(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleSaveAnimal}
+        onSaveSuccess={handleSaveSuccess}
+      />
+
+      <ConfirmModal
+        isOpen={showSaveSuccess}
+        message="Expediente guardado correctamente"
+        confirmLabel="aceptar"
+        onConfirm={handleConfirmSuccess}
       />
 
       <HistorialMovimientosModal
