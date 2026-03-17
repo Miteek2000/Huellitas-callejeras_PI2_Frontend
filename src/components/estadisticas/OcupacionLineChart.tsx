@@ -23,8 +23,7 @@ export function OcupacionLineChart({ data, modo }: OcupacionLineChartProps) {
   const maxY = Math.max(...data.map((p) => p.ocupacion_total), 1);
 
   const tickFormatter = (value: string) => {
-    if (modo === 'mes') return value.slice(0, 7); 
-    return value.slice(5);                        
+    return value.split(' ').slice(0, 2).join(' ');
   };
 
   return (
