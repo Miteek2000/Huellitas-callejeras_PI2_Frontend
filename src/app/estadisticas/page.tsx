@@ -2,98 +2,51 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { getRefugioId } from '@/app/lib/auth';
-import { AnimalsService } from '@/app/services/animals.service';
 import { RefugiosService } from '@/app/services/refugios.service';
+import { StatisticsService } from '@/app/services/statistics.service';
 import { OcupacionLineChart } from '@/components/estadisticas/OcupacionLineChart';
+import { PeriodoSelector } from '@/components/estadisticas/PeriodoSelector';
 import { PromediosTable } from '@/components/estadisticas/PromediosTable';
-import type { Animal } from '@/schemas/animal.schema';
-import type { OcupacionTimelinePoint, PromediosStats } from '@/schemas/estadisticas.schema';
+import type { GraficaRow, IndicadorRow } from '@/schemas/estadisticas.schema';
 
-// Datos de simulación para probar la gráfica
-const MOCK_TIMELINE: OcupacionTimelinePoint[] = [
-  { fecha: '2026-03-01', ocupacion: 2, capacidadMax: 20, entradas: 2, salidas: 0 },
-  { fecha: '2026-03-02', ocupacion: 3, capacidadMax: 20, entradas: 2, salidas: 1 },
-  { fecha: '2026-03-03', ocupacion: 5, capacidadMax: 20, entradas: 3, salidas: 1 },
-  { fecha: '2026-03-04', ocupacion: 8, capacidadMax: 20, entradas: 4, salidas: 1 },
-  { fecha: '2026-03-05', ocupacion: 6, capacidadMax: 20, entradas: 1, salidas: 3 },
-  { fecha: '2026-03-06', ocupacion: 9, capacidadMax: 20, entradas: 4, salidas: 1 },
-  { fecha: '2026-03-07', ocupacion: 12, capacidadMax: 20, entradas: 5, salidas: 2 },
-  { fecha: '2026-03-08', ocupacion: 10, capacidadMax: 20, entradas: 2, salidas: 4 },
-  { fecha: '2026-03-09', ocupacion: 11, capacidadMax: 20, entradas: 3, salidas: 2 },
-  { fecha: '2026-03-10', ocupacion: 15, capacidadMax: 20, entradas: 5, salidas: 1 },
-];
+type Modo = 'semana' | 'mes';
 
-function normalizeArray<T>(value: unknown): T[] {
-  if (Array.isArray(value)) return value;
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
-  if (value && typeof value === 'object') {
-    const candidate = value as {
-      data?: unknown;
-      results?: unknown;
-      items?: unknown;
-    };
+function parseLocalDate(value: string): Date {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
 
-    if (Array.isArray(candidate.data)) return candidate.data as T[];
-    if (Array.isArray(candidate.results)) return candidate.results as T[];
-    if (Array.isArray(candidate.items)) return candidate.items as T[];
+function buildRange(modo: Modo, fechaBase: string): { fechaIni: string; fechaFin: string } {
+  const base = parseLocalDate(fechaBase);
+
+  if (modo === 'semana') {
+    const end = new Date(base);
+    end.setDate(base.getDate() + 6);
+    return { fechaIni: formatLocalDate(base), fechaFin: formatLocalDate(end) };
   }
 
-  return [];
+  const firstDay = new Date(base.getFullYear(), base.getMonth(), 1);
+  const lastDay = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+  return { fechaIni: formatLocalDate(firstDay), fechaFin: formatLocalDate(lastDay) };
 }
 
 export default function EstadisticasPage() {
   const refugioId = getRefugioId();
   const [loading, setLoading] = useState(true);
-  const [animales, setAnimales] = useState<Animal[]>([]);
-  const [timeline, setTimeline] = useState<OcupacionTimelinePoint[]>(MOCK_TIMELINE);
-  const [capacidadMax, setCapacidadMax] = useState(20);
+  const [modo, setModo] = useState<Modo>('semana');
+  const [fechaBase, setFechaBase] = useState<string>(() => formatLocalDate(new Date()));
+  const [indicadores, setIndicadores] = useState<IndicadorRow[]>([]);
+  const [graficaData, setGraficaData] = useState<GraficaRow[]>([]);
+  const [capacidadMax, setCapacidadMax] = useState<number | null>(null);
 
-  const promedios = useMemo((): PromediosStats => {
-    if (!animales.length) {
-      return {
-        edadPromedio: 0,
-        sexoMasculino: 0,
-        tamanoPromedio: 'N/A',
-        discapacidadPorcentaje: 0,
-        agresividadPorcentaje: 0,
-        enfermedadPorcentaje: 0,
-      };
-    }
-
-    const edades = animales
-      .map((a) => {
-        const edad = typeof a.edad === 'string' ? parseInt(a.edad, 10) : a.edad;
-        return Number.isNaN(edad) ? 0 : edad;
-      })
-      .filter((e) => e > 0);
-
-    const edadPromedio =
-      edades.length > 0 ? Math.round(edades.reduce((a, b) => a + b, 0) / edades.length) : 0;
-
-    const sexoMasculino = animales.filter((a) => a.sexo?.toLowerCase() === 'macho').length;
-    const sexoMasculinoPorcentaje = Math.round((sexoMasculino / animales.length) * 100);
-
-    const tamaños = animales.map((a) => a.tamano).filter(Boolean);
-    const tamanoMasFrequente = tamaños.length > 0 ? tamaños[0] : 'N/A';
-
-    const discapacidadCount = animales.filter((a) => a.discapacidad).length;
-    const discapacidadPorcentaje = Math.round((discapacidadCount / animales.length) * 100);
-
-    const agresividadCount = animales.filter((a) => a.es_agresivo).length;
-    const agresividadPorcentaje = Math.round((agresividadCount / animales.length) * 100);
-
-    const enfermedadCount = animales.filter((a) => a.enfermedad_no_tratable).length;
-    const enfermedadPorcentaje = Math.round((enfermedadCount / animales.length) * 100);
-
-    return {
-      edadPromedio,
-      sexoMasculino: sexoMasculinoPorcentaje,
-      tamanoPromedio: tamanoMasFrequente,
-      discapacidadPorcentaje,
-      agresividadPorcentaje,
-      enfermedadPorcentaje,
-    };
-  }, [animales]);
+  const rango = useMemo(() => buildRange(modo, fechaBase), [modo, fechaBase]);
 
   useEffect(() => {
     if (!refugioId) {
@@ -102,28 +55,23 @@ export default function EstadisticasPage() {
     }
 
     Promise.all([
-      AnimalsService.getAll(refugioId).catch(() => null),
+      StatisticsService.getIndicadores(refugioId).catch(() => []),
       RefugiosService.getById(refugioId).catch(() => null),
     ])
-      .then(([animalsResponse, refugioResponse]) => {
-        const animals = normalizeArray<Animal>(animalsResponse);
-        const maxCapacity = Number(refugioResponse?.capacidad_max ?? 20);
-
-        setAnimales(animals);
-        setCapacidadMax(maxCapacity);
-
-        // Actualizar la gráfica con la capacidad real
-        setTimeline(
-          MOCK_TIMELINE.map((point) => ({
-            ...point,
-            capacidadMax: maxCapacity,
-          }))
-        );
+      .then(([indicadoresData, refugioData]) => {
+        setIndicadores(Array.isArray(indicadoresData) ? indicadoresData : []);
+        setCapacidadMax(typeof refugioData?.capacidad_max === 'number' ? refugioData.capacidad_max : null);
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, [refugioId]);
+
+  useEffect(() => {
+    if (!refugioId) return;
+
+    StatisticsService.getHistorial(refugioId, rango.fechaIni, rango.fechaFin, modo)
+      .then((data) => setGraficaData(Array.isArray(data) ? data : []))
+      .catch(() => setGraficaData([]));
+  }, [refugioId, modo, rango.fechaIni, rango.fechaFin]);
 
   if (loading) {
     return <div className="min-h-screen bg-[#F0F0F0] p-10 text-[#2B264F]">Cargando...</div>;
@@ -136,9 +84,23 @@ export default function EstadisticasPage() {
       </h1>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
-        <PromediosTable promedios={promedios} />
-        <OcupacionLineChart data={timeline} />
+        <PromediosTable indicadores={indicadores} />
+
+        <div className="flex flex-col gap-3 w-full lg:w-auto">
+          <PeriodoSelector
+            modo={modo}
+            fechaBase={fechaBase}
+            fechaIni={rango.fechaIni}
+            fechaFin={rango.fechaFin}
+            capacidadMax={capacidadMax}
+            onModoChange={setModo}
+            onFechaBaseChange={setFechaBase}
+          />
+
+          <OcupacionLineChart data={graficaData} modo={modo} />
+        </div>
       </div>
     </div>
   );
 }
+
