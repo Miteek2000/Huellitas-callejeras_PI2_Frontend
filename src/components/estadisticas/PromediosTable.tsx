@@ -1,5 +1,6 @@
 import React from 'react';
 import type { IndicadorRow } from '@/schemas/estadisticas.schema';
+import { HistoricoCell } from './HistoricoCell';
 
 interface PromediosTableProps {
   indicadores: IndicadorRow[];
@@ -11,9 +12,6 @@ const RESULTADO_COLORES: Record<string, string> = {
   alto: 'text-red-600 font-semibold',
   mediano: 'text-yellow-700 font-semibold',
   bajo: 'text-green-700 font-semibold',
-  alta: 'text-red-600 font-semibold',
-  media: 'text-yellow-700 font-semibold',
-  baja: 'text-green-700 font-semibold',
 };
 
 function getColorResultado(resultado: string): string {
@@ -59,7 +57,7 @@ export function PromediosTable({ indicadores }: PromediosTableProps) {
                     {row.datos}
                   </td>
                   <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
-                    {row.historico}
+                    <HistoricoCell value={row.historico} />
                   </td>
                   <td className="bg-[#D6DCE4] text-[#2B264F] text-sm px-6 py-4 text-center">
                     {row.actual}
