@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfirmModal } from '@/components/ui';
-import { AuthService } from '@/app/services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 interface LogoutConfirmModalProps {
   isOpen: boolean;

@@ -2,8 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { getRefugioId } from '@/app/lib/auth';
-import { RefugiosService } from '@/app/services/refugios.service';
-import { StatisticsService } from '@/app/services/statistics.service';
+import { RefugiosService } from '../../services/refugios.service';
+import { StatisticsService } from '../../services/statistics.service';
 import { OcupacionLineChart } from '@/components/estadisticas/OcupacionLineChart';
 import { PeriodoSelector } from '@/components/estadisticas/PeriodoSelector';
 import { PromediosTable } from '@/components/estadisticas/PromediosTable';

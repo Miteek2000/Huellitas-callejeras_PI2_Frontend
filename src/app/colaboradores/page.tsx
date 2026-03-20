@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ColaboradoresService } from '../services/colaboradores.service';
-import { RefugiosService, type Refugio } from '../services/refugios.service';
-import { AnimalsService } from '../services/animals.service';
-import { RolesService } from '../services/roles.service';
+import { ColaboradoresService } from '../../services/colaboradores.service';
+import { RefugiosService, type Refugio } from '../../services/refugios.service';
+import { AnimalsService } from '../../services/animals.service';
+import { RolesService } from '../../services/roles.service';
 import { getRefugioId, getUserRole, ROLES } from '../lib/auth';
 import ColaboradorModal from '../../components/colaboradores/ColaboradorModal';
 import DomicilioModal from '../../components/colaboradores/DomicilioModal';
@@ -14,8 +14,7 @@ import DomicilioTable from '../../components/colaboradores/DomicilioTable';
 import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTable';
 import { Spinner } from '@/components/ui/Spinner';
 import type { Usuario } from '@/schemas/auth.schema';
-import type { Rol } from '../services/roles.service';
-import type { Animal } from '@/schemas/animal.schema';
+import type { Rol } from '../../services/roles.service';
 
 export default function ColaboradoresPage() {
   const router = useRouter();

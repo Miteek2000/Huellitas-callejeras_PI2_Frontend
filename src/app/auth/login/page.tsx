@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginForm } from '@/components/auth';
 import type { LoginFormData } from '@/schemas/auth.schema';
-import { AuthService } from '@/app/services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 
 export default function LoginPage() {
   const router = useRouter();

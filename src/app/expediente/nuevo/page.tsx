@@ -6,8 +6,8 @@ import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedien
 import { ConfirmModal } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import type { Animal } from '@/schemas/animal.schema';
-import { AnimalsService } from '@/app/services/animals.service';
-import { MovementsService } from '@/app/services/movements.service';
+import { AnimalsService } from '../../../services/animals.service';
+import { MovementsService } from '../../../services/movements.service';
 import { getRefugioId, getUsuarioId, getUserRole, ROLES } from '@/app/lib/auth';
 import Image from 'next/image';
 
