@@ -49,7 +49,7 @@ export default function EditarExpedientePage() {
     fotoFile?: File | null,
     movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
   ) => {
-    const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
+    const { id_animal, usuario_id, refugio_id, imagen, createdAt, updatedAt, ...payload } = data;
 
     const formData = new FormData();
     if (fotoFile) formData.append('imagen', fotoFile);
