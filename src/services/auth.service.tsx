@@ -1,5 +1,5 @@
-import { ENDPOINTS } from '../lib/endpoints';
-import { apiFetch } from '../lib/interceptors';
+import { ENDPOINTS } from '../app/lib/endpoints';
+import { apiFetch } from '../app/lib/interceptors';
 import { RefugiosService } from './refugios.service';
 import type {
   RegisterDTO,

@@ -7,8 +7,8 @@ import { ConfirmModal, Spinner } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
-import { AnimalsService } from '@/app/services/animals.service';
-import { MovementsService } from '@/app/services/movements.service';
+import { AnimalsService } from '../../../services/animals.service';
+import { MovementsService } from '../../../services/movements.service';
 import { getImageUrl } from '@/app/lib/endpoints';
 import { getUserRole, ROLES } from '@/app/lib/auth';
 

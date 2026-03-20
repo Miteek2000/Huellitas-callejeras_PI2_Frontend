@@ -1,6 +1,6 @@
 import React from 'react';
 import TableActionButtons from './TableActionButtons';
-import type { Refugio } from '@/app/services/refugios.service';
+import type { Refugio } from '../../services/refugios.service';
 
 interface DomicilioTableProps {
   refugio?: Refugio | null;

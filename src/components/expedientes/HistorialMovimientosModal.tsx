@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import type { Movimiento } from '@/schemas/movimiento.schema';
-import { MovementsService } from '@/app/services/movements.service';
+import { MovementsService } from '../../services/movements.service';
 
 interface HistorialMovimientosModalProps {
   isOpen: boolean;
