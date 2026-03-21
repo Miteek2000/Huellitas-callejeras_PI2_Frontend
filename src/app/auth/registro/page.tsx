@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RegisterForm } from '@/components/auth';
 import type { RegisterFormData, RegistroCompletoData } from '@/schemas/auth.schema';
-import { AuthService } from '@/app/services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 
 export default function RegistroPage() {
   const router = useRouter();
