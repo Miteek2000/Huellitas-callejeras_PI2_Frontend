@@ -8,7 +8,7 @@ import type { Movimiento } from '@/schemas/movimiento.schema';
 import type { Animal } from '@/schemas/animal.schema';
 import { AnimalsService } from '../../../services/animals.service';
 import { MovementsService } from '../../../services/movements.service';
-import { getRefugioId, getUsuarioId, getUserRole, ROLES } from '@/app/lib/auth';
+import { getRefugioId, getUserRole, ROLES } from '@/app/lib/auth';
 import Image from 'next/image';
 
 export default function ExpedientePage() {
@@ -25,12 +25,10 @@ export default function ExpedientePage() {
   const handleSaveAnimal = async (
     data: Animal,
     fotoFile?: File | null,
-    movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
+    movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>,
   ) => {
     const refugioId = getRefugioId();
-    const usuarioId = getUsuarioId();
-
-    if (!refugioId || !usuarioId) {
+    if (!refugioId) {
       router.push('/auth/login');
       return;
     }
@@ -50,7 +48,6 @@ export default function ExpedientePage() {
     form.append('enfermedad_no_tratable', data.enfermedad_no_tratable ? '1' : '0');
     form.append('discapacidad', data.discapacidad ? '1' : '0');
     form.append('refugio_id', refugioId);
-    form.append('usuario_id', usuarioId);
     if (fotoFile) form.append('imagen', fotoFile);
 
     const animalCreado = await AnimalsService.createWithForm(form);
@@ -65,9 +62,7 @@ export default function ExpedientePage() {
     setAnimalCreadoId(animalCreado.id_animal ?? null);
   };
 
-  const handleSaveSuccess = () => {
-    setShowSaveSuccess(true);
-  };
+  const handleSaveSuccess = () => setShowSaveSuccess(true);
 
   const handleConfirmSuccess = () => {
     setShowSaveSuccess(false);
@@ -77,17 +72,20 @@ export default function ExpedientePage() {
   };
 
   const handleSaveMovimiento = (
-    movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
+    movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>,
   ) => {
-    setMovimientos(prev => [{ ...movimiento, animal_id: '' }, ...prev]);
+    setMovimientos((prev) => [{ ...movimiento, animal_id: '' }, ...prev]);
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] p-6">
+    <div className="min-h-screen bg-[#FFFFFF] px-2 py-4 sm:p-6">
       <div className="max-w-7xl mx-auto mb-6 mt-6">
         <div className="w-full md:w-1/2 bg-[#E8E8E8] rounded-lg shadow-sm p-2 flex items-center justify-between">
           <div className="flex items-center text-gray-700">
-            <button onClick={() => router.back()} className="flex items-center hover:text-gray-900">
+            <button
+              onClick={() => router.push('/galeria')}
+              className="flex items-center hover:text-gray-900"
+            >
               <Image src="/imagenes/flecha.svg" alt="Volver" width={34} height={34} />
             </button>
             <span className="ml-2 text-[#182F51]">Expediente del paciente</span>
@@ -99,6 +97,8 @@ export default function ExpedientePage() {
       </div>
 
       <ExpedienteForm
+        cancelMessage="¿Deseas cancelar este expediente?"
+        onCancelConfirmed={() => router.push('/galeria')}
         onOpenHistorial={() => setIsModalOpen(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleSaveAnimal}

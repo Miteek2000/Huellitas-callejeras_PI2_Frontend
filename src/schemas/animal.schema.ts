@@ -1,3 +1,9 @@
+export interface AnimalImagen {
+  id_animal_imagen: string;
+  imagen: string;
+  animal_id: string;
+}
+
 export interface Animal {
   id_animal?: string;
   nombre: string;
@@ -8,13 +14,13 @@ export interface Animal {
   peso: string | number;
   sexo: string;
   imagen?: string | null;
+  imagenes?: AnimalImagen[];
   tamano: string;
   enfermedad_no_tratable: boolean;
   discapacidad: boolean;
   es_agresivo: boolean;
   lugar: string;
   descripcion: string;
-  usuario_id?: string;
   refugio_id?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
