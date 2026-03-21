@@ -157,7 +157,6 @@ export default function GaleriaPage() {
                 key={animal.id_animal}
                 nombre={animal.nombre}
                 raza={animal.raza}
-                // Pasar el array de imágenes (el campo imagen legacy ya no existe)
                 imagenes={animal.imagenes ?? []}
                 tipoHuella={tipoHuella}
                 canDelete={!isColaborador}
