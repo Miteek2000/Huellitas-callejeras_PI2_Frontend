@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/components/ui';
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
 import { useExpedienteForm } from './useExpedienteForm';
@@ -11,15 +11,20 @@ import {
   type ExpedienteFieldErrorKey,
 } from './expedienteValidation';
 import { getImageUrl } from '@/app/lib/endpoints';
-import type { Animal, AnimalImagen } from '@/schemas/animal.schema';
+import type { Animal } from '@/schemas/animal.schema';
 import type { Movimiento } from '@/schemas/movimiento.schema';
+import Image from 'next/image';
 
 const DEFAULT_IMAGE = '/imagenes/galeria/default.png';
 
 interface ExpedienteFormProps {
   onOpenHistorial?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
-  onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
+  onSaveAnimal?: (
+    animal: Animal,
+    fotosNuevas?: File[],
+    movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
+  ) => Promise<void>;
   onSaveSuccess?: () => void;
   onDeleteImagen?: (imagenId: string) => Promise<void>;
   initialData?: Partial<Animal>;
@@ -51,22 +56,24 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     tipoMovimientoOptions,
     motivoOptions,
     fileInputRef,
-    fotoFile,
-    fotoPreviewUrl,
+    fotosNuevas,
+    fotoPreviews,
     imagenesExistentes,
     imagenActiva,
     setImagenActiva,
-    totalImagenes,
+    todasParaCarrusel,
     showCancelConfirm,
+    showFotoModal,
+    setShowFotoModal,
     handleInputChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,
     handleFotoClick,
-    handleFotoChange,
+    handleFotosChange,
     handleDeleteImagen,
-    handleCancelPreview,
+    handleQuitarFotoNueva,
     setShowCancelConfirm,
   } = useExpedienteForm({
     initialData,
@@ -89,165 +96,97 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   const handlePesoKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === '-') e.preventDefault();
   };
-  const handleNumberWheel = (e: React.WheelEvent<HTMLInputElement>) => {
-    e.currentTarget.blur();
-  };
+  const handleNumberWheel = (e: React.WheelEvent<HTMLInputElement>) => e.currentTarget.blur();
 
   const hasError = (field: string) => Boolean(errors[field]);
   const getFieldError = (field: ExpedienteFieldErrorKey) =>
     hasError(field) ? EXPEDIENTE_FIELD_ERROR_MESSAGES[field] : undefined;
 
-  const todasLasImagenes: Array<{ id: string; src: string; esPendiente?: boolean }> = [
-    ...imagenesExistentes.map(img => ({
-      id: img.id_animal_imagen,
-      src: getImageUrl(img.imagen) ?? DEFAULT_IMAGE,
-    })),
-    ...(fotoPreviewUrl
-      ? [{ id: '__preview__', src: fotoPreviewUrl, esPendiente: true }]
-      : []),
-  ];
 
-  const imagenActivaSrc = todasLasImagenes[imagenActiva]?.src ?? DEFAULT_IMAGE;
-  const imagenActivaId = todasLasImagenes[imagenActiva]?.id;
-  const imagenActivaEsPendiente = todasLasImagenes[imagenActiva]?.esPendiente ?? false;
+  const imagenActivaItem = todasParaCarrusel[imagenActiva];
+  const imagenActivaSrc = imagenActivaItem
+    ? imagenActivaItem.esExistente
+      ? (getImageUrl(imagenActivaItem.src) ?? DEFAULT_IMAGE)
+      : imagenActivaItem.src
+    : null;
 
-  const irAnterior = () =>
-    setImagenActiva(i => (i - 1 + todasLasImagenes.length) % todasLasImagenes.length);
-  const irSiguiente = () =>
-    setImagenActiva(i => (i + 1) % todasLasImagenes.length);
+  const irAnterior = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImagenActiva(i => (i - 1 + todasParaCarrusel.length) % todasParaCarrusel.length);
+  };
+  const irSiguiente = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImagenActiva(i => (i + 1) % todasParaCarrusel.length);
+  };
 
   return (
     <div className={`max-w-7xl mx-auto rounded-lg shadow-lg p-4 sm:p-8 transition-all ${readOnly ? 'bg-[#DCDCDC] opacity-85 saturate-50' : 'bg-[#E8E8E8]'}`}>
       <form onSubmit={handleSubmit} noValidate>
 
-        <div className="flex flex-col sm:flex-row items-start sm:space-x-6 space-y-4 sm:space-y-0 mb-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start sm:space-x-6 space-y-4 sm:space-y-0 mb-8">
 
-          <div className={`flex-shrink-0 bg-white border rounded-xl overflow-hidden w-full sm:w-72 ${hasError('foto') ? 'border-red-500' : 'border-gray-200'}`}>
-            <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-              <span className="text-xs font-medium text-gray-500">Fotos del animal</span>
-              {!readOnly && (
-                <button
-                  type="button"
-                  onClick={handleFotoClick}
-                  className="flex items-center gap-1 text-xs text-[#194566] border border-[#194566] rounded-md px-2 py-1 hover:bg-[#194566] hover:text-white transition-colors"
-                >
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                  Agregar foto
-                </button>
-              )}
-            </div>
+          <div className="relative w-40 h-40 sm:w-60 sm:h-60 flex-shrink-0">
+            <div className="absolute inset-0 bg-[#5F7A91] rounded-full" />
+            <div className="absolute inset-2 bg-white rounded-full" />
 
-            <div className="relative bg-gray-100" style={{ aspectRatio: '4/3' }}>
-              {todasLasImagenes.length > 0 ? (
-                <img
-                  src={imagenActivaSrc}
-                  alt="Foto del animal"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div
-                  className={`w-full h-full flex flex-col items-center justify-center gap-2 ${!readOnly ? 'cursor-pointer hover:bg-gray-200 transition-colors' : ''}`}
-                  onClick={!readOnly ? handleFotoClick : undefined}
-                >
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
-                  <span className="text-xs text-gray-400">{readOnly ? 'Sin fotos' : 'Subir foto'}</span>
-                </div>
-              )}
-
-              {todasLasImagenes.length > 1 && (
+            <div
+              className={`absolute inset-4 bg-[#2B5278] rounded-full overflow-hidden flex items-center justify-center group ${
+                hasError('foto') ? 'ring-2 ring-red-500' : ''
+              } ${!readOnly ? 'cursor-pointer' : ''}`}
+              onClick={!readOnly ? () => setShowFotoModal(true) : undefined}
+            >
+              {imagenActivaSrc ? (
                 <>
-                  <button
-                    type="button"
-                    onClick={irAnterior}
-                    className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black bg-opacity-40 text-white flex items-center justify-center hover:bg-opacity-70 transition-colors text-base"
-                  >‹</button>
-                  <button
-                    type="button"
-                    onClick={irSiguiente}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black bg-opacity-40 text-white flex items-center justify-center hover:bg-opacity-70 transition-colors text-base"
-                  >›</button>
+                  <img src={imagenActivaSrc} alt="Foto del paciente" className="w-full h-full object-cover" />
+                  {!readOnly && (
+                    <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center rounded-full">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-1">
+                           <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} className="brightness-0"
+                            style={{ filter: 'brightness(0) saturate(100%) invert(20%) sepia(50%) saturate(800%) hue-rotate(185deg) brightness(90%)' }}/>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
                 </>
               )}
-
-              {imagenActivaEsPendiente && (
-                <span className="absolute top-2 left-2 text-xs bg-[#194566] text-white px-2 py-0.5 rounded">
-                  pendiente
-                </span>
-              )}
             </div>
 
-            {todasLasImagenes.length > 0 && (
-              <div className="flex items-center justify-between px-3 py-1.5 border-t border-gray-100 bg-gray-50">
-                <span className="text-xs text-gray-400">{imagenActiva + 1} / {todasLasImagenes.length}</span>
-                {!readOnly && imagenActivaId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (imagenActivaEsPendiente) {
-                        handleCancelPreview();
-                      } else {
-                        handleDeleteImagen(imagenActivaId);
-                      }
-                    }}
-                    className="text-xs text-red-500 hover:text-red-700 transition-colors"
-                  >
-                    {imagenActivaEsPendiente ? 'Cancelar' : 'Eliminar foto'}
-                  </button>
-                )}
-              </div>
+            {todasParaCarrusel.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={irAnterior}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#194566] text-white flex items-center justify-center hover:bg-[#153a52] transition-colors shadow z-10 text-lg leading-none"
+                >‹</button>
+                <button
+                  type="button"
+                  onClick={irSiguiente}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#194566] text-white flex items-center justify-center hover:bg-[#153a52] transition-colors shadow z-10 text-lg leading-none"
+                >›</button>
+              </>
             )}
 
-            {todasLasImagenes.length > 0 && (
-              <div className="grid grid-cols-4 gap-1 p-2 border-t border-gray-100">
-                {todasLasImagenes.map((img, i) => (
-                  <button
-                    key={img.id}
-                    type="button"
+            {/* Contador */}
+            {todasParaCarrusel.length > 1 && (
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-1">
+                {todasParaCarrusel.map((_, i) => (
+                  <span
+                    key={i}
                     onClick={() => setImagenActiva(i)}
-                    className={`aspect-square rounded overflow-hidden border-2 transition-colors ${
-                      i === imagenActiva ? 'border-[#194566]' : 'border-transparent'
-                    } ${img.esPendiente ? 'opacity-70' : ''}`}
-                  >
-                    <img src={img.src} alt={`foto ${i + 1}`} className="w-full h-full object-cover" />
-                  </button>
+                    className={`block w-2 h-2 rounded-full cursor-pointer transition-colors ${
+                      i === imagenActiva ? 'bg-[#194566]' : 'bg-gray-300'
+                    }`}
+                  />
                 ))}
-
-                {!readOnly && (
-                  <button
-                    type="button"
-                    onClick={handleFotoClick}
-                    className="aspect-square rounded border border-dashed border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
-                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                  </button>
-                )}
               </div>
-            )}
-
-            {hasError('foto') && (
-              <p className="text-xs text-red-600 px-3 pb-2">Agrega al menos una foto</p>
             )}
           </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            disabled={readOnly}
-            onChange={handleFotoChange}
-          />
-
-          <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl font-semibold text-[#194566] mb-4">
+          <div className={todasParaCarrusel.length > 1 ? 'mt-6 sm:mt-0' : ''}>
+            <h1 className="text-xl sm:text-2xl font-semibold text-[#194566] mb-4 text-center sm:text-left">
               Expediente de paciente
             </h1>
             <ExpedienteActionButtons
@@ -256,6 +195,9 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               currentState={initialData?.estado}
               disabled={readOnly}
             />
+            {hasError('foto') && (
+              <p className="text-red-600 text-sm mt-2">Agrega al menos una foto</p>
+            )}
           </div>
         </div>
 
@@ -315,7 +257,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               <Select label="Motivo" name="motivo_movimiento" value={movimientoData.motivo} onChange={handleInputChange} options={motivoOptions} disabled={readOnly} className={hasError('motivo') ? 'border-red-500' : ''} />
               <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
             </div>
-
             <div className="mt-4">
               <div className="flex items-center mb-4">
                 <div className="bg-[#5A7A8F] text-white px-6 py-2 rounded-l-md">
@@ -346,6 +287,131 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
         cancelLabel="cancelar"
         onConfirm={handleConfirmCancel}
         onCancel={() => setShowCancelConfirm(false)}
+      />
+
+      {showFotoModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setShowFotoModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="bg-[#194566] text-white px-5 py-4 flex items-center justify-between">
+              <span className="font-semibold">Fotos del animal</span>
+              <button
+                type="button"
+                onClick={() => setShowFotoModal(false)}
+                className="hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-4">
+              {todasParaCarrusel.length > 0 ? (
+                <div className="relative rounded-lg overflow-hidden mb-3" style={{ aspectRatio: '4/3' }}>
+                  <img
+                    src={
+                      imagenActivaItem?.esExistente
+                        ? (getImageUrl(imagenActivaItem.src) ?? DEFAULT_IMAGE)
+                        : (imagenActivaItem?.src ?? DEFAULT_IMAGE)
+                    }
+                    alt="preview"
+                    className="w-full h-full object-cover"
+                  />
+                  {!imagenActivaItem?.esExistente && (
+                    <span className="absolute top-2 left-2 text-xs bg-[#194566] text-white px-2 py-0.5 rounded">
+                      pendiente
+                    </span>
+                  )}
+                  {todasParaCarrusel.length > 1 && (
+                    <>
+                      <button type="button" onClick={irAnterior} className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black bg-opacity-40 text-white text-lg flex items-center justify-center">‹</button>
+                      <button type="button" onClick={irSiguiente} className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black bg-opacity-40 text-white text-lg flex items-center justify-center">›</button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-lg bg-gray-100 flex items-center justify-center mb-3" style={{ aspectRatio: '4/3' }}>
+                  <p className="text-sm text-gray-400">Sin fotos aún</p>
+                </div>
+              )}
+
+              {todasParaCarrusel.length > 0 && (
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs text-gray-400">{imagenActiva + 1} / {todasParaCarrusel.length}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (imagenActivaItem?.esExistente) {
+                        handleDeleteImagen(imagenActivaItem.id);
+                      } else {
+                        const idx = imagenActiva - imagenesExistentes.length;
+                        handleQuitarFotoNueva(idx);
+                      }
+                    }}
+                    className="text-xs text-red-500 hover:text-red-700 transition-colors"
+                  >
+                    {imagenActivaItem?.esExistente ? 'Eliminar foto' : 'Quitar foto'}
+                  </button>
+                </div>
+              )}
+
+              {todasParaCarrusel.length > 0 && (
+                <div className="grid grid-cols-5 gap-1.5 mb-4">
+                  {todasParaCarrusel.map((img, i) => (
+                    <button
+                      key={img.id}
+                      type="button"
+                      onClick={() => setImagenActiva(i)}
+                      className={`aspect-square rounded-md overflow-hidden border-2 transition-colors ${
+                        i === imagenActiva ? 'border-[#194566]' : 'border-transparent'
+                      } ${!img.esExistente ? 'opacity-70' : ''}`}
+                    >
+                      <img
+                        src={img.esExistente ? (getImageUrl(img.src) ?? DEFAULT_IMAGE) : img.src}
+                        alt={`foto ${i + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleFotoClick}
+                className="w-full py-2.5 border-2 border-dashed border-[#194566] text-[#194566] rounded-lg text-sm font-medium hover:bg-[#194566] hover:text-white transition-colors flex items-center justify-center gap-2"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Agregar fotos
+              </button>
+
+              {fotosNuevas.length > 0 && (
+                <p className="text-xs text-[#194566] text-center mt-2">
+                  {fotosNuevas.length} foto{fotosNuevas.length > 1 ? 's' : ''} pendiente{fotosNuevas.length > 1 ? 's' : ''} de guardar
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        disabled={readOnly}
+        onChange={handleFotosChange}
       />
     </div>
   );

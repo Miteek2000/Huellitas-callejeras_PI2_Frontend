@@ -46,34 +46,31 @@ export default function EditarExpedientePage() {
 
   const handleUpdateAnimal = async (
     data: Animal,
-    fotoFile?: File | null,
+    fotosNuevas?: File[],
     movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>,
   ) => {
     const {
-      id_animal,
-      usuario_id,
-      refugio_id,
-      imagenes,
-      etiquetas,
-      createdAt,
-      updatedAt,
+      id_animal, usuario_id, refugio_id,
+      imagenes, etiquetas, createdAt, updatedAt,
       ...payload
     } = data;
 
     const formData = new FormData();
-    if (fotoFile) formData.append('imagen', fotoFile);
-
     const booleanFields = ['es_agresivo', 'enfermedad_no_tratable', 'discapacidad'];
     Object.entries(payload).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        formData.append(
-          key,
-          booleanFields.includes(key) ? (value ? '1' : '0') : String(value),
-        );
+        formData.append(key, booleanFields.includes(key) ? (value ? '1' : '0') : String(value));
       }
     });
-
     await AnimalsService.updateWithForm(animalId, formData);
+
+    if (fotosNuevas && fotosNuevas.length > 0) {
+      for (const foto of fotosNuevas) {
+        const fotoForm = new FormData();
+        fotoForm.append('imagen', foto);
+        await AnimalsService.updateWithForm(animalId, fotoForm);
+      }
+    }
 
     if (movimiento) {
       const nuevoMovimiento = await MovementsService.create({

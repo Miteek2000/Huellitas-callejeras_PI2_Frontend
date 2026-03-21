@@ -9,7 +9,11 @@ import { EXPEDIENTE_AGE_LIMITS, validateExpedienteForm } from './expedienteValid
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
-  onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
+  onSaveAnimal?: (
+    animal: Animal,
+    fotosNuevas?: File[],
+    movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
+  ) => Promise<void>;
   onSaveSuccess?: () => void;
   onDeleteImagen?: (imagenId: string) => Promise<void>;
   initialData?: Partial<Animal>;
@@ -47,11 +51,15 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     options?.initialData?.imagenes ?? []
   );
 
+  const [fotosNuevas, setFotosNuevas] = useState<File[]>([]);
+  const [fotoPreviews, setFotoPreviews] = useState<string[]>([]);
+
   const [imagenActiva, setImagenActiva] = useState(0);
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showFotoModal, setShowFotoModal] = useState(false);
 
   const especiesOptions = [
     { value: '', label: 'Seleccione...' },
@@ -93,10 +101,11 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   ];
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [fotoFile, setFotoFile] = useState<File | null>(null);
-  const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(null);
 
-  const totalImagenes = imagenesExistentes.length + (fotoPreviewUrl ? 1 : 0);
+  const todasParaCarrusel = [
+    ...imagenesExistentes.map(img => ({ id: img.id_animal_imagen, src: img.imagen, esExistente: true })),
+    ...fotoPreviews.map((src, i) => ({ id: `__nuevo__${i}`, src, esExistente: false })),
+  ];
 
   const handleEstadoChange = (apiValue: string) => {
     setFormData(prev => ({ ...prev, estado: apiValue }));
@@ -126,7 +135,10 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
         if (soloDigitos === '') {
           setFormData(prev => ({ ...prev, edad: '' }));
         } else {
-          setFormData(prev => ({ ...prev, edad: Math.min(parseInt(soloDigitos, 10), EXPEDIENTE_AGE_LIMITS.MAX).toString() }));
+          setFormData(prev => ({
+            ...prev,
+            edad: Math.min(parseInt(soloDigitos, 10), EXPEDIENTE_AGE_LIMITS.MAX).toString(),
+          }));
         }
       } else if (name === 'peso') {
         setFormData(prev => ({ ...prev, peso: value.replace(/-/g, '') }));
@@ -139,17 +151,14 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
   const handleFotoClick = () => fileInputRef.current?.click();
 
-  const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    if (fotoPreviewUrl) URL.revokeObjectURL(fotoPreviewUrl);
-    if (file) {
-      setFotoFile(file);
-      setFotoPreviewUrl(URL.createObjectURL(file));
-      setImagenActiva(imagenesExistentes.length);
-    } else {
-      setFotoFile(null);
-      setFotoPreviewUrl(null);
-    }
+  const handleFotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+
+    const nuevasPreviews = files.map(f => URL.createObjectURL(f));
+    setFotosNuevas(prev => [...prev, ...files]);
+    setFotoPreviews(prev => [...prev, ...nuevasPreviews]);
+    setImagenActiva(imagenesExistentes.length + fotoPreviews.length);
     if (errors.foto) setErrors(prev => ({ ...prev, foto: false }));
     e.target.value = '';
   };
@@ -162,10 +171,10 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     setImagenActiva(0);
   };
 
-  const handleCancelPreview = () => {
-    if (fotoPreviewUrl) URL.revokeObjectURL(fotoPreviewUrl);
-    setFotoFile(null);
-    setFotoPreviewUrl(null);
+  const handleQuitarFotoNueva = (index: number) => {
+    URL.revokeObjectURL(fotoPreviews[index]);
+    setFotosNuevas(prev => prev.filter((_, i) => i !== index));
+    setFotoPreviews(prev => prev.filter((_, i) => i !== index));
     setImagenActiva(Math.max(0, imagenesExistentes.length - 1));
   };
 
@@ -173,7 +182,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     e.preventDefault();
     if (isSaving) return;
 
-    const hasFoto = imagenesExistentes.length > 0 || Boolean(fotoFile);
+    const hasFoto = imagenesExistentes.length > 0 || fotosNuevas.length > 0;
     const nextErrors = validateExpedienteForm(formData, hasFoto);
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -188,10 +197,11 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     try {
       setIsSaving(true);
       if (options?.onSaveAnimal) {
-        await options.onSaveAnimal(formData, fotoFile, movimiento);
+        await options.onSaveAnimal(formData, fotosNuevas, movimiento);
       }
-      setFotoFile(null);
-      setFotoPreviewUrl(null);
+      fotoPreviews.forEach(url => URL.revokeObjectURL(url));
+      setFotosNuevas([]);
+      setFotoPreviews([]);
       options?.onSaveSuccess?.();
     } catch (error) {
       throw error;
@@ -218,22 +228,25 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     tipoMovimientoOptions,
     motivoOptions,
     fileInputRef,
-    fotoFile,
-    fotoPreviewUrl,
+    fotosNuevas,
+    fotoPreviews,
     imagenesExistentes,
+    setImagenesExistentes,
     imagenActiva,
     setImagenActiva,
-    totalImagenes,
+    todasParaCarrusel,
     showCancelConfirm,
+    showFotoModal,
+    setShowFotoModal,
     handleInputChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
     handleConfirmCancel,
     handleFotoClick,
-    handleFotoChange,
+    handleFotosChange,
     handleDeleteImagen,
-    handleCancelPreview,
+    handleQuitarFotoNueva,
     setShowCancelConfirm,
   };
 };

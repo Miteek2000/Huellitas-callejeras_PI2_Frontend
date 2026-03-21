@@ -24,7 +24,7 @@ export default function ExpedientePage() {
 
   const handleSaveAnimal = async (
     data: Animal,
-    fotoFile?: File | null,
+    fotosNuevas?: File[],
     movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>,
   ) => {
     const refugioId = getRefugioId();
@@ -51,9 +51,20 @@ export default function ExpedientePage() {
     form.append('discapacidad', data.discapacidad ? '1' : '0');
     form.append('refugio_id', refugioId);
     form.append('usuario_id', usuarioId);
-    if (fotoFile) form.append('imagen', fotoFile);
+
+    if (fotosNuevas && fotosNuevas.length > 0) {
+      form.append('imagen', fotosNuevas[0]);
+    }
 
     const animalCreado = await AnimalsService.createWithForm(form);
+
+    if (fotosNuevas && fotosNuevas.length > 1 && animalCreado.id_animal) {
+      for (const foto of fotosNuevas.slice(1)) {
+        const fotoForm = new FormData();
+        fotoForm.append('imagen', foto);
+        await AnimalsService.updateWithForm(animalCreado.id_animal, fotoForm);
+      }
+    }
 
     if (movimiento && animalCreado.id_animal) {
       await MovementsService.create({
