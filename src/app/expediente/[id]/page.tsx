@@ -8,8 +8,8 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
-import { AnimalsService } from '@/app/services/animals.service';
-import { MovementsService } from '@/app/services/movements.service';
+import { AnimalsService } from '../../../services/animals.service';
+import { MovementsService } from '../../../services/movements.service';
 import { getImageUrl } from '@/app/lib/endpoints';
 import { getUserRole, ROLES } from '@/app/lib/auth';
 
@@ -50,7 +50,7 @@ export default function EditarExpedientePage() {
     fotoFile?: File | null,
     movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
   ) => {
-    const { id_animal, usuario_id, refugio_id, imagen, ...payload } = data;
+    const { id_animal, usuario_id, refugio_id, imagen, createdAt, updatedAt, ...payload } = data;
 
     const formData = new FormData();
     if (fotoFile) formData.append('imagen', fotoFile);

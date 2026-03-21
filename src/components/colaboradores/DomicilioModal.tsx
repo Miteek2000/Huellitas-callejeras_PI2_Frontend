@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Input } from '@/components/ui';
-import type { Refugio } from '@/app/services/refugios.service';
+import type { Refugio } from '../../services/refugios.service';
 
 interface DomicilioModalProps {
   refugio?: Refugio | null;

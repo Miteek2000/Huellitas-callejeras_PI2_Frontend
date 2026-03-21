@@ -16,4 +16,6 @@ export interface Animal {
   descripcion: string;
   usuario_id?: string;
   refugio_id?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }

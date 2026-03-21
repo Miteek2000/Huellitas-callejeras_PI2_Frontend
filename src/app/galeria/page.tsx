@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { AnimalsService } from '@/app/services/animals.service';
-import { MovementsService } from '@/app/services/movements.service';
+import { AnimalsService } from '../../services/animals.service';
+import { MovementsService } from '../../services/movements.service';
 import { ExpedienteCard } from '@/components/animals/ExpedienteCard';
 import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { Button } from '@/components/ui/Button';

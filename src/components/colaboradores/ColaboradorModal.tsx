@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui';
-import type { Rol } from '@/app/services/roles.service';
+import type { Rol } from '../../services/roles.service';
 import type { Usuario } from '@/schemas/auth.schema';
 import {
   colaboradorCreateSchema,
