@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Animal, AnimalImagen } from '@/schemas/animal.schema';
+import type { Animal, AnimalImagen } from '@/schemas/animal.schema';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { getMotivosPermitidos } from './MovimientoValidationError';
 import { EXPEDIENTE_AGE_LIMITS, validateExpedienteForm } from './expedienteValidation';
@@ -9,15 +9,10 @@ import { EXPEDIENTE_AGE_LIMITS, validateExpedienteForm } from './expedienteValid
 interface UseExpedienteFormOptions {
   onCancelConfirmed?: () => void;
   onSaveMovimiento?: (movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => void;
-  onSaveAnimal?: (
-    animal: Animal,
-    fotoFile?: File | null,
-    movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>,
-  ) => Promise<void>;
+  onSaveAnimal?: (animal: Animal, fotoFile?: File | null, movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>) => Promise<void>;
   onSaveSuccess?: () => void;
   onDeleteImagen?: (imagenId: string) => Promise<void>;
   initialData?: Partial<Animal>;
-  initialImagenes?: AnimalImagen[];
 }
 
 export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
@@ -49,8 +44,10 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   }));
 
   const [imagenesExistentes, setImagenesExistentes] = useState<AnimalImagen[]>(
-    options?.initialImagenes ?? options?.initialData?.imagenes ?? [],
+    options?.initialData?.imagenes ?? []
   );
+
+  const [imagenActiva, setImagenActiva] = useState(0);
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -61,13 +58,11 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     { value: 'perro', label: 'Perro' },
     { value: 'gato', label: 'Gato' },
   ];
-
   const sexoOptions = [
     { value: '', label: 'Seleccione...' },
     { value: 'Macho', label: 'Macho' },
     { value: 'Hembra', label: 'Hembra' },
   ];
-
   const tamanoOptions = [
     { value: '', label: 'Seleccione...' },
     { value: 'miniatura', label: 'Miniatura' },
@@ -76,13 +71,11 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     { value: 'grande', label: 'Grande' },
     { value: 'gigante', label: 'Gigante' },
   ];
-
   const tipoMovimientoOptions = [
     { value: '', label: 'Seleccione...' },
     { value: 'entrada', label: 'Entrada' },
     { value: 'salida', label: 'Salida' },
   ];
-
   const todosMotivos = [
     { value: 'rescate', label: 'Rescate' },
     { value: 'retorno', label: 'Retorno' },
@@ -103,59 +96,45 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(null);
 
-  const handleBooleanChange = (
-    field: 'es_agresivo' | 'enfermedad_no_tratable' | 'discapacidad',
-    value: boolean,
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  const totalImagenes = imagenesExistentes.length + (fotoPreviewUrl ? 1 : 0);
 
   const handleEstadoChange = (apiValue: string) => {
-    setFormData((prev) => ({ ...prev, estado: apiValue }));
-    if (errors.estado) setErrors((prev) => ({ ...prev, estado: false }));
+    setFormData(prev => ({ ...prev, estado: apiValue }));
+    if (errors.estado) setErrors(prev => ({ ...prev, estado: false }));
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
-    if (
-      name === 'tipo_movimiento' ||
-      name === 'fecha_movimiento' ||
-      name === 'motivo_movimiento'
-    ) {
+    if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
       const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
       if (name === 'tipo_movimiento') {
         const permitidos = getMotivosPermitidos(value);
-        setMovimientoData((prev) => ({
+        setMovimientoData(prev => ({
           ...prev,
           tipo_movimiento: value,
           motivo: permitidos.includes(prev.motivo) ? prev.motivo : '',
         }));
       } else {
-        setMovimientoData((prev) => ({ ...prev, [fieldName]: value }));
+        setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
       }
     } else {
       if (name === 'edad') {
         const soloDigitos = value.replace(/\D/g, '');
         if (soloDigitos === '') {
-          setFormData((prev) => ({ ...prev, edad: '' }));
+          setFormData(prev => ({ ...prev, edad: '' }));
         } else {
-          const edadNormalizada = Math.min(
-            parseInt(soloDigitos, 10),
-            EXPEDIENTE_AGE_LIMITS.MAX,
-          );
-          setFormData((prev) => ({ ...prev, edad: edadNormalizada.toString() }));
+          setFormData(prev => ({ ...prev, edad: Math.min(parseInt(soloDigitos, 10), EXPEDIENTE_AGE_LIMITS.MAX).toString() }));
         }
       } else if (name === 'peso') {
-        setFormData((prev) => ({ ...prev, peso: value.replace(/-/g, '') }));
+        setFormData(prev => ({ ...prev, peso: value.replace(/-/g, '') }));
       } else {
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
       }
     }
-
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: false }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: false }));
   };
 
   const handleFotoClick = () => fileInputRef.current?.click();
@@ -166,27 +145,36 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     if (file) {
       setFotoFile(file);
       setFotoPreviewUrl(URL.createObjectURL(file));
+      setImagenActiva(imagenesExistentes.length);
     } else {
       setFotoFile(null);
       setFotoPreviewUrl(null);
     }
-    if (errors.foto) setErrors((prev) => ({ ...prev, foto: false }));
+    if (errors.foto) setErrors(prev => ({ ...prev, foto: false }));
+    e.target.value = '';
   };
 
   const handleDeleteImagen = async (imagenId: string) => {
     if (options?.onDeleteImagen) {
       await options.onDeleteImagen(imagenId);
     }
-    setImagenesExistentes((prev) => prev.filter((img) => img.id_animal_imagen !== imagenId));
+    setImagenesExistentes(prev => prev.filter(img => img.id_animal_imagen !== imagenId));
+    setImagenActiva(0);
+  };
+
+  const handleCancelPreview = () => {
+    if (fotoPreviewUrl) URL.revokeObjectURL(fotoPreviewUrl);
+    setFotoFile(null);
+    setFotoPreviewUrl(null);
+    setImagenActiva(Math.max(0, imagenesExistentes.length - 1));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSaving) return;
 
-    const hasFoto = Boolean(fotoFile || fotoPreviewUrl || imagenesExistentes.length > 0);
+    const hasFoto = imagenesExistentes.length > 0 || Boolean(fotoFile);
     const nextErrors = validateExpedienteForm(formData, hasFoto);
-
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
@@ -213,7 +201,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   };
 
   const handleCancel = () => setShowCancelConfirm(true);
-
   const handleConfirmCancel = () => {
     setShowCancelConfirm(false);
     options?.onCancelConfirmed?.();
@@ -233,10 +220,12 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     fileInputRef,
     fotoFile,
     fotoPreviewUrl,
-    showCancelConfirm,
     imagenesExistentes,
+    imagenActiva,
+    setImagenActiva,
+    totalImagenes,
+    showCancelConfirm,
     handleInputChange,
-    handleBooleanChange,
     handleEstadoChange,
     handleSubmit,
     handleCancel,
@@ -244,6 +233,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     handleFotoClick,
     handleFotoChange,
     handleDeleteImagen,
+    handleCancelPreview,
     setShowCancelConfirm,
   };
 };

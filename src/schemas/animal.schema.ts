@@ -4,6 +4,17 @@ export interface AnimalImagen {
   animal_id: string;
 }
 
+export interface Etiqueta {
+  id_etiqueta: string;
+  nombre: string;
+}
+
+export interface EtiquetaAnimal {
+  animal_id: string;
+  etiqueta_id: string;
+  etiqueta: Etiqueta;
+}
+
 export interface Animal {
   id_animal?: string;
   nombre: string;
@@ -13,8 +24,8 @@ export interface Animal {
   edad: string | number;
   peso: string | number;
   sexo: string;
-  imagen?: string | null;
   imagenes?: AnimalImagen[];
+  etiquetas?: EtiquetaAnimal[];
   tamano: string;
   enfermedad_no_tratable: boolean;
   discapacidad: boolean;

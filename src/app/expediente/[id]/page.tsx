@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
-import { ConfirmModal, Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui/Spinner';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import type { Movimiento } from '@/schemas/movimiento.schema';
-import type { Animal, AnimalImagen } from '@/schemas/animal.schema';
+import type { Animal } from '@/schemas/animal.schema';
 import Image from 'next/image';
 import { AnimalsService } from '../../../services/animals.service';
 import { MovementsService } from '../../../services/movements.service';
@@ -20,7 +21,6 @@ export default function EditarExpedientePage() {
   const [showHistorial, setShowHistorial] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [expediente, setExpediente] = useState<Animal | null>(null);
-  const [imagenes, setImagenes] = useState<AnimalImagen[]>([]);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [loading, setLoading] = useState(true);
   const [isColaborador] = useState<boolean>(() => getUserRole() === ROLES.COLABORADOR);
@@ -36,7 +36,6 @@ export default function EditarExpedientePage() {
       const animal = await AnimalsService.getById(animalId);
       const animalMovements = await MovementsService.getByAnimalId(animalId);
       setExpediente(animal);
-      setImagenes(animal.imagenes ?? []);
       setMovimientos(animalMovements);
     } catch (error) {
       console.error('Error cargando expediente:', error);
@@ -50,7 +49,16 @@ export default function EditarExpedientePage() {
     fotoFile?: File | null,
     movimiento?: Omit<Movimiento, 'id_movimiento' | 'animal_id'>,
   ) => {
-    const { id_animal, refugio_id, imagen, imagenes: _imgs, createdAt, updatedAt, ...payload } = data;
+    const {
+      id_animal,
+      usuario_id,
+      refugio_id,
+      imagenes,
+      etiquetas,
+      createdAt,
+      updatedAt,
+      ...payload
+    } = data;
 
     const formData = new FormData();
     if (fotoFile) formData.append('imagen', fotoFile);
@@ -58,7 +66,10 @@ export default function EditarExpedientePage() {
     const booleanFields = ['es_agresivo', 'enfermedad_no_tratable', 'discapacidad'];
     Object.entries(payload).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        formData.append(key, booleanFields.includes(key) ? (value ? '1' : '0') : String(value));
+        formData.append(
+          key,
+          booleanFields.includes(key) ? (value ? '1' : '0') : String(value),
+        );
       }
     });
 
@@ -69,7 +80,7 @@ export default function EditarExpedientePage() {
         ...movimiento,
         animal_id: animalId,
       });
-      setMovimientos((prev) => [nuevoMovimiento, ...prev]);
+      setMovimientos(prev => [nuevoMovimiento, ...prev]);
     }
 
     await loadData();
@@ -78,7 +89,7 @@ export default function EditarExpedientePage() {
 
   const handleDeleteImagen = async (imagenId: string) => {
     await AnimalsService.deleteImagen(imagenId);
-    setImagenes((prev) => prev.filter((img) => img.id_animal_imagen !== imagenId));
+    await loadData();
   };
 
   const handleSaveSuccess = () => setShowSaveSuccess(true);
@@ -91,7 +102,7 @@ export default function EditarExpedientePage() {
         ...movimiento,
         animal_id: animalId,
       });
-      setMovimientos((prev) => [nuevoMovimiento, ...prev]);
+      setMovimientos(prev => [nuevoMovimiento, ...prev]);
     } catch (error) {
       console.error('Error guardando movimiento:', error);
     }
@@ -105,10 +116,7 @@ export default function EditarExpedientePage() {
       <div className="max-w-7xl mx-auto mb-6 mt-6">
         <div className="w-full md:w-1/2 bg-[#E8E8E8] rounded-lg shadow-sm p-2 flex items-center justify-between">
           <div className="flex items-center text-gray-700">
-            <button
-              onClick={() => router.push('/galeria')}
-              className="flex items-center hover:text-gray-900"
-            >
+            <button onClick={() => router.push('/galeria')} className="flex items-center hover:text-gray-900">
               <Image src="/imagenes/flecha.svg" alt="Volver" width={34} height={34} />
             </button>
             <span className="ml-2 text-[#182F51]">Editar expediente</span>
@@ -117,11 +125,7 @@ export default function EditarExpedientePage() {
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className={
-                isEditing
-                  ? 'hover:opacity-80 transition-opacity'
-                  : 'rounded-full p-1 bg-[#D7E8CB] shadow-sm hover:bg-[#C7DDB6] transition-all'
-              }
+              className={isEditing ? 'hover:opacity-80 transition-opacity' : 'rounded-full p-1 bg-[#D7E8CB] shadow-sm hover:bg-[#C7DDB6] transition-all'}
             >
               <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
             </button>
@@ -131,7 +135,6 @@ export default function EditarExpedientePage() {
 
       <ExpedienteForm
         initialData={expediente}
-        initialImagenes={imagenes}
         readOnly={!isEditing}
         cancelMessage="¿Deseas cancelar los cambios?"
         onCancelConfirmed={() => router.push('/galeria')}

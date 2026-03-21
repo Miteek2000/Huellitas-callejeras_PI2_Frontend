@@ -21,7 +21,7 @@ export const AnimalsService = {
 
   getAll: (refugioId: string, page = 1, limit = 12): Promise<PaginatedAnimals> =>
     apiFetch<PaginatedAnimals>(
-      `${ENDPOINTS.ANIMALS}/refugio/${refugioId}?page=${page}&limit=${limit}`,
+      `${ENDPOINTS.ANIMALS}/refugio/${refugioId}?page=${page}&limit=${limit}`
     ),
 
   getById: (id: string): Promise<Animal> =>
