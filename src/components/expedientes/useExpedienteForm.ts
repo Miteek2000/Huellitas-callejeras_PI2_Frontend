@@ -26,6 +26,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     especie: '',
     raza: '',
     edad: '',
+    unidad_edad: 'meses',
     sexo: '',
     peso: '',
     tamano: '',
@@ -42,9 +43,22 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     motivo: '',
   });
 
+  const getEdadInicial = (initialData?: Partial<Animal>): { edad: string | number; unidad_edad: 'meses' | 'años' } => {
+    if (!initialData?.edad) return { edad: '', unidad_edad: 'meses' };
+    const edadMeses = Number(initialData.edad);
+    if (edadMeses >= 12 && edadMeses % 12 === 0) {
+      return { edad: edadMeses / 12, unidad_edad: 'años' };
+    }
+    return { edad: edadMeses, unidad_edad: 'meses' };
+  };
+
+  const edadInicial = getEdadInicial(options?.initialData);
+
   const [formData, setFormData] = useState<Animal>(() => ({
     ...defaultFormData,
     ...options?.initialData,
+    edad: edadInicial.edad,
+    unidad_edad: edadInicial.unidad_edad,
   }));
 
   const [imagenesExistentes, setImagenesExistentes] = useState<AnimalImagen[]>(
@@ -53,9 +67,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
   const [fotosNuevas, setFotosNuevas] = useState<File[]>([]);
   const [fotoPreviews, setFotoPreviews] = useState<string[]>([]);
-
   const [imagenActiva, setImagenActiva] = useState(0);
-
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -83,6 +95,10 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     { value: '', label: 'Seleccione...' },
     { value: 'entrada', label: 'Entrada' },
     { value: 'salida', label: 'Salida' },
+  ];
+  const unidadEdadOptions = [
+    { value: 'meses', label: 'Meses' },
+    { value: 'años', label: 'Años' },
   ];
   const todosMotivos = [
     { value: 'rescate', label: 'Rescate' },
@@ -129,22 +145,25 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       } else {
         setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
       }
-    } else {
-      if (name === 'edad') {
-        const soloDigitos = value.replace(/\D/g, '');
-        if (soloDigitos === '') {
-          setFormData(prev => ({ ...prev, edad: '' }));
-        } else {
-          setFormData(prev => ({
-            ...prev,
-            edad: Math.min(parseInt(soloDigitos, 10), EXPEDIENTE_AGE_LIMITS.MAX).toString(),
-          }));
-        }
-      } else if (name === 'peso') {
-        setFormData(prev => ({ ...prev, peso: value.replace(/-/g, '') }));
+    } else if (name === 'unidad_edad') {
+      setFormData(prev => ({ ...prev, unidad_edad: value as 'meses' | 'años' }));
+    } else if (name === 'edad') {
+      const soloDigitos = value.replace(/\D/g, '');
+      const maxEdad = formData.unidad_edad === 'años'
+        ? EXPEDIENTE_AGE_LIMITS.MAX_AÑOS
+        : EXPEDIENTE_AGE_LIMITS.MAX_MESES;
+      if (soloDigitos === '') {
+        setFormData(prev => ({ ...prev, edad: '' }));
       } else {
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({
+          ...prev,
+          edad: Math.min(parseInt(soloDigitos, 10), maxEdad).toString(),
+        }));
       }
+    } else if (name === 'peso') {
+      setFormData(prev => ({ ...prev, peso: value.replace(/-/g, '') }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: false }));
   };
@@ -154,7 +173,6 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const handleFotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-
     const nuevasPreviews = files.map(f => URL.createObjectURL(f));
     setFotosNuevas(prev => [...prev, ...files]);
     setFotoPreviews(prev => [...prev, ...nuevasPreviews]);
@@ -226,6 +244,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     sexoOptions,
     tamanoOptions,
     tipoMovimientoOptions,
+    unidadEdadOptions,
     motivoOptions,
     fileInputRef,
     fotosNuevas,

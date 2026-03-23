@@ -41,6 +41,7 @@ export default function ExpedientePage() {
     form.append('especie', data.especie);
     form.append('raza', data.raza);
     form.append('edad', String(data.edad));
+    form.append('unidad_edad', data.unidad_edad ?? 'meses');
     form.append('peso', String(data.peso));
     form.append('sexo', data.sexo);
     form.append('tamano', data.tamano);
