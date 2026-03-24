@@ -51,8 +51,6 @@ export const EtiquetasAsignadas: React.FC<EtiquetasAsignadasProps> = ({
     setIsLoading(true);
     try {
       await EtiquetasService.asignarAAnimal(animalId, etiquetaId);
-      
-      // Consegir la etiqueta del objeto disponible
       const etiqueta = etiquetasDisponibles.find(e => e.id_etiqueta === etiquetaId);
       if (etiqueta) {
         const nuevaEtiquetaAsignada: EtiquetaAnimal = {
@@ -101,7 +99,6 @@ export const EtiquetasAsignadas: React.FC<EtiquetasAsignadasProps> = ({
       </div>
 
       <div className="space-y-4">
-        {/* Etiquetas Asignadas */}
         <div>
           <p className="text-sm text-gray-700 mb-2 font-semibold">Etiquetas asignadas:</p>
           {etiquetasAssignadas.length > 0 ? (
@@ -132,7 +129,6 @@ export const EtiquetasAsignadas: React.FC<EtiquetasAsignadasProps> = ({
           )}
         </div>
 
-        {/* Botón para agregar etiquetas */}
         {!readOnly && etiquetasNoAsignadas.length > 0 && (
           <div>
             <button
@@ -150,7 +146,6 @@ export const EtiquetasAsignadas: React.FC<EtiquetasAsignadasProps> = ({
         )}
       </div>
 
-      {/* Modal de selección de etiquetas */}
       {showModal && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50"
@@ -194,12 +189,12 @@ export const EtiquetasAsignadas: React.FC<EtiquetasAsignadasProps> = ({
               )}
             </div>
 
-            <div className="flex gap-4 justify-end p-6 border-t border-gray-200">
+            <div className="flex gap-6 p-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
                 disabled={isLoading}
-                className="px-6 py-2 rounded-full bg-[#9F9F9F] text-white text-sm hover:bg-[#888888] transition-colors disabled:opacity-50"
+                className="flex-1 py-2 rounded-full bg-[#9F9F9F] text-white text-sm hover:bg-[#888888] transition-colors disabled:opacity-50 font-medium"
               >
                 Cancelar
               </button>
