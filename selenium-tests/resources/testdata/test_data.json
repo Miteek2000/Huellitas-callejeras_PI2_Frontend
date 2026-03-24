@@ -1,0 +1,55 @@
+{
+  "usuarios": {
+    "valido": {
+      "email": "admin@huellitascallejeras.com",
+      "password": "Admin1234!"
+    },
+    "invalido": {
+      "email": "noexiste@example.com",
+      "password": "WrongPass99"
+    },
+    "propietario": {
+      "email": "propietario@huellitascallejeras.com",
+      "password": "Owner1234!"
+    },
+    "colaborador": {
+      "email": "colaborador@huellitascallejeras.com",
+      "password": "Colab1234!"
+    }
+  },
+  "animales": {
+    "valido": {
+      "nombre": "Pelusa",
+      "especie": "Perro",
+      "sexo": "Hembra",
+      "edad": "2",
+      "descripcion": "Animal de prueba generado automáticamente"
+    },
+    "nuevoEstado": "En adopción"
+  },
+  "colaboradores": {
+    "valido": {
+      "nombre": "Test Colaborador",
+      "email": "colaborador.test@example.com",
+      "rol": "Voluntario"
+    }
+  },
+  "movimientos": {
+    "valido": {
+      "tipo": "Entrada",
+      "motivo": "Rescate",
+      "fecha": "2026-03-11",
+      "descripcion": "Movimiento registrado por prueba automatizada"
+    }
+  },
+  "registro": {
+    "valido": {
+      "nombre": "Refugio Test Automatizado",
+      "email": "refugio.test@example.com",
+      "password": "TestPass1234!"
+    },
+    "alternativo": {
+      "email": "refugio.alt@example.com"
+    }
+  }
+}

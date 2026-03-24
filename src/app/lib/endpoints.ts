@@ -10,6 +10,7 @@ export const ENDPOINTS = {
   MOVEMENTS: `${BASE_URL}/movements`,
   ROLES: `${BASE_URL}/roles`,
   USERS: `${BASE_URL}/users`,
+  ETIQUETAS: `${BASE_URL}/etiquetas`,
   STATISTICS: {
     INDICADORES: `${BASE_URL}/statistics/indicadores`,
     HISTORIAL: `${BASE_URL}/statistics/historial`,

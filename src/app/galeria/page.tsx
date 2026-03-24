@@ -7,6 +7,7 @@ import { ExpedienteCard } from '@/components/animals/ExpedienteCard';
 import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { Input } from '@/components/ui/Input';
 import { DeleteConfirmModal } from '@/components/animals/DeleteConfirmModal';
+import { EtiquetasGaleria } from '@/components/galeria';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Animal } from '@/schemas/animal.schema';
@@ -80,7 +81,7 @@ export default function GaleriaPage() {
 
   return (
     <div className="min-h-screen bg-[#F1F1F1] p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-10 gap-3">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-10 gap-3">
         <div className="flex-1 flex items-center">
           <div className="bg-[#E9E9E9] flex items-center px-3 py-2 min-h-[45px] w-full max-w-xl" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
             <button type="button" onClick={() => setShowLogoutConfirm(true)} className="flex items-center min-w-0">
@@ -97,14 +98,17 @@ export default function GaleriaPage() {
             )}
           </div>
         </div>
-        <div className="w-full sm:w-96 relative sm:ml-8">
-          <Image src='/imagenes/galeria/buscar.svg' alt="buscar" width={20} height={20} className="absolute left-3 top-2.5" />
-          <Input
-            placeholder="Buscar paciente por nombre o ID"
-            value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
-            className="pl-10 w-full"
-          />
+        <div className="flex flex-col w-full sm:w-96 gap-3 sm:ml-8">
+          <div className="relative">
+            <Image src='/imagenes/galeria/buscar.svg' alt="buscar" width={20} height={20} className="absolute left-3 top-2.5" />
+            <Input
+              placeholder="Buscar paciente por nombre o ID"
+              value={busqueda}
+              onChange={e => setBusqueda(e.target.value)}
+              className="pl-10 w-full"
+            />
+          </div>
+          <EtiquetasGaleria />
         </div>
       </div>
 
