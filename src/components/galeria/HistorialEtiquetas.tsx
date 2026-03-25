@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { EtiquetasService } from '@/services/etiquetas.service';
 import { getRefugioId } from '@/app/lib/auth';
 import { EditarEtiquetaModal } from './EditarEtiquetaModal';
+import { ConfirmarBorradoModal } from './ConfirmarBorradoModal';
 import type { Etiqueta } from '@/schemas/animal.schema';
 
 export const HistorialEtiquetas: React.FC = () => {
@@ -13,6 +14,7 @@ export const HistorialEtiquetas: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [etiquetaEditando, setEtiquetaEditando] = useState<Etiqueta | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [idEtiquetaBorrar, setIdEtiquetaBorrar] = useState<string|null>(null);
 
   useEffect(() => {
     cargarEtiquetas();
@@ -55,15 +57,17 @@ export const HistorialEtiquetas: React.FC = () => {
     }
   };
 
-  const handleBorrar = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas borrar esta etiqueta?')) {
-      return;
-    }
+  const handleBorrar = (id: string) => {
+    setIdEtiquetaBorrar(id);
+  };
 
+  const handleConfirmarBorrado = async () => {
+    if (!idEtiquetaBorrar) return;
     try {
       setIsProcessing(true);
-      await EtiquetasService.delete(id);
+      await EtiquetasService.delete(idEtiquetaBorrar);
       await cargarEtiquetas();
+      setIdEtiquetaBorrar(null);
     } catch (error) {
       console.error('Error borrando etiqueta:', error);
     } finally {
@@ -76,10 +80,7 @@ export const HistorialEtiquetas: React.FC = () => {
       <button
         type="button"
         onClick={() => setShowModal(true)}
-        className="bg-[#194566] text-white px-4 sm:px-6 py-2 rounded-full hover:bg-[#153a52] transition-colors flex items-center justify-center gap-2 font-medium">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          <path d="M12 5v14M5 12h14" />
-        </svg>
+        className="w-45 bg-[#194566] text-white px-4 sm:px-8 py-2 rounded-full hover:bg-[#153a52] transition-colors flex items-center justify-center gap-2 font-medium">
         <span>Historial</span>
       </button>
       {showModal && (
@@ -88,14 +89,16 @@ export const HistorialEtiquetas: React.FC = () => {
           onClick={() => setShowModal(false)}
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div
-            className="bg-[#C8D1D7] rounded-lg shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto"
+            className="bg-[#C8D1D7] rounded-lg shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}>
-            <div className="bg-[#194566] text-white px-6 py-4 sticky top-0 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Historial de Etiquetas</h2>
+            <div className="bg-[#194566] text-white px-6 py-4 sticky top-0 flex items-center justify-center relative">
+              <h2 className="text-lg font-semibold text-center w-full">Historial de Etiquetas</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors"
-                type="button">
+                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors absolute right-4"
+                type="button"
+                style={{ top: '50%', transform: 'translateY(-50%)' }}
+              >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
@@ -114,7 +117,7 @@ export const HistorialEtiquetas: React.FC = () => {
                       key={etiqueta.id_etiqueta}
                       className="flex items-center justify-between p-2 rounded-xl border border-gray-200 bg-white hover:bg-[#f3f6f8] transition-all">
                       <div className="flex-1">
-                        <span className="text-[#194566] text-base">{etiqueta.nombre}</span>
+                        <span className="text-[#194566] text-base ml-3">{etiqueta.nombre}</span>
                       </div>
                       <div className="flex gap-2 ml-2">
                         <button
@@ -122,23 +125,13 @@ export const HistorialEtiquetas: React.FC = () => {
                           onClick={() => handleEditarClick(etiqueta)}
                           disabled={isProcessing}
                           className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#194566] text-white text-sm hover:bg-[#153a52] transition-colors disabled:opacity-50 font-medium">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
                           Editar
                         </button>
                         <button
                           type="button"
                           onClick={() => handleBorrar(etiqueta.id_etiqueta)}
                           disabled={isProcessing}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-500 text-white text-sm hover:bg-red-600 transition-colors disabled:opacity-50 font-medium">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#E83525] text-white text-sm hover:bg-red-600 transition-colors disabled:opacity-50 font-medium">
                           Borrar
                         </button>
                       </div>
@@ -154,6 +147,13 @@ export const HistorialEtiquetas: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmarBorradoModal
+        isOpen={!!idEtiquetaBorrar}
+        onClose={() => setIdEtiquetaBorrar(null)}
+        onConfirm={handleConfirmarBorrado}
+        isLoading={isProcessing}
+      />
 
       {etiquetaEditando && (
         <EditarEtiquetaModal

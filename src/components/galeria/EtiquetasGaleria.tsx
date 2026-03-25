@@ -34,7 +34,7 @@ export const EtiquetasGaleria: React.FC<AgregarEtiquetaButtonProps> = ({ onRefre
       <button
         type="button"
         onClick={() => setShowModal(true)}
-        className="bg-[#194566] text-white px-4 sm:px-6 py-2 rounded-full hover:bg-[#153a52] transition-colors flex items-center justify-center gap-2 font-medium">
+        className="bg-[#194566] text-white px-5 sm:px-8 py-2 rounded-full hover:bg-[#153a52] transition-colors flex items-center justify-center gap-2 font-medium">
         <span>Agregar Etiqueta</span>
       </button>
 
