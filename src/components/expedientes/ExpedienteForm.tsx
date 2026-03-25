@@ -280,7 +280,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
         )}
 
         <div className="flex flex-wrap justify-center gap-4 mt-16">
-          <Button type="submit" variant="primary" disabled={readOnly || isSaving} className="!bg-[#2B264F] !text-white w-full sm:w-auto px-16 md:px-50 h-10 flex items-center justify-center font-semibold">
+          <Button type="submit" variant="primary" disabled={readOnly || isSaving} className="!bg-[#2B264F] !text-white w-full sm:w-auto px-16 md:px-50     h-10 flex items-center justify-center font-semibold">
             {isSaving ? 'Guardando...' : 'Guardar'}
           </Button>
           <Button type="button" variant="secondary" onClick={handleCancel} className="!bg-[#A7A7A7] !text-white w-full sm:w-auto px-16 md:px-50 h-10 flex items-center justify-center font-semibold">
