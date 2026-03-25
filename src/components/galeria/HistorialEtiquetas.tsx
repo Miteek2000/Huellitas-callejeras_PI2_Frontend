@@ -17,8 +17,10 @@ export const HistorialEtiquetas: React.FC = () => {
   const [idEtiquetaBorrar, setIdEtiquetaBorrar] = useState<string|null>(null);
 
   useEffect(() => {
-    cargarEtiquetas();
-  }, []);
+    if (showModal) {
+      cargarEtiquetas();
+    }
+  }, [showModal]);
 
   const cargarEtiquetas = async () => {
     try {

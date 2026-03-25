@@ -108,6 +108,7 @@ export default function ExpedientePage() {
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleSaveAnimal}
         onSaveSuccess={handleSaveSuccess}
+        onCancelConfirmed={() => router.push('/galeria')}
       />
 
       <ConfirmModal

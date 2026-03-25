@@ -37,7 +37,7 @@ export const HistorialMovimientosModal: React.FC<HistorialMovimientosModalProps>
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
     >
       <div
-        className="bg-[#C8D1D7] rounded-lg shadow-xl w-full max-w-2xl mx-4"
+        className="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-[#194566] text-white px-6 py-4 rounded-t-lg relative">

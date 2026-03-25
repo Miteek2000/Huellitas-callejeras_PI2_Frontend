@@ -179,7 +179,8 @@ export const EtiquetasAsignadas: React.FC<EtiquetasAsignadasProps> = ({
                     type="button"
                     onClick={() => handleAsignarEtiqueta(etiqueta.id_etiqueta)}
                     disabled={isLoading}
-                    className="w-full text-left px-4 py-3 rounded-lg border border-[#194566] text-[#194566] hover:bg-[#194566] hover:text-white transition-colors disabled:opacity-50 font-medium"
+                    className="w-full text-left px-4 py-2 rounded-lg border border-[#194566] text-[#194566] bg-white hover:bg-[#194566] hover:text-white transition-colors disabled:opacity-50 font-medium shadow-sm"
+                    style={{ minHeight: '40px' }}
                   >
                     {etiqueta.nombre}
                   </button>
@@ -187,17 +188,6 @@ export const EtiquetasAsignadas: React.FC<EtiquetasAsignadasProps> = ({
               ) : (
                 <p className="text-center text-gray-500">No hay etiquetas disponibles</p>
               )}
-            </div>
-
-            <div className="flex gap-6 p-6 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                disabled={isLoading}
-                className="flex-1 py-2 rounded-full bg-[#9F9F9F] text-white text-sm hover:bg-[#888888] transition-colors disabled:opacity-50 font-medium"
-              >
-                Cancelar
-              </button>
             </div>
           </div>
         </div>
