@@ -77,12 +77,12 @@ export default function EstadisticasPage() {
   if (loading) return <Spinner message="Cargando estadísticas..." />;
 
   return (
-    <div className="min-h-screen bg-[#F0F0F0] px-12 py-10">
-      <h1 className="text-3xl font-bold text-[#2B264F] text-center mb-16">
+    <div className="min-h-screen bg-[#F0F0F0] px-2 py-6 sm:px-4 md:px-8 lg:px-12 lg:py-10">
+      <h1 className="text-2xl sm:text-3xl font-bold text-[#2B264F] text-center mb-8 sm:mb-12 lg:mb-16">
         Panel de Estadísticas
       </h1>
 
-      <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
+      <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row items-stretch lg:items-start justify-center">
         <PromediosTable indicadores={indicadores} />
 
         <div className="flex flex-col gap-3 w-full lg:w-auto">
