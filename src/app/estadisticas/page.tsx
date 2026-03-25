@@ -8,6 +8,7 @@ import { OcupacionLineChart } from '@/components/estadisticas/OcupacionLineChart
 import { PeriodoSelector } from '@/components/estadisticas/PeriodoSelector';
 import { PromediosTable } from '@/components/estadisticas/PromediosTable';
 import type { GraficaRow, IndicadorRow } from '@/schemas/estadisticas.schema';
+import { Spinner } from '@/components/ui/Spinner';
 
 type Modo = 'semana' | 'mes';
 
@@ -73,9 +74,7 @@ export default function EstadisticasPage() {
       .catch(() => setGraficaData([]));
   }, [refugioId, modo, rango.fechaIni, rango.fechaFin]);
 
-  if (loading) {
-    return <div className="min-h-screen bg-[#F0F0F0] p-10 text-[#2B264F]">Cargando...</div>;
-  }
+  if (loading) return <Spinner message="Cargando estadísticas..." />;
 
   return (
     <div className="min-h-screen bg-[#F0F0F0] px-12 py-10">

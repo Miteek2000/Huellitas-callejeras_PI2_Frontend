@@ -114,7 +114,7 @@ export default function ColaboradoresPage() {
     setSelectedColaborador(null);
   };
 
-  if (loading) return <Spinner />;
+    if (loading) return <Spinner message="Cargando colaboradores..." />;
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen text-[#000000] text-center">

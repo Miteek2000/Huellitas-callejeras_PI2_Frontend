@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { Spinner } from '@/components/ui/Spinner';
 import { useRouter } from 'next/navigation';
 import { AnimalsService } from '../../services/animals.service';
 import { MovementsService } from '../../services/movements.service';
@@ -117,9 +118,9 @@ export default function GaleriaPage() {
 
       <div className="bg-[#E8E8E8] rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-8 justify-items-center" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
         {cargando ? (
-          <div className="col-span-full flex justify-center py-16">
-            <div className="w-10 h-10 border-4 border-[#194566] border-t-transparent rounded-full animate-spin" />
-          </div>
+            <div className="col-span-full flex justify-center items-center py-16">
+              <Spinner message="Cargando galeria..." fullScreen={false} />
+            </div>
         ) : animalesFiltrados.length === 0 && busqueda.trim() !== '' ? (
           <div className="col-span-full flex flex-col items-center justify-center py-16 gap-4">
             <p className="text-[#194566] font-semibold text-lg">No se encontró ningún paciente</p>
