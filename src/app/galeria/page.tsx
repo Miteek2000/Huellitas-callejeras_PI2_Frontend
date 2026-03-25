@@ -98,8 +98,8 @@ export default function GaleriaPage() {
             )}
           </div>
         </div>
-        <div className="flex flex-col w-full sm:w-96 gap-3 sm:ml-8">
-          <div className="relative">
+        <div className="flex flex-col w-full sm:w-auto gap-3 sm:gap-2">
+          <div className="relative w-full sm:w-96">
             <Image src='/imagenes/galeria/buscar.svg' alt="buscar" width={20} height={20} className="absolute left-3 top-2.5" />
             <Input
               placeholder="Buscar paciente por nombre o ID"
@@ -108,7 +108,9 @@ export default function GaleriaPage() {
               className="pl-10 w-full"
             />
           </div>
-          <EtiquetasGaleria />
+          <div className="flex justify-end">
+            <EtiquetasGaleria />
+          </div>
         </div>
       </div>
 
