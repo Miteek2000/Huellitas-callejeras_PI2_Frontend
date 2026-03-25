@@ -11,7 +11,7 @@ export const Input: React.FC<InputProps> = ({
   className = '',
   ...props 
 }) => {
-  const defaultBg = className.includes('bg-') ? '' : 'bg-[#D9D9D9]';
+  const defaultBg = className.includes('bg-') ? '' : 'bg-[#FFFFFF]';
   const defaultBorder = className.includes('border-') ? '' : 'border-none';
   
   return (

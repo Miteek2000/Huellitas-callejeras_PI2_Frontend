@@ -7,7 +7,7 @@ import { ExpedienteCard } from '@/components/animals/ExpedienteCard';
 import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { Input } from '@/components/ui/Input';
 import { DeleteConfirmModal } from '@/components/animals/DeleteConfirmModal';
-import { EtiquetasGaleria } from '@/components/galeria';
+import { EtiquetasGaleria, HistorialEtiquetas } from '@/components/galeria';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Animal } from '@/schemas/animal.schema';
@@ -108,8 +108,9 @@ export default function GaleriaPage() {
               className="pl-10 w-full"
             />
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             <EtiquetasGaleria />
+            <HistorialEtiquetas />
           </div>
         </div>
       </div>
