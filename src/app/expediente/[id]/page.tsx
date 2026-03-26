@@ -52,6 +52,7 @@ export default function EditarExpedientePage() {
     const {
       id_animal, usuario_id, refugio_id,
       imagenes, etiquetas, createdAt, updatedAt,
+      unidad_edad,
       ...payload
     } = data;
 
@@ -62,6 +63,8 @@ export default function EditarExpedientePage() {
         formData.append(key, booleanFields.includes(key) ? (value ? '1' : '0') : String(value));
       }
     });
+    formData.append('unidad_edad', unidad_edad ?? 'meses');
+
     await AnimalsService.updateWithForm(animalId, formData);
 
     if (fotosNuevas && fotosNuevas.length > 0) {

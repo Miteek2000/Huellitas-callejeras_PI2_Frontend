@@ -55,6 +55,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     sexoOptions,
     tamanoOptions,
     tipoMovimientoOptions,
+    unidadEdadOptions,
     motivoOptions,
     fileInputRef,
     fotosNuevas,
@@ -103,7 +104,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   const getFieldError = (field: ExpedienteFieldErrorKey) =>
     hasError(field) ? EXPEDIENTE_FIELD_ERROR_MESSAGES[field] : undefined;
 
-
   const imagenActivaItem = todasParaCarrusel[imagenActiva];
   const imagenActivaSrc = imagenActivaItem
     ? imagenActivaItem.esExistente
@@ -119,6 +119,10 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     e.stopPropagation();
     setImagenActiva(i => (i + 1) % todasParaCarrusel.length);
   };
+
+  const maxEdad = formData.unidad_edad === 'años'
+    ? EXPEDIENTE_AGE_LIMITS.MAX_AÑOS
+    : EXPEDIENTE_AGE_LIMITS.MAX_MESES;
 
   return (
     <div className={`max-w-7xl mx-auto rounded-lg shadow-lg p-4 sm:p-8 transition-all ${readOnly ? 'bg-[#DCDCDC] opacity-85 saturate-50' : 'bg-[#E8E8E8]'}`}>
@@ -142,16 +146,14 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                   {!readOnly && (
                     <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center rounded-full">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-1">
-                           <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} className="brightness-0"
-                            style={{ filter: 'brightness(0) saturate(100%) invert(20%) sepia(50%) saturate(800%) hue-rotate(185deg) brightness(90%)' }}/>
+                        <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} className="brightness-0"
+                          style={{ filter: 'brightness(0) saturate(100%) invert(20%) sepia(50%) saturate(800%) hue-rotate(185deg) brightness(90%)' }} />
                       </div>
                     </div>
                   )}
                 </>
               ) : (
-                <>
-                  <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
-                </>
+                <Image src="/imagenes/agregarImagen.svg" alt="Agregar foto" width={80} height={80} />
               )}
             </div>
 
@@ -170,7 +172,6 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               </>
             )}
 
-            {/* Contador */}
             {todasParaCarrusel.length > 1 && (
               <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-1">
                 {todasParaCarrusel.map((_, i) => (
@@ -207,7 +208,41 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
             <Input label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('nombre') ? 'border-red-500' : ''} error={getFieldError('nombre')} />
             <Select label="Especie" name="especie" value={formData.especie} onChange={handleInputChange} options={especiesOptions} disabled={readOnly} className={hasError('especie') ? 'border-red-500' : ''} error={getFieldError('especie')} />
             <Input label="Raza" name="raza" value={formData.raza} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('raza') ? 'border-red-500' : ''} error={getFieldError('raza')} />
-            <Input label="Edad" name="edad" type="number" min={EXPEDIENTE_AGE_LIMITS.MIN} max={EXPEDIENTE_AGE_LIMITS.MAX} step={1} inputMode="numeric" value={formData.edad} onChange={handleInputChange} onKeyDown={handleEdadKeyDown} onWheel={handleNumberWheel} placeholder="" disabled={readOnly} className={hasError('edad') ? 'border-red-500' : ''} error={getFieldError('edad')} />
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Edad</label>
+              <div className="flex gap-2">
+                <input
+                  name="edad"
+                  type="number"
+                  min={1}
+                  max={maxEdad}
+                  step={1}
+                  inputMode="numeric"
+                  value={formData.edad}
+                  onChange={handleInputChange}
+                  onKeyDown={handleEdadKeyDown}
+                  onWheel={handleNumberWheel}
+                  disabled={readOnly}
+                  className={`w-full px-4 py-2 rounded-lg bg-[#D9D9D9] border-none text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed ${hasError('edad') ? 'border-red-500 !border !border-solid' : ''}`}
+                />
+                <select
+                  name="unidad_edad"
+                  value={formData.unidad_edad ?? 'meses'}
+                  onChange={handleInputChange}
+                  disabled={readOnly}
+                  className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+                >
+                  {unidadEdadOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              {hasError('edad') && (
+                <p className="mt-1 text-sm text-red-600">{getFieldError('edad')}</p>
+              )}
+            </div>
+
             <Select label="Sexo" name="sexo" value={formData.sexo} onChange={handleInputChange} options={sexoOptions} disabled={readOnly} className={hasError('sexo') ? 'border-red-500' : ''} error={getFieldError('sexo')} />
             <Input label="Peso" name="peso" type="number" min={0} value={formData.peso} onChange={handleInputChange} onKeyDown={handlePesoKeyDown} onWheel={handleNumberWheel} placeholder="" disabled={readOnly} className={hasError('peso') ? 'border-red-500' : ''} error={getFieldError('peso')} />
             <Select label="Tamaño" name="tamano" value={formData.tamano} onChange={handleInputChange} options={tamanoOptions} disabled={readOnly} className={hasError('tamano') ? 'border-red-500' : ''} error={getFieldError('tamano')} />
