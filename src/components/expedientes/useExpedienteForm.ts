@@ -202,6 +202,15 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
     const hasFoto = imagenesExistentes.length > 0 || fotosNuevas.length > 0;
     const nextErrors = validateExpedienteForm(formData, hasFoto);
+
+    const isCreacion = !options?.initialData || !options?.initialData.id_animal;
+    if (
+      isCreacion &&
+      (!movimientoData.tipo_movimiento || movimientoData.tipo_movimiento.toLowerCase() !== 'entrada')
+    ) {
+      setErrors({ ...nextErrors, primer_movimiento: true });
+      return;
+    }
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;

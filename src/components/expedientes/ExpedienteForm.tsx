@@ -292,6 +292,11 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               <Input label="Fecha" name="fecha_movimiento" type="date" value={movimientoData.fecha_movimiento} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('fecha_movimiento') ? 'border-red-500' : ''} />
               <Select label="Motivo" name="motivo_movimiento" value={movimientoData.motivo} onChange={handleInputChange} options={motivoOptions} disabled={readOnly} className={hasError('motivo') ? 'border-red-500' : ''} />
               <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
+              {hasError('primer_movimiento') && (
+                <p className="text-red-600 text-sm mt-1">
+                  {EXPEDIENTE_FIELD_ERROR_MESSAGES.primer_movimiento}
+                </p>
+              )}
             </div>
             <div className="mt-4">
               <div className="flex items-center mb-4">

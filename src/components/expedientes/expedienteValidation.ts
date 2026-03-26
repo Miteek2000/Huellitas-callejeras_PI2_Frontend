@@ -24,6 +24,7 @@ export const EXPEDIENTE_FIELD_ERROR_MESSAGES = {
   lugar: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
   descripcion: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
   foto: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
+  primer_movimiento: 'Para crear un expediente, primero debe registrar una fecha de entrada',
 } as const;
 
 export type ExpedienteFieldErrorKey = keyof typeof EXPEDIENTE_FIELD_ERROR_MESSAGES;
