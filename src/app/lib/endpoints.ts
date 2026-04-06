@@ -14,6 +14,7 @@ export const ENDPOINTS = {
   STATISTICS: {
     INDICADORES: `${BASE_URL}/statistics/indicadores`,
     HISTORIAL: `${BASE_URL}/statistics/historial`,
+    ANIMALES_ACTIVOS: `${BASE_URL}/statistics/animales-activos`,
   },
 };
 
