@@ -49,8 +49,8 @@ export function AnimalesAlertaBox({ alertas }: AnimalesAlertaBoxProps) {
         <span className="text-xs font-bold text-red-600">{alertas.length} casos</span>
       </div>
 
-      <div className="space-y-3">
-        {alertas.slice(0, 5).map((alerta, idx) => {
+      <div className="max-h-[280px] overflow-y-auto space-y-3">
+        {alertas.map((alerta, idx) => {
           const config = NIVEL_COLORES[alerta.nivel_riesgo] || NIVEL_COLORES['Bajo'];
           const dias = calcularDias(alerta.fecha_primer_ingreso);
           return (
