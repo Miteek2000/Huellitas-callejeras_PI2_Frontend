@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { OcupacionLineChart } from './OcupacionLineChart';
 import { PeriodoSelector } from './PeriodoSelector';
 import { PromediosTable } from './PromediosTable';
+import { VeredictoCard } from './VeredictoCard';
 import { EstadoCapacidadCard } from './EstadoCapacidadCard';
 import { AnimalesAlertaBox } from './AnimalesAlertaBox';
 import { EstadisticasHeader } from './EstadisticasHeader';
@@ -55,8 +56,9 @@ export function EstadisticasContent({
 
       <div className="flex flex-col gap-6 lg:flex-row">
 
-        <div className="flex-1">
+        <div className="flex-1 flex flex-col gap-6">
           <PromediosTable indicadores={indicadores} />
+          {veredicto && <VeredictoCard veredicto={veredicto} />}
         </div>
 
 
@@ -76,7 +78,6 @@ export function EstadisticasContent({
             fechaBase={fechaBase}
             fechaIni={rango.fechaIni}
             fechaFin={rango.fechaFin}
-            capacidadMax={capacidadMax}
             onModoChange={onModoChange}
             onFechaBaseChange={onFechaBaseChange}
           />

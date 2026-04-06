@@ -6,11 +6,18 @@ export interface IndicadorRow {
 }
 
 export interface AlertaRow {
-  id: string;
-  titulo: string;
-  descripcion: string;
+  id_alerta: string;
+  tipo_alerta: string;
   nivel_riesgo: 'Alto' | 'Medio' | 'Bajo';
   refugio_id: string;
+  id_animal: string;
+  animal: string;
+  especie: string;
+  estado_registro: string;
+  fue_devuelto: boolean;
+  veces_regresado: string;
+  fecha_primer_ingreso: string;
+  fecha_ultima_salida: string | null;
 }
 
 export interface VeredictoKPI {
@@ -61,9 +68,18 @@ export interface AnimalActivoRow {
   nombre: string;
   especie: string;
   raza: string;
+  sexo: string;
+  tamaño: string;
+  edad: number;
+  enfermedad_no_tratable: boolean;
+  discapacidad: boolean;
+  es_agresivo: boolean;
+  estado: string;
   dias_en_refugio: number;
   fecha_ingreso: string;
   probabilidad_adopcion: number;
+  nivel_adoptabilidad: string;
+  nivel_confianza: string;
 }
 
 export interface AnimalesActivosResponse {

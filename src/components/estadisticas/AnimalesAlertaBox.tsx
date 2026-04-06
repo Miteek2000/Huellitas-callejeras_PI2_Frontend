@@ -35,6 +35,12 @@ export function AnimalesAlertaBox({ alertas }: AnimalesAlertaBoxProps) {
       </div>
     );
   }
+  const calcularDias = (fechaIngreso: string): number => {
+    const fecha = new Date(fechaIngreso);
+    const hoy = new Date();
+    const diferencia = hoy.getTime() - fecha.getTime();
+    return Math.floor(diferencia / (1000 * 60 * 60 * 24));
+  };
 
   return (
     <div className="bg-white rounded-xl border border-[#E5EBF8] p-4">
@@ -43,20 +49,23 @@ export function AnimalesAlertaBox({ alertas }: AnimalesAlertaBoxProps) {
         <span className="text-xs font-bold text-red-600">{alertas.length} casos</span>
       </div>
 
-      <div className="space-y-2.5">
-        {alertas.slice(0, 5).map((alerta) => {
+      <div className="space-y-3">
+        {alertas.slice(0, 5).map((alerta, idx) => {
           const config = NIVEL_COLORES[alerta.nivel_riesgo] || NIVEL_COLORES['Bajo'];
+          const dias = calcularDias(alerta.fecha_primer_ingreso);
           return (
-            <div key={alerta.id} className={`rounded-lg p-3 border-l-4 border-red-500`}>
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-[#2B264F]">{alerta.titulo}</p>
-                  <p className="text-xs text-[#666] mt-0.5">{alerta.descripcion}</p>
-                </div>
-                <span className={`text-xs font-bold px-2 py-1 rounded whitespace-nowrap ${config.badge}`}>
-                  {alerta.nivel_riesgo}
-                </span>
+            <div key={`${alerta.id_alerta}-${idx}`} className="flex gap-3 items-start pt-3 pb-3 border-b border-[#E5EBF8] last:border-b-0">
+
+              <span className={`text-xs font-bold px-2 py-1 rounded whitespace-nowrap ${config.badge} w-14 text-center`}>
+                {alerta.nivel_riesgo}
+              </span>
+              
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-[#2B264F]">{alerta.animal}</p>
+                <p className="text-xs text-[#666] mt-0.5">{alerta.tipo_alerta} — {alerta.estado_registro}</p>
               </div>
+              
+              <span className="text-xs font-semibold text-[#2B264F] whitespace-nowrap">{dias} días</span>
             </div>
           );
         })}
