@@ -4,10 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { getRefugioId } from '@/app/lib/auth';
 import { RefugiosService } from '../../services/refugios.service';
 import { StatisticsService } from '../../services/statistics.service';
-import { OcupacionLineChart } from '@/components/estadisticas/OcupacionLineChart';
-import { PeriodoSelector } from '@/components/estadisticas/PeriodoSelector';
-import { PromediosTable } from '@/components/estadisticas/PromediosTable';
-import type { GraficaRow, IndicadorRow } from '@/schemas/estadisticas.schema';
+import { EstadisticasContent } from '@/components/estadisticas/EstadisticasContent';
+import type { GraficaRow, IndicadorRow, IndicadoresResponse, Veredicto, AnimalActivoRow, AlertaRow } from '@/schemas/estadisticas.schema';
 import { Spinner } from '@/components/ui/Spinner';
 
 type Modo = 'semana' | 'mes';
@@ -45,7 +43,11 @@ export default function EstadisticasPage() {
   const [fechaBase, setFechaBase] = useState<string>(() => formatLocalDate(new Date()));
   const [indicadores, setIndicadores] = useState<IndicadorRow[]>([]);
   const [graficaData, setGraficaData] = useState<GraficaRow[]>([]);
-  const [capacidadMax, setCapacidadMax] = useState<number | null>(null);
+  const [capacidadMax, setCapacidadMax] = useState<number>(40);
+  const [veredicto, setVeredicto] = useState<Veredicto | null>(null);
+  const [alertas, setAlertas] = useState<AlertaRow[]>([]);
+  const [animalesActivos, setAnimalesActivos] = useState<AnimalActivoRow[]>([]);
+  const [totalActivos, setTotalActivos] = useState(13);
 
   const rango = useMemo(() => buildRange(modo, fechaBase), [modo, fechaBase]);
 
@@ -56,12 +58,21 @@ export default function EstadisticasPage() {
     }
 
     Promise.all([
-      StatisticsService.getIndicadores(refugioId).catch(() => []),
+      StatisticsService.getIndicadores(refugioId).catch(() => null),
       RefugiosService.getById(refugioId).catch(() => null),
+      StatisticsService.getAnimalesActivos(refugioId).catch(() => null),
     ])
-      .then(([indicadoresData, refugioData]) => {
-        setIndicadores(Array.isArray(indicadoresData) ? indicadoresData : []);
-        setCapacidadMax(typeof refugioData?.capacidad_max === 'number' ? refugioData.capacidad_max : null);
+      .then(([indicadoresData, refugioData, animalesData]) => {
+        if (indicadoresData) {
+          setIndicadores(Array.isArray(indicadoresData.indicadores) ? indicadoresData.indicadores : []);
+          setCapacidadMax(indicadoresData.capacidad_max ?? null);
+          setAlertas(Array.isArray(indicadoresData.alertas) ? indicadoresData.alertas : []);
+          setVeredicto(indicadoresData.veredicto ?? null);
+        }
+        if (animalesData) {
+          setAnimalesActivos(Array.isArray(animalesData.animales) ? animalesData.animales : []);
+          setTotalActivos(animalesData.total_activos ?? 0);
+        }
       })
       .finally(() => setLoading(false));
   }, [refugioId]);
@@ -77,29 +88,20 @@ export default function EstadisticasPage() {
   if (loading) return <Spinner message="Cargando estadísticas..." />;
 
   return (
-    <div className="min-h-screen bg-[#F0F0F0] px-2 py-6 sm:px-4 md:px-8 lg:px-12 lg:py-10">
-      <h1 className="text-2xl sm:text-3xl font-bold text-[#2B264F] text-center mb-8 sm:mb-12 lg:mb-16">
-        Panel de Estadísticas
-      </h1>
-
-      <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row items-stretch lg:items-start justify-center">
-        <PromediosTable indicadores={indicadores} />
-
-        <div className="flex flex-col gap-3 w-full lg:w-auto">
-          <PeriodoSelector
-            modo={modo}
-            fechaBase={fechaBase}
-            fechaIni={rango.fechaIni}
-            fechaFin={rango.fechaFin}
-            capacidadMax={capacidadMax}
-            onModoChange={setModo}
-            onFechaBaseChange={setFechaBase}
-          />
-
-          <OcupacionLineChart data={graficaData} modo={modo} />
-        </div>
-      </div>
-    </div>
+    <EstadisticasContent
+      modo={modo}
+      fechaBase={fechaBase}
+      rango={rango}
+      indicadores={indicadores}
+      graficaData={graficaData}
+      capacidadMax={capacidadMax}
+      veredicto={veredicto}
+      alertas={alertas}
+      animalesActivos={animalesActivos}
+      totalActivos={totalActivos}
+      onModoChange={setModo}
+      onFechaBaseChange={setFechaBase}
+    />
   );
 }
 

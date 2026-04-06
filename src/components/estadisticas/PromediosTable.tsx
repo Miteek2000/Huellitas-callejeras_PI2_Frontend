@@ -20,14 +20,13 @@ function getColorResultado(resultado: string): string {
 
 export function PromediosTable({ indicadores }: PromediosTableProps) {
   return (
-    <div className="flex flex-col gap-4 w-full lg:w-auto lg:min-w-[540px]">
-      <div className="bg-white rounded-3xl shadow-lg p-4 sm:p-8 w-full h-fit">
-        <h2 className="text-base sm:text-lg font-semibold text-[#2B264F] text-center mb-4 sm:mb-8">
-          Promedios calculados del refugio
-        </h2>
+    <div className="bg-white rounded-3xl shadow-lg p-4 sm:p-8 w-full h-fit">
+      <h2 className="text-sm sm:text-base font-semibold text-[#2B264F] text-center mb-6 sm:mb-8 uppercase tracking-wide">
+        Promedios calculados del refugio
+      </h2>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[420px] border-separate border-spacing-0 text-xs sm:text-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full border-separate border-spacing-0 text-xs sm:text-sm">
             <thead>
               <tr>
                 <th className="bg-[#3D5A80] text-white font-medium px-3 sm:px-6 py-2 sm:py-3 rounded-tl-lg text-left">
@@ -46,7 +45,11 @@ export function PromediosTable({ indicadores }: PromediosTableProps) {
             </thead>
             <tbody>
               {!indicadores.length ? (
-                <tr></tr>
+                <tr>
+                  <td colSpan={4} className="bg-[#F5F5F5] text-[#666] px-3 sm:px-6 py-8 text-center text-sm">
+                    No hay datos de indicadores disponibles
+                  </td>
+                </tr>
               ) : indicadores.map((row, idx) => {
                 const isLast = idx === indicadores.length - 1;
                 return (
@@ -76,6 +79,5 @@ export function PromediosTable({ indicadores }: PromediosTableProps) {
           </table>
         </div>
       </div>
-    </div>
-  );
+    );
 }
