@@ -3,8 +3,8 @@ import { apiFetch } from '@/app/lib/interceptors';
 import type {
   GraficaRow,
   HistorialResponse,
-  IndicadorRow,
   IndicadoresResponse,
+  AnimalesActivosResponse,
 } from '@/schemas/estadisticas.schema';
 
 type Modo = 'semana' | 'mes';
@@ -14,9 +14,9 @@ function getFechaRango(modo: Modo): { fechaIni: string; fechaFin: string } {
   const ini = new Date(hoy);
 
   if (modo === 'semana') {
-    ini.setDate(hoy.getDate() - 10 * 7); // 10 semanas atras
+    ini.setDate(hoy.getDate() - 7); 
   } else {
-    ini.setFullYear(hoy.getFullYear() - 1); // 12 meses atras
+    ini.setFullYear(hoy.getFullYear() - 1); 
   }
 
   const toISO = (d: Date) => d.toISOString().split('T')[0];
@@ -24,12 +24,11 @@ function getFechaRango(modo: Modo): { fechaIni: string; fechaFin: string } {
 }
 
 export const StatisticsService = {
-  async getIndicadores(refugioId: string): Promise<IndicadorRow[]> {
+  async getIndicadores(refugioId: string): Promise<IndicadoresResponse> {
     const response = await apiFetch<IndicadoresResponse>(
       `${ENDPOINTS.STATISTICS.INDICADORES}/${refugioId}`,
     );
-
-    return Array.isArray(response.indicadores) ? response.indicadores : [];
+    return response;
   },
 
   async getHistorial(
@@ -49,5 +48,12 @@ export const StatisticsService = {
   getHistorialPorModo(refugioId: string, modo: Modo): Promise<GraficaRow[]> {
     const { fechaIni, fechaFin } = getFechaRango(modo);
     return StatisticsService.getHistorial(refugioId, fechaIni, fechaFin, modo);
+  },
+
+  async getAnimalesActivos(refugioId: string): Promise<AnimalesActivosResponse> {
+    const response = await apiFetch<AnimalesActivosResponse>(
+      `${ENDPOINTS.STATISTICS.ANIMALES_ACTIVOS}/${refugioId}`,
+    );
+    return response;
   },
 };

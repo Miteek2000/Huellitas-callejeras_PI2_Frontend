@@ -27,9 +27,9 @@ export function OcupacionLineChart({ data, modo }: OcupacionLineChartProps) {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-8 w-full lg:w-auto lg:min-w-[620px] h-fit border border-[#E8ECF3]">
-      <h2 className="mb-1 text-lg font-semibold text-[#1F2A56] text-center">Ocupacion del refugio</h2>
-      <div className="h-[380px]">
+    <div className="bg-white rounded-3xl shadow-lg p-4 sm:p-6 w-full lg:w-auto lg:min-w-full h-fit border border-[#E8ECF3]">
+      <h2 className="mb-2 text-sm font-semibold text-[#1F2A56] text-center">Ocupacion del refugio</h2>
+      <div className="h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 14, left: 2, bottom: 0 }}>
             <CartesianGrid stroke="#E9EDF5" strokeDasharray="3 3" vertical={false} />

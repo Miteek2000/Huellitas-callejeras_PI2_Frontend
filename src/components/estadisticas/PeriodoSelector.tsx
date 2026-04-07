@@ -7,7 +7,6 @@ interface PeriodoSelectorProps {
   fechaBase: string;
   fechaIni: string;
   fechaFin: string;
-  capacidadMax: number | null;
   onModoChange: (modo: Modo) => void;
   onFechaBaseChange: (fecha: string) => void;
 }
@@ -17,16 +16,11 @@ export function PeriodoSelector({
   fechaBase,
   fechaIni,
   fechaFin,
-  capacidadMax,
   onModoChange,
   onFechaBaseChange,
 }: PeriodoSelectorProps) {
   return (
     <div className="rounded-xl border border-[#D7DDEA] bg-white shadow-sm p-4 space-y-2.5">
-      <div className="rounded-lg border border-[#D7DDEA]/50 px-3 py-2">
-        <p className="text-xs text-[#44506A] font-medium">Capacidad: <span className="text-sm font-bold text-[#194566]">{capacidadMax ?? 'N/A'}</span></p>
-      </div>
-
       <div className="rounded-lg border border-[#D7DDEA]/50 px-3 py-2.5 space-y-2">
         <span className="text-xs text-[#44506A] font-medium block">Ver por:</span>
         

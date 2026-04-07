@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ColaboradoresService } from '../../services/colaboradores.service';
 import { RefugiosService, type Refugio } from '../../services/refugios.service';
-import { AnimalsService } from '../../services/animals.service';
+import { StatisticsService } from '../../services/statistics.service';
 import { RolesService } from '../../services/roles.service';
 import { getRefugioId, getUserRole, ROLES } from '../lib/auth';
 import ColaboradorModal from '../../components/colaboradores/ColaboradorModal';
@@ -54,16 +54,15 @@ export default function ColaboradoresPage() {
     Promise.all([
       ColaboradoresService.findAll(refugioId),
       refugioId ? RefugiosService.getById(refugioId) : Promise.resolve(null),
-      AnimalsService.getAll(refugioId, 1, 1000),
+      refugioId ? StatisticsService.getAnimalesActivos(refugioId) : Promise.resolve(null),
       refugioId ? RolesService.getByRefugio(refugioId).catch(() => []) : Promise.resolve([]),
-    ]).then(([todosUsuarios, refugioData, animalesResult, rolesData]: [Usuario[], Refugio | null, Awaited<ReturnType<typeof AnimalsService.getAll>>, Rol[]]) => {
+    ]).then(([todosUsuarios, refugioData, animalesData, rolesData]) => {
       const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
       const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
       setAdminData(propietario);
       setColaboradores(soloColaboradores);
       if (refugioData) setRefugio(refugioData);
-      const enUso = animalesResult.data.filter((a) => a.refugio_id === refugioId).length;
-      setEspaciosEnUso(enUso);
+      setEspaciosEnUso(animalesData?.total_activos ?? 0);
       setRoles(rolesData.filter((r) => ['admin', 'colaborador'].includes(r.nombre.toLowerCase())));
     }).finally(() => setLoading(false));
   }, []);
@@ -114,7 +113,7 @@ export default function ColaboradoresPage() {
     setSelectedColaborador(null);
   };
 
-  if (loading) return <Spinner />;
+    if (loading) return <Spinner message="Cargando colaboradores..." />;
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen text-[#000000] text-center">

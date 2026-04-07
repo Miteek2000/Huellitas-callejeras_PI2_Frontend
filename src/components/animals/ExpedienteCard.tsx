@@ -118,7 +118,7 @@ export const ExpedienteCard: React.FC<Props> = ({
               alt="fondo eliminar"
               width={30}
               height={30}
-              className="absolute top-0 left-0 z-0"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
             />
             <Image src={iconoDelete} alt="eliminar" width={18} height={18} className="z-10" />
           </button>

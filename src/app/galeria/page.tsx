@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { Spinner } from '@/components/ui/Spinner';
 import { useRouter } from 'next/navigation';
 import { AnimalsService } from '../../services/animals.service';
 import { MovementsService } from '../../services/movements.service';
@@ -7,6 +8,7 @@ import { ExpedienteCard } from '@/components/animals/ExpedienteCard';
 import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { Input } from '@/components/ui/Input';
 import { DeleteConfirmModal } from '@/components/animals/DeleteConfirmModal';
+import { EtiquetasGaleria, HistorialEtiquetas } from '@/components/galeria';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Animal } from '@/schemas/animal.schema';
@@ -80,7 +82,7 @@ export default function GaleriaPage() {
 
   return (
     <div className="min-h-screen bg-[#F1F1F1] p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-10 gap-3">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-10 gap-3">
         <div className="flex-1 flex items-center">
           <div className="bg-[#E9E9E9] flex items-center px-3 py-2 min-h-[45px] w-full max-w-xl" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
             <button type="button" onClick={() => setShowLogoutConfirm(true)} className="flex items-center min-w-0">
@@ -97,22 +99,28 @@ export default function GaleriaPage() {
             )}
           </div>
         </div>
-        <div className="w-full sm:w-96 relative sm:ml-8">
-          <Image src='/imagenes/galeria/buscar.svg' alt="buscar" width={20} height={20} className="absolute left-3 top-2.5" />
-          <Input
-            placeholder="Buscar paciente por nombre o ID"
-            value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
-            className="pl-10 w-full"
-          />
+        <div className="flex flex-col w-full sm:w-auto gap-3 sm:gap-2">
+          <div className="relative w-full sm:w-96">
+            <Image src='/imagenes/galeria/buscar.svg' alt="buscar" width={20} height={20} className="absolute left-3 top-2.5" />
+            <Input
+              placeholder="Buscar paciente por nombre o ID"
+              value={busqueda}
+              onChange={e => setBusqueda(e.target.value)}
+              className="pl-10 w-full"
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <EtiquetasGaleria />
+            <HistorialEtiquetas />
+          </div>
         </div>
       </div>
 
       <div className="bg-[#E8E8E8] rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-8 justify-items-center" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
         {cargando ? (
-          <div className="col-span-full flex justify-center py-16">
-            <div className="w-10 h-10 border-4 border-[#194566] border-t-transparent rounded-full animate-spin" />
-          </div>
+            <div className="col-span-full flex justify-center items-center py-16">
+              <Spinner message="Cargando galeria..." fullScreen={false} />
+            </div>
         ) : animalesFiltrados.length === 0 && busqueda.trim() !== '' ? (
           <div className="col-span-full flex flex-col items-center justify-center py-16 gap-4">
             <p className="text-[#194566] font-semibold text-lg">No se encontró ningún paciente</p>

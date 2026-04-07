@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/components/ui';
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
+import { EtiquetasAsignadas } from './EtiquetasAsignadas';
 import { useExpedienteForm } from './useExpedienteForm';
 import { MovimientoValidationError } from './MovimientoValidationError';
 import {
@@ -291,6 +292,11 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               <Input label="Fecha" name="fecha_movimiento" type="date" value={movimientoData.fecha_movimiento} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('fecha_movimiento') ? 'border-red-500' : ''} />
               <Select label="Motivo" name="motivo_movimiento" value={movimientoData.motivo} onChange={handleInputChange} options={motivoOptions} disabled={readOnly} className={hasError('motivo') ? 'border-red-500' : ''} />
               <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
+              {hasError('primer_movimiento') && (
+                <p className="text-red-600 text-sm mt-1">
+                  {EXPEDIENTE_FIELD_ERROR_MESSAGES.primer_movimiento}
+                </p>
+              )}
             </div>
             <div className="mt-4">
               <div className="flex items-center mb-4">
@@ -305,11 +311,19 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
           </div>
         </div>
 
+        {initialData?.id_animal && (
+          <EtiquetasAsignadas
+            animalId={initialData.id_animal}
+            etiquetasActuales={initialData.etiquetas}
+            readOnly={readOnly}
+          />
+        )}
+
         <div className="flex flex-wrap justify-center gap-4 mt-16">
-          <Button type="submit" variant="primary" disabled={readOnly || isSaving} className="!bg-[#2B264F] !text-white w-full sm:w-auto sm:px-16 md:px-24 h-10 flex items-center justify-center font-semibold">
+          <Button type="submit" variant="primary" disabled={readOnly || isSaving} className="!bg-[#2B264F] !text-white w-full sm:w-auto px-16 md:px-50     h-10 flex items-center justify-center font-semibold">
             {isSaving ? 'Guardando...' : 'Guardar'}
           </Button>
-          <Button type="button" variant="secondary" onClick={handleCancel} className="!bg-[#A7A7A7] !text-white w-full sm:w-auto sm:px-16 md:px-24 h-10 flex items-center justify-center font-semibold">
+          <Button type="button" variant="secondary" onClick={handleCancel} className="!bg-[#A7A7A7] !text-white w-full sm:w-auto px-16 md:px-50 h-10 flex items-center justify-center font-semibold">
             Cancelar
           </Button>
         </div>

@@ -1,18 +1,20 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL 
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`
 
 export const ENDPOINTS = {
   AUTH: {
-    REGISTER: `${BASE_URL}/api/auth/register`,
-    LOGIN: `${BASE_URL}/api/auth/login`,
+    REGISTER: `${BASE_URL}/auth/register`,
+    LOGIN: `${BASE_URL}/auth/login`,
   },
   REFUGIOS: `${BASE_URL}/refugios`,
   ANIMALS: `${BASE_URL}/animals`,
   MOVEMENTS: `${BASE_URL}/movements`,
   ROLES: `${BASE_URL}/roles`,
   USERS: `${BASE_URL}/users`,
+  ETIQUETAS: `${BASE_URL}/etiquetas`,
   STATISTICS: {
     INDICADORES: `${BASE_URL}/statistics/indicadores`,
     HISTORIAL: `${BASE_URL}/statistics/historial`,
+    ANIMALES_ACTIVOS: `${BASE_URL}/statistics/animales-activos`,
   },
 };
 
