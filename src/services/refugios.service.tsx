@@ -25,12 +25,6 @@ export interface Refugio {
 }
 
 export const RefugiosService = {
-  create: (data: CreateRefugioDTO): Promise<Refugio> =>
-    apiFetch<Refugio>(ENDPOINTS.REFUGIOS, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-
   getById: (id: string): Promise<Refugio> =>
     apiFetch<Refugio>(`${ENDPOINTS.REFUGIOS}/${id}`),
 

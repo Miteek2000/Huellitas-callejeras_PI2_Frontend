@@ -22,6 +22,7 @@ export interface Animal {
   especie: string;
   raza: string;
   edad: string | number;
+  unidad_edad?: 'meses' | 'años';
   peso: string | number;
   sexo: string;
   imagenes?: AnimalImagen[];

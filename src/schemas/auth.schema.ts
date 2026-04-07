@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { passwordSchema } from './password.schema';
-import type { CreateRefugioDTO } from '../services/refugios.service';
 
 export const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -81,7 +80,16 @@ export interface AuthResponse {
 }
 
 export interface RegistroCompletoData {
-  refugio: CreateRefugioDTO;
+  refugio: {
+    nombre: string;
+    capacidad_max: number;
+    estado: string;
+    municipio: string;
+    colonia: string;
+    calle: string;
+    num_exterior?: number;
+    num_interior?: number;
+  };
   usuario: {
     nombre: string;
     apellido_p: string;

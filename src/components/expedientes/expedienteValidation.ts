@@ -4,11 +4,12 @@ export const EXPEDIENTE_REQUIRED_FIELD_MESSAGE = 'Este campo es obligatorio';
 
 export const EXPEDIENTE_AGE_LIMITS = {
   MIN: 1,
-  MAX: 100,
+  MAX_MESES: 360,
+  MAX_AÑOS: 30,
 } as const;
 
 export const EXPEDIENTE_AGE_INVALID_MESSAGE =
-  `La edad debe ser un numero entero entre ${EXPEDIENTE_AGE_LIMITS.MIN} y ${EXPEDIENTE_AGE_LIMITS.MAX}`;
+  'La edad debe ser un número entero válido';
 
 export const EXPEDIENTE_WEIGHT_INVALID_MESSAGE = 'El peso debe ser mayor a 0';
 
@@ -38,6 +39,9 @@ export const validateExpedienteForm = (
   const edadValue = String(formData.edad ?? '').trim();
   const edadNum = Number(formData.edad);
   const pesoNum = Number(formData.peso);
+  const maxEdad = formData.unidad_edad === 'años'
+    ? EXPEDIENTE_AGE_LIMITS.MAX_AÑOS
+    : EXPEDIENTE_AGE_LIMITS.MAX_MESES;
 
   if (isEmpty(formData.nombre)) nextErrors.nombre = true;
   if (isEmpty(formData.estado)) nextErrors.estado = true;
@@ -48,7 +52,7 @@ export const validateExpedienteForm = (
     isEmpty(edadValue) ||
     !Number.isInteger(edadNum) ||
     edadNum < EXPEDIENTE_AGE_LIMITS.MIN ||
-    edadNum > EXPEDIENTE_AGE_LIMITS.MAX
+    edadNum > maxEdad
   ) {
     nextErrors.edad = true;
   }
