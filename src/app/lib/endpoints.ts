@@ -1,9 +1,9 @@
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL 
 
 export const ENDPOINTS = {
   AUTH: {
-    REGISTER: `${BASE_URL}/auth/register`,
-    LOGIN: `${BASE_URL}/auth/login`,
+    REGISTER: `${BASE_URL}/api/auth/register`,
+    LOGIN: `${BASE_URL}/api/auth/login`,
   },
   REFUGIOS: `${BASE_URL}/refugios`,
   ANIMALS: `${BASE_URL}/animals`,
