@@ -14,6 +14,14 @@ const stateLabels: Record<RecupercacionState, string> = {
   extraviado: 'Extraviado',
 };
 
+const stateTooltips: Record<RecupercacionState, string> = {
+  recuperacion: 'este estado cambiará al registrar el movimiento de recuperación',
+  adopcion: 'este estado cambiará al registrar el movimiento de adopción',
+  adoptado: 'este estado cambiará al registrar el movimiento de adoptado',
+  defuncion: 'este estado cambiará al registrar el movimiento de defunción',
+  extraviado: 'este estado cambiará al registrar el movimiento de extraviado',
+};
+
 const stateApiValues: Record<RecupercacionState, string> = {
   recuperacion: 'recuperacion',
   adopcion: 'adopcion',
@@ -31,6 +39,8 @@ const apiToState: Record<string, RecupercacionState> = {
 };
 
 const stateOrder: RecupercacionState[] = ['recuperacion', 'adopcion', 'adoptado', 'defuncion', 'extraviado'];
+
+const blockedStates: RecupercacionState[] = ['adoptado', 'defuncion', 'extraviado'];
 
 interface ExpedienteActionButtonsProps {
   onHistorialClick?: () => void;
@@ -51,8 +61,12 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirmChange, setShowConfirmChange] = useState(false);
   const [pendingState, setPendingState] = useState<RecupercacionState | null>(null);
+  const [hoveredState, setHoveredState] = useState<RecupercacionState | null>(null);
 
   const handleStateSelect = (newState: RecupercacionState) => {
+    if (blockedStates.includes(newState)) {
+      return;
+    }
     setPendingState(newState);
     setIsOpen(false);
     setShowConfirmChange(true);
@@ -87,17 +101,25 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
 
         {isOpen && !disabled && (
           <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
-            {stateOrder.map((s) => (
-              <button
-                key={s}
-                onClick={() => handleStateSelect(s)}
-                className={`w-full text-left px-4 py-2 hover:bg-[#194566] hover:text-white transition-colors ${
-                  state === s ? 'bg-[#194566] text-white' : 'text-gray-800'
-                }`}
-              >
-                {stateLabels[s]}
-              </button>
-            ))}
+            {stateOrder.map((s) => {
+              const isBlocked = blockedStates.includes(s);
+              return (
+                <button
+                  key={s}
+                  onClick={() => handleStateSelect(s)}
+                  disabled={isBlocked}
+                  className={`w-full text-left px-4 py-2 transition-colors ${
+                    isBlocked
+                      ? 'opacity-50 cursor-not-allowed text-gray-400'
+                      : `hover:bg-[#194566] hover:text-white ${
+                          state === s ? 'bg-[#194566] text-white' : 'text-gray-800'
+                        }`
+                  }`}
+                >
+                  {stateLabels[s]}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

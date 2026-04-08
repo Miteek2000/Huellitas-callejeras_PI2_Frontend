@@ -65,11 +65,11 @@ export interface HistorialResponse {
 
 export interface AnimalActivoRow {
   id_animal: string;
-  nombre: string;
+  animal: string;
   especie: string;
   raza: string;
   sexo: string;
-  tamaño: string;
+  tamano: string;
   edad: number;
   enfermedad_no_tratable: boolean;
   discapacidad: boolean;
