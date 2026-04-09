@@ -23,10 +23,25 @@ export function AnimalesActivosTable({ animales, totalActivos }: AnimalesActivos
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] border-separate border-spacing-0 text-xs sm:text-sm">
+        <table className="w-full min-w-[1200px] border-separate border-spacing-0 text-xs sm:text-sm">
           <thead>
             <tr>
               <th className="bg-[#3D5A80] text-white font-medium px-3 sm:px-6 py-2 sm:py-3 rounded-tl-lg text-left">
+                Nombre
+              </th>
+              <th className="bg-[#3D5A80] text-white font-medium px-3 sm:px-6 py-2 sm:py-3 text-center">
+                Especie
+              </th>
+              <th className="bg-[#3D5A80] text-white font-medium px-3 sm:px-6 py-2 sm:py-3 text-center">
+                Sexo
+              </th>
+              <th className="bg-[#3D5A80] text-white font-medium px-3 sm:px-6 py-2 sm:py-3 text-center">
+                Tamaño
+              </th>
+              <th className="bg-[#3D5A80] text-white font-medium px-3 sm:px-6 py-2 sm:py-3 text-center">
+                Edad
+              </th>
+              <th className="bg-[#3D5A80] text-white font-medium px-3 sm:px-6 py-2 sm:py-3 text-center">
                 Estado
               </th>
               <th className="bg-[#3D5A80] text-white font-medium px-3 sm:px-6 py-2 sm:py-3 text-center">
@@ -76,6 +91,21 @@ export function AnimalesActivosTable({ animales, totalActivos }: AnimalesActivos
 
               return (
                 <tr key={animal.id_animal}>
+                  <td className="bg-[#F8F9FB] text-[#2B264F] px-3 sm:px-6 py-3 sm:py-4 text-left font-medium">
+                    {animal.animal}
+                  </td>
+                  <td className="bg-[#F8F9FB] text-[#2B264F] px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    {animal.especie}
+                  </td>
+                  <td className="bg-[#F8F9FB] text-[#2B264F] px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    {animal.sexo}
+                  </td>
+                  <td className="bg-[#F8F9FB] text-[#2B264F] px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    {animal.tamano || '-'}
+                  </td>
+                  <td className="bg-[#F8F9FB] text-[#2B264F] px-3 sm:px-6 py-3 sm:py-4 text-center font-medium">
+                    {animal.edad}
+                  </td>
                   <td className={`bg-[#F8F9FB] text-[#2B264F] px-3 sm:px-6 py-3 sm:py-4 text-left font-medium${isLast ? ' rounded-bl-lg' : ''}`}>
                     {animal.estado}
                   </td>
