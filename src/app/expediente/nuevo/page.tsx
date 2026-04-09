@@ -35,6 +35,7 @@ export default function ExpedientePage() {
       return;
     }
 
+    
     const form = new FormData();
     form.append('nombre', data.nombre);
     form.append('estado', data.estado);
