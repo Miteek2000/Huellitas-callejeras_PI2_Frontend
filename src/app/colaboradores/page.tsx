@@ -5,7 +5,7 @@ import { ColaboradoresService } from '../../services/colaboradores.service';
 import { RefugiosService, type Refugio } from '../../services/refugios.service';
 import { StatisticsService } from '../../services/statistics.service';
 import { RolesService } from '../../services/roles.service';
-import { getRefugioId, getUserRole, ROLES } from '../lib/auth';
+import { getRefugioId, getUserRole, getUsuarioId, ROLES } from '../lib/auth';
 import ColaboradorModal from '../../components/colaboradores/ColaboradorModal';
 import DomicilioModal from '../../components/colaboradores/DomicilioModal';
 import ConfirmModal from '../../components/colaboradores/ConfirmModal';
@@ -43,18 +43,18 @@ export default function ColaboradoresPage() {
 
   const cargarColaboradores = async (refugioId: string) => {
     const todosUsuarios = await ColaboradoresService.findAll(refugioId);
-    const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
-    const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
-    setAdminData(propietario);
-    setColaboradores(soloColaboradores);
+    if (rol === ROLES.COLABORADOR) {
+      setAdminData(null);
+      setColaboradores(todosUsuarios.filter((u) => u.id_usuario === getUsuarioId()));
+    } else {
+      const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
+      const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
+      setAdminData(propietario);
+      setColaboradores(soloColaboradores);
+    }
   };
 
   useEffect(() => {
-    if (rol === ROLES.COLABORADOR) {
-      router.replace('/galeria');
-      return;
-    }
-
     const refugioId = getRefugioId();
 
     Promise.all([
@@ -64,10 +64,15 @@ export default function ColaboradoresPage() {
       refugioId ? RolesService.getByRefugio(refugioId).catch(() => []) : Promise.resolve([]),
       getStatus(),
     ]).then(([todosUsuarios, refugioData, animalesData, rolesData, faStatus]) => {
-      const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
-      const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
-      setAdminData(propietario);
-      setColaboradores(soloColaboradores);
+      if (rol === ROLES.COLABORADOR) {
+        setAdminData(null);
+        setColaboradores(todosUsuarios.filter((u) => u.id_usuario === getUsuarioId()));
+      } else {
+        const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
+        const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
+        setAdminData(propietario);
+        setColaboradores(soloColaboradores);
+      }
       if (refugioData) setRefugio(refugioData);
       setEspaciosEnUso(animalesData?.total_activos ?? 0);
       setRoles(rolesData.filter((r) => ['admin', 'colaborador'].includes(r.nombre.toLowerCase())));
@@ -155,18 +160,20 @@ export default function ColaboradoresPage() {
         </div>
       </div>
 
-      <AdminTable
-        admin={adminData ? {
-          nombre: adminData.nombre,
-          apellidoPaterno: adminData.apellido_p,
-          apellidoMaterno: adminData.apellido_m,
-          email: adminData.email,
-          contrasena: '********',
-        } : undefined}
-        isAdmin={isPropietario}
-        onEditar={() => { setSelectedColaborador(adminData); setEsPropietario(true); setErrorModal(''); setShowColaboradorModal(true); }}
-        onEliminar={() => { setSelectedColaborador(adminData); setShowConfirmModal(true); }}
-      />
+      {rol !== ROLES.COLABORADOR && (
+        <AdminTable
+          admin={adminData ? {
+            nombre: adminData.nombre,
+            apellidoPaterno: adminData.apellido_p,
+            apellidoMaterno: adminData.apellido_m,
+            email: adminData.email,
+            contrasena: '********',
+          } : undefined}
+          isAdmin={isPropietario}
+          onEditar={() => { setSelectedColaborador(adminData); setEsPropietario(true); setErrorModal(''); setShowColaboradorModal(true); }}
+          onEliminar={() => { setSelectedColaborador(adminData); setShowConfirmModal(true); }}
+        />
+      )}
 
       <DomicilioTable
         refugio={refugio}
