@@ -58,7 +58,9 @@ export default function ExpedientePage() {
       form.append('imagen', fotosNuevas[0]);
     }
 
-    const animalCreado = await AnimalsService.createWithForm(form);
+    const animalCreado = movimiento
+      ? await AnimalsService.createWithFormAndMovement(form, movimiento)
+      : await AnimalsService.createWithForm(form);
 
     if (fotosNuevas && fotosNuevas.length > 1 && animalCreado.id_animal) {
       for (const foto of fotosNuevas.slice(1)) {
@@ -66,13 +68,6 @@ export default function ExpedientePage() {
         fotoForm.append('imagen', foto);
         await AnimalsService.updateWithForm(animalCreado.id_animal, fotoForm);
       }
-    }
-
-    if (movimiento && animalCreado.id_animal) {
-      await MovementsService.create({
-        ...movimiento,
-        animal_id: animalCreado.id_animal,
-      });
     }
 
     setAnimalCreadoId(animalCreado.id_animal ?? null);

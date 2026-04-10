@@ -20,6 +20,8 @@ interface UseExpedienteFormOptions {
 }
 
 export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
+  const isCreacion = !options?.initialData || !options?.initialData.id_animal;
+
   const defaultFormData: Animal = {
     nombre: '',
     estado: 'recuperacion',
@@ -37,10 +39,13 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     discapacidad: false,
   };
 
-  const [movimientoData, setMovimientoData] = useState({
-    tipo_movimiento: '',
-    fecha_movimiento: '',
-    motivo: '',
+  const [movimientoData, setMovimientoData] = useState(() => {
+
+    return {
+      tipo_movimiento: isCreacion ? 'entrada' : '',
+      fecha_movimiento: '',
+      motivo: '',
+    };
   });
 
   const getEdadInicial = (initialData?: Partial<Animal>): { edad: string | number; unidad_edad: 'meses' | 'años' } => {
@@ -134,6 +139,11 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     const { name, value } = e.target;
 
     if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
+
+      if (name === 'tipo_movimiento' && isCreacion) {
+        return;
+      }
+
       const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
       if (name === 'tipo_movimiento') {
         const permitidos = getMotivosPermitidos(value);
@@ -203,23 +213,29 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     const hasFoto = imagenesExistentes.length > 0 || fotosNuevas.length > 0;
     const nextErrors = validateExpedienteForm(formData, hasFoto);
 
-    const isCreacion = !options?.initialData || !options?.initialData.id_animal;
-    if (
-      isCreacion &&
-      (!movimientoData.tipo_movimiento || movimientoData.tipo_movimiento.toLowerCase() !== 'entrada')
-    ) {
-      setErrors({ ...nextErrors, primer_movimiento: true });
-      return;
+
+    if (isCreacion) {
+      if (!movimientoData.fecha_movimiento || !movimientoData.motivo) {
+        setErrors({ ...nextErrors, primer_movimiento: true });
+        return;
+      }
     }
+
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
     }
 
-    const movimiento =
-      movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo
-        ? movimientoData
-        : undefined;
+
+    const movimiento = isCreacion
+      ? {
+          tipo_movimiento: movimientoData.tipo_movimiento,
+          fecha_movimiento: movimientoData.fecha_movimiento,
+          motivo: movimientoData.motivo,
+        }
+      : (movimientoData.tipo_movimiento && movimientoData.fecha_movimiento && movimientoData.motivo
+          ? movimientoData
+          : undefined);
 
     try {
       setIsSaving(true);

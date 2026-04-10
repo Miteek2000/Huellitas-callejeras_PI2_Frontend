@@ -1,16 +1,10 @@
-'use client';
-
 import React, { useState } from 'react';
 import { Button, ConfirmModal, Input, Select, Checkbox, Textarea } from '@/components/ui';
 import { ExpedienteActionButtons } from './ExpedienteActionButtons';
 import { EtiquetasAsignadas } from './EtiquetasAsignadas';
 import { useExpedienteForm } from './useExpedienteForm';
 import { MovimientoValidationError } from './MovimientoValidationError';
-import {
-  EXPEDIENTE_AGE_LIMITS,
-  EXPEDIENTE_FIELD_ERROR_MESSAGES,
-  type ExpedienteFieldErrorKey,
-} from './expedienteValidation';
+import {EXPEDIENTE_AGE_LIMITS,EXPEDIENTE_FIELD_ERROR_MESSAGES,type ExpedienteFieldErrorKey,} from './expedienteValidation';
 import { getImageUrl } from '@/app/lib/endpoints';
 import type { Animal } from '@/schemas/animal.schema';
 import type { Movimiento } from '@/schemas/movimiento.schema';
@@ -45,6 +39,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
   cancelMessage = '¿Deseas cancelar este expediente?',
   onCancelConfirmed,
 }) => {
+  const isCreacion = !initialData || !initialData.id_animal;
+
   const {
     formData,
     setFormData,
@@ -284,29 +280,93 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
             <div>
               <div className="flex items-center mb-4">
                 <div className="bg-[#5A7A8F] text-white px-6 py-2 rounded-l-md">
-                  <h3 className="text-sm font-medium">Registro de movimientos</h3>
+                  <h3 className="text-sm font-medium">
+                    {isCreacion ? 'Entrada (obligatorio)' : 'Registro de movimientos'}
+                  </h3>
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]" />
               </div>
-              <Select label="Tipo de movimiento" name="tipo_movimiento" value={movimientoData.tipo_movimiento} onChange={handleInputChange} options={tipoMovimientoOptions} disabled={readOnly} className={hasError('tipo_movimiento') ? 'border-red-500' : ''} />
-              <Input label="Fecha" name="fecha_movimiento" type="date" value={movimientoData.fecha_movimiento} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('fecha_movimiento') ? 'border-red-500' : ''} />
-              <Select label="Motivo" name="motivo_movimiento" value={movimientoData.motivo} onChange={handleInputChange} options={motivoOptions} disabled={readOnly} className={hasError('motivo') ? 'border-red-500' : ''} />
-              <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
-              {hasError('primer_movimiento') && (
-                <p className="text-red-600 text-sm mt-1">
-                  {EXPEDIENTE_FIELD_ERROR_MESSAGES.primer_movimiento}
-                </p>
+
+              {isCreacion ? (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tipo de movimiento
+                    </label>
+                    <div className="px-4 py-2 rounded-lg bg-[#D9D9D9] border border-gray-300 text-black">
+                      Entrada
+                    </div>
+                  </div>
+                  <Input
+                    label="Fecha de entrada"
+                    name="fecha_movimiento"
+                    type="date"
+                    value={movimientoData.fecha_movimiento}
+                    onChange={handleInputChange}
+                    placeholder=""
+                    disabled={readOnly}
+                    className={hasError('fecha_movimiento') ? 'border-red-500' : ''}
+                  />
+                  <Select
+                    label="Motivo de rescate"
+                    name="motivo_movimiento"
+                    value={movimientoData.motivo}
+                    onChange={handleInputChange}
+                    options={motivoOptions}
+                    disabled={readOnly}
+                    className={hasError('motivo') ? 'border-red-500' : ''}
+                  />
+                  {hasError('primer_movimiento') && (
+                    <p className="text-red-600 text-sm mt-1">
+                      Completa la fecha y motivo de la entrada al refugio
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Select
+                    label="Tipo de movimiento"
+                    name="tipo_movimiento"
+                    value={movimientoData.tipo_movimiento}
+                    onChange={handleInputChange}
+                    options={tipoMovimientoOptions}
+                    disabled={readOnly}
+                    className={hasError('tipo_movimiento') ? 'border-red-500' : ''}
+                  />
+                  <Input
+                    label="Fecha"
+                    name="fecha_movimiento"
+                    type="date"
+                    value={movimientoData.fecha_movimiento}
+                    onChange={handleInputChange}
+                    placeholder=""
+                    disabled={readOnly}
+                    className={hasError('fecha_movimiento') ? 'border-red-500' : ''}
+                  />
+                  <Select
+                    label="Motivo"
+                    name="motivo_movimiento"
+                    value={movimientoData.motivo}
+                    onChange={handleInputChange}
+                    options={motivoOptions}
+                    disabled={readOnly}
+                    className={hasError('motivo') ? 'border-red-500' : ''}
+                  />
+                  <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
+                </>
               )}
             </div>
             <div className="mt-4">
               <div className="flex items-center mb-4">
                 <div className="bg-[#5A7A8F] text-white px-6 py-2 rounded-l-md">
-                  <h3 className="text-sm font-medium">Datos de rescate</h3>
+                  <h3 className="text-sm font-medium">
+                    {isCreacion ? 'Información de la entrada' : 'Información del paciente'}
+                  </h3>
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]" />
               </div>
-              <Input label="Lugar" name="lugar" value={formData.lugar} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('lugar') ? 'border-red-500' : ''} error={getFieldError('lugar')} />
-              <Textarea label="Descripción" name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows={4} placeholder="" disabled={readOnly} className={hasError('descripcion') ? 'border-red-500' : ''} error={getFieldError('descripcion')} />
+              <Input label={isCreacion ? 'Lugar de entrada' : 'Lugar'} name="lugar" value={formData.lugar} onChange={handleInputChange} placeholder="" disabled={readOnly} className={hasError('lugar') ? 'border-red-500' : ''} error={getFieldError('lugar')} />
+              <Textarea label={isCreacion ? 'Detalles de la entrada' : 'Descripción'} name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows={4} placeholder="" disabled={readOnly} className={hasError('descripcion') ? 'border-red-500' : ''} error={getFieldError('descripcion')} />
             </div>
           </div>
         </div>
