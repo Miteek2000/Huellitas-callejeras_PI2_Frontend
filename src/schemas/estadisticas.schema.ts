@@ -70,6 +70,7 @@ export interface AnimalActivoRow {
   raza: string;
   sexo: string;
   tamano: string;
+  peso?: string;
   edad: number;
   enfermedad_no_tratable: boolean;
   discapacidad: boolean;
