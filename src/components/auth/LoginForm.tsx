@@ -5,12 +5,19 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui';
 import type { LoginFormData } from '@/schemas/auth.schema';
 
-export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void; error?: string }> = ({ onSubmit, error }) => {
+export const LoginForm: React.FC<{ 
+  onSubmit?: (data: LoginFormData) => void;
+  onVerify2FA?: (totpCode: string) => void;
+  error?: string;
+  step?: 'credentials' | '2fa';
+  isLoading?: boolean;
+}> = ({ onSubmit, onVerify2FA, error, step = 'credentials', isLoading }) => {
   const router = useRouter();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
   });
+  const [totpCode, setTotpCode] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -19,7 +26,11 @@ export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void; err
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.(formData);
+    if (step === 'credentials') {
+      onSubmit?.(formData);
+    } else if (step === '2fa') {
+      onVerify2FA?.(totpCode);
+    }
   };
 
   return (
@@ -39,26 +50,48 @@ export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void; err
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <Input
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Ingrese su email"
-              className="bg-[#D9D9D9] border-none placeholder:text-gray-600"
-            />
-            
-            <Input
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Ingrese su contraseña"
-              className="bg-[#D9D9D9] border-none placeholder:text-gray-600"
-            />
+            {step === 'credentials' ? (
+              <>
+                <Input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Ingrese su email"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-600"
+                />
+                
+                <Input
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Ingrese su contraseña"
+                  className="bg-[#D9D9D9] border-none placeholder:text-gray-600"
+                />
+              </>
+            ) : (
+              <>
+                <p className="text-center text-sm text-[#182F51] mb-2 font-medium">
+                  Ingresa el código de 6 dígitos de tu app autenticadora
+                </p>
+                <div className="flex justify-center">
+                  <Input
+                    name="totpCode"
+                    type="text"
+                    maxLength={6}
+                    value={totpCode}
+                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                    autoFocus
+                    className="bg-[#D9D9D9] border-none placeholder:text-gray-400 text-center text-3xl tracking-[0.5em] font-mono h-16 w-full max-w-xs"
+                  />
+                </div>
+              </>
+            )}
 
             {error && (
-              <div className=" text-red-700 px-4 rounded-lg text-sm text-center">
+              <div className=" text-red-700 px-4 rounded-lg text-sm text-center font-medium">
                 {error}
               </div>
             )}
@@ -66,22 +99,25 @@ export const LoginForm: React.FC<{ onSubmit?: (data: LoginFormData) => void; err
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full bg-[#2B264F] text-white py-2 rounded-full text-lg font-medium hover:bg-[#1F1B3D] transition-colors"
+                disabled={isLoading || (step === '2fa' && totpCode.length !== 6)}
+                className="w-full bg-[#2B264F] text-white py-3 border-none rounded-full text-lg font-medium hover:bg-[#1F1B3D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Iniciar
+                {isLoading ? 'Cargando...' : step === 'credentials' ? 'Iniciar' : 'Verificar código'}
               </button>
             </div>
 
-            <p className="text-center text-sm text-[#182F51]">
-              ¿No tienes una cuenta?{' '}
-              <button
-                type="button"
-                onClick={() => router.push('/auth/registro')}
-                className="font-bold hover:underline transition-colors"
-              >
-                Regístrate
-              </button>
-            </p>
+            {step === 'credentials' && (
+              <p className="text-center text-sm text-[#182F51]">
+                ¿No tienes una cuenta?{' '}
+                <button
+                  type="button"
+                  onClick={() => router.push('/auth/registro')}
+                  className="font-bold hover:underline transition-colors"
+                >
+                  Regístrate
+                </button>
+              </p>
+            )}
           </form>
         </div>
       </div>

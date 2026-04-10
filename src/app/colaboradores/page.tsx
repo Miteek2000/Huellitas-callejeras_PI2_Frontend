@@ -12,15 +12,21 @@ import ConfirmModal from '../../components/colaboradores/ConfirmModal';
 import AdminTable from '../../components/colaboradores/AdminTable';
 import DomicilioTable from '../../components/colaboradores/DomicilioTable';
 import ColaboradoresTable from '../../components/colaboradores/ColaboradoresTable';
+import Enable2FAModal from '../../components/auth/Enable2FAModal';
 import { Spinner } from '@/components/ui/Spinner';
 import type { Usuario } from '@/schemas/auth.schema';
 import type { Rol } from '../../services/roles.service';
+import { use2FA } from '@/hooks/use2FA';
 
 export default function ColaboradoresPage() {
   const router = useRouter();
+  const { getStatus } = use2FA();
   const [showColaboradorModal, setShowColaboradorModal] = useState(false);
   const [showDomicilioModal, setShowDomicilioModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [isEnabling2FA, setIsEnabling2FA] = useState(true);
   const [esPropietario, setEsPropietario] = useState(false);
   const [selectedColaborador, setSelectedColaborador] = useState<Usuario | null>(null);
   const [colaboradores, setColaboradores] = useState<Usuario[]>([]);
@@ -56,7 +62,8 @@ export default function ColaboradoresPage() {
       refugioId ? RefugiosService.getById(refugioId) : Promise.resolve(null),
       refugioId ? StatisticsService.getAnimalesActivos(refugioId) : Promise.resolve(null),
       refugioId ? RolesService.getByRefugio(refugioId).catch(() => []) : Promise.resolve([]),
-    ]).then(([todosUsuarios, refugioData, animalesData, rolesData]) => {
+      getStatus(),
+    ]).then(([todosUsuarios, refugioData, animalesData, rolesData, faStatus]) => {
       const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
       const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
       setAdminData(propietario);
@@ -64,8 +71,14 @@ export default function ColaboradoresPage() {
       if (refugioData) setRefugio(refugioData);
       setEspaciosEnUso(animalesData?.total_activos ?? 0);
       setRoles(rolesData.filter((r) => ['admin', 'colaborador'].includes(r.nombre.toLowerCase())));
+      if (faStatus) setIs2FAEnabled(faStatus.twoFactorEnabled);
     }).finally(() => setLoading(false));
   }, []);
+
+  const handleToggle2FA = () => {
+    setIsEnabling2FA(!is2FAEnabled);
+    setShow2FAModal(true);
+  };
 
   const handleSaveDomicilio = async (data: Partial<Refugio>) => {
     const refugioId = getRefugioId();
@@ -117,10 +130,28 @@ export default function ColaboradoresPage() {
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen text-[#000000] text-center">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 mb-6 text-left">
-        <h1 className="text-2xl font-semibold text-[#194566]">{refugio?.nombre ?? 'Cargando...'}</h1>
-        <span className="text-[#194566] font-bold">Espacios máximos: {refugio?.capacidad_max ?? '-'}</span>
-        <span className="text-[#194566] font-bold">Espacios en uso: {espaciosEnUso}</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-8 mb-6 text-left">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+          <h1 className="text-2xl font-semibold text-[#194566]">{refugio?.nombre ?? 'Cargando...'}</h1>
+          <span className="text-[#194566] font-bold">Espacios máximos: {refugio?.capacidad_max ?? '-'}</span>
+          <span className="text-[#194566] font-bold">Espacios en uso: {espaciosEnUso}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
+          <span className="text-sm font-medium text-gray-700">Autenticación 2FA:</span>
+          <button
+            onClick={handleToggle2FA}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#194566] focus:ring-offset-2 ${
+              is2FAEnabled ? 'bg-green-500' : 'bg-gray-300'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                is2FAEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       <AdminTable
@@ -177,6 +208,13 @@ export default function ColaboradoresPage() {
           onClose={() => setShowConfirmModal(false)}
         />
       )}
+
+      <Enable2FAModal
+        isOpen={show2FAModal}
+        onClose={() => setShow2FAModal(false)}
+        onSuccess={() => setIs2FAEnabled(isEnabling2FA)}
+        isEnabling={isEnabling2FA}
+      />
     </div>
   );
 }

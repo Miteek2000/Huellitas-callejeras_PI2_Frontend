@@ -60,7 +60,7 @@ export interface LoginDTO {
 }
 
 export interface AuthResponse {
-  user: {
+  user?: {
     id_usuario: string;
     nombre: string;
     apellido_p: string;
@@ -76,7 +76,9 @@ export interface AuthResponse {
       nombre: string;
     };
   };
-  access_token: string;
+  access_token?: string;
+  requires2FA?: boolean;
+  userId?: string;
 }
 
 export interface RegistroCompletoData {
