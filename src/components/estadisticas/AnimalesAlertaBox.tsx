@@ -24,7 +24,6 @@ const NIVEL_COLORES: Record<string, { bg: string; text: string; badge: string }>
 };
 
 export function AnimalesAlertaBox({ alertas }: AnimalesAlertaBoxProps) {
-  const [hoveredAlerta, setHoveredAlerta] = useState<string | null>(null);
 
   if (!alertas || alertas.length === 0) {
     return (
@@ -59,23 +58,12 @@ export function AnimalesAlertaBox({ alertas }: AnimalesAlertaBoxProps) {
           return (
             <div key={alertKey} className="flex gap-3 items-start pt-3 pb-3 border-b border-[#E5EBF8] last:border-b-0 relative">
 
-              <div
-                className="relative"
-                onMouseEnter={() => setHoveredAlerta(alertKey)}
-                onMouseLeave={() => setHoveredAlerta(null)}
-              >
+              <div className="relative">
                 <span 
-                  className={`text-xs font-bold px-2 py-1 rounded whitespace-nowrap ${config.badge} w-14 text-center cursor-help block`}
+                  className={`text-xs font-bold px-2 py-1 rounded whitespace-nowrap ${config.badge} w-14 text-center block`}
                 >
                   {alerta.nivel_riesgo}
                 </span>
-
-                {hoveredAlerta === alertKey && (
-                  <div className="absolute left-full top-1/2 ml-2 -translate-y-1/2 px-3 py-2 bg-[#2B264F] text-white text-xs rounded whitespace-nowrap z-50 pointer-events-none">
-                    Este estado cambiará al registrar el movimiento de {alerta.estado_registro.toLowerCase()}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-t-transparent border-b-transparent border-r-[#2B264F]"></div>
-                  </div>
-                )}
               </div>
               
               <div className="flex-1">
