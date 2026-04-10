@@ -42,10 +42,21 @@ export default function ColaboradoresPage() {
   const isAdminOrPropietario = rol === ROLES.ADMIN || isPropietario;
 
   const cargarColaboradores = async (refugioId: string) => {
-    const todosUsuarios = await ColaboradoresService.findAll(refugioId);
+    let todosUsuarios: Usuario[] = [];
+    try {
+      if (rol === ROLES.COLABORADOR) {
+        const usuario = await ColaboradoresService.findById(getUsuarioId());
+        todosUsuarios = [usuario];
+      } else {
+        todosUsuarios = await ColaboradoresService.findAll(refugioId);
+      }
+    } catch {
+      todosUsuarios = [];
+    }
+
     if (rol === ROLES.COLABORADOR) {
       setAdminData(null);
-      setColaboradores(todosUsuarios.filter((u) => u.id_usuario === getUsuarioId()));
+      setColaboradores(todosUsuarios.filter((u) => String(u.id_usuario) === String(getUsuarioId())));
     } else {
       const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
       const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
@@ -58,25 +69,28 @@ export default function ColaboradoresPage() {
     const refugioId = getRefugioId();
 
     Promise.all([
-      ColaboradoresService.findAll(refugioId),
-      refugioId ? RefugiosService.getById(refugioId) : Promise.resolve(null),
-      refugioId ? StatisticsService.getAnimalesActivos(refugioId) : Promise.resolve(null),
+      rol === ROLES.COLABORADOR 
+        ? ColaboradoresService.findById(getUsuarioId()).then(u => [u]).catch(() => []) 
+        : ColaboradoresService.findAll(refugioId).catch(() => []),
+      refugioId ? RefugiosService.getById(refugioId).catch(() => null) : Promise.resolve(null),
+      refugioId ? StatisticsService.getAnimalesActivos(refugioId).catch(() => null) : Promise.resolve(null),
       refugioId ? RolesService.getByRefugio(refugioId).catch(() => []) : Promise.resolve([]),
-      getStatus(),
+      getStatus().catch(() => null),
     ]).then(([todosUsuarios, refugioData, animalesData, rolesData, faStatus]) => {
+      const usuarios = todosUsuarios as Usuario[];
       if (rol === ROLES.COLABORADOR) {
         setAdminData(null);
-        setColaboradores(todosUsuarios.filter((u) => u.id_usuario === getUsuarioId()));
+        setColaboradores(usuarios.filter((u) => String(u.id_usuario) === String(getUsuarioId())));
       } else {
-        const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
-        const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
+        const propietario = usuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
+        const soloColaboradores = usuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
         setAdminData(propietario);
         setColaboradores(soloColaboradores);
       }
-      if (refugioData) setRefugio(refugioData);
-      setEspaciosEnUso(animalesData?.total_activos ?? 0);
-      setRoles(rolesData.filter((r) => ['admin', 'colaborador'].includes(r.nombre.toLowerCase())));
-      if (faStatus) setIs2FAEnabled(faStatus.twoFactorEnabled);
+      if (refugioData) setRefugio(refugioData as Refugio);
+      setEspaciosEnUso((animalesData as any)?.total_activos ?? 0);
+      setRoles((rolesData as Rol[]).filter((r) => ['admin', 'colaborador'].includes(r.nombre.toLowerCase())));
+      if (faStatus) setIs2FAEnabled((faStatus as any).twoFactorEnabled);
     }).finally(() => setLoading(false));
   }, []);
 
