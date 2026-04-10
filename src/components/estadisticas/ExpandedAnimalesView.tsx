@@ -21,7 +21,7 @@ export function ExpandedAnimalesView({
           onClick={onBack}
           className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#D7DDEA] bg-white text-[#194566] font-semibold hover:bg-[#F0F0F0] transition"
         >
-          <Image src="/imagenes/flecha.svg" alt="Atrás" width={24} height={24} style={{ transform: 'rotate(180deg)' }} />
+          <Image src="/imagenes/flecha.svg" alt="Atrás" width={24} height={24} />
           Atrás
         </button>
       </div>
