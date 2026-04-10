@@ -281,7 +281,7 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               <div className="flex items-center mb-4">
                 <div className="bg-[#5A7A8F] text-white px-6 py-2 rounded-l-md">
                   <h3 className="text-sm font-medium">
-                    {isCreacion ? 'Entrada (obligatorio)' : 'Registro de movimientos'}
+                    {isCreacion ? 'Entrada' : 'Registro de movimientos'}
                   </h3>
                 </div>
                 <div className="flex-1 h-1 bg-[#5A7A8F]" />
@@ -307,15 +307,14 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
                     disabled={readOnly}
                     className={hasError('fecha_movimiento') ? 'border-red-500' : ''}
                   />
-                  <Select
-                    label="Motivo de rescate"
-                    name="motivo_movimiento"
-                    value={movimientoData.motivo}
-                    onChange={handleInputChange}
-                    options={motivoOptions}
-                    disabled={readOnly}
-                    className={hasError('motivo') ? 'border-red-500' : ''}
-                  />
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Motivo de rescate
+                    </label>
+                    <div className="px-4 py-2 rounded-lg bg-[#D9D9D9] border border-gray-300 text-black">
+                      Rescate
+                    </div>
+                  </div>
                   {hasError('primer_movimiento') && (
                     <p className="text-red-600 text-sm mt-1">
                       Completa la fecha y motivo de la entrada al refugio

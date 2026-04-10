@@ -44,7 +44,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     return {
       tipo_movimiento: isCreacion ? 'entrada' : '',
       fecha_movimiento: '',
-      motivo: '',
+      motivo: isCreacion ? 'rescate' : '',
     };
   });
 
@@ -141,6 +141,10 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
 
       if (name === 'tipo_movimiento' && isCreacion) {
+        return;
+      }
+
+      if (name === 'motivo_movimiento' && isCreacion) {
         return;
       }
 
