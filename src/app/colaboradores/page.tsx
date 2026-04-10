@@ -104,6 +104,7 @@ export default function ColaboradoresPage() {
           contrasena: contrasena,
           refugio_id: getRefugioId(),
           activo: true,
+          aceptacion_term: true,
         } as Omit<Usuario, 'id_usuario'>);
       }
 

@@ -47,6 +47,7 @@ export interface RegisterDTO {
   rol_id: string;
   refugio_id: string;
   acepta_terminos?: boolean;
+  aceptacion_term?: boolean;
 }
 
 export interface Usuario extends RegisterDTO {
