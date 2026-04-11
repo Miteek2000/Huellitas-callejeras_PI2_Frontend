@@ -32,7 +32,9 @@ export const AuthService = {
       body: JSON.stringify(payload),
     });
 
-    this.saveToken(response.access_token);
+    if (response.access_token) {
+      this.saveToken(response.access_token);
+    }
     return response;
   },
 
@@ -42,7 +44,9 @@ export const AuthService = {
       body: JSON.stringify(credentials),
     });
 
-    this.saveToken(response.access_token);
+    if (response.access_token) {
+      this.saveToken(response.access_token);
+    }
     return response;
   },
 
