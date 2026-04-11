@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExpedienteForm, HistorialMovimientosModal } from '@/components/expedientes';
+import { ExpedienteForm, HistorialMovimientosModal, CapacidadAlertaBox } from '@/components/expedientes';
 import { ConfirmModal } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import type { Animal } from '@/schemas/animal.schema';
 import { AnimalsService } from '../../../services/animals.service';
 import { MovementsService } from '../../../services/movements.service';
+import { StatisticsService } from '../../../services/statistics.service';
+import { RefugiosService } from '../../../services/refugios.service';
 import { getRefugioId, getUsuarioId, getUserRole, ROLES } from '@/app/lib/auth';
 import Image from 'next/image';
 
@@ -17,10 +19,50 @@ export default function ExpedientePage() {
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [animalCreadoId, setAnimalCreadoId] = useState<string | null>(null);
+  const [espaciosEnUso, setEspaciosEnUso] = useState<number>(0);
+  const [capacidadMax, setCapacidadMax] = useState<number>(0);
+  const [limitAlcanzado, setLimitAlcanzado] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   if (typeof window !== 'undefined' && getUserRole() === ROLES.COLABORADOR) {
     router.replace('/galeria');
   }
+
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        const refugioId = getRefugioId();
+        if (!refugioId) {
+          router.push('/auth/login');
+          return;
+        }
+
+        const [refugioData, animalesData] = await Promise.all([
+          RefugiosService.getById(refugioId).catch(() => null),
+          StatisticsService.getAnimalesActivos(refugioId).catch(() => null),
+        ]);
+
+        if (refugioData) {
+          setCapacidadMax(refugioData.capacidad_max);
+        }
+
+        if (animalesData) {
+          const totalActivos = (animalesData as any)?.total_activos ?? 0;
+          setEspaciosEnUso(totalActivos);
+          
+          if (refugioData && totalActivos >= refugioData.capacidad_max) {
+            setLimitAlcanzado(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error cargando datos de capacidad:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarDatos();
+  }, [router]);
 
   const handleSaveAnimal = async (
     data: Animal,
@@ -97,6 +139,16 @@ export default function ExpedientePage() {
             <Image src="/imagenes/edit.svg" alt="Editar" width={34} height={34} />
           </button>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto">
+        {!loading && (
+          <CapacidadAlertaBox
+            espaciosEnUso={espaciosEnUso}
+            capacidadMax={capacidadMax}
+            limite_alcanzado={limitAlcanzado}
+          />
+        )}
       </div>
 
       <ExpedienteForm
