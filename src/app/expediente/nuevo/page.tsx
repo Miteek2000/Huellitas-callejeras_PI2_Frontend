@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExpedienteForm, HistorialMovimientosModal, CapacidadAlertaBox } from '@/components/expedientes';
+import { FormularioBloqueadoCapacidad, HistorialMovimientosModal, CapacidadAlertaBox } from '@/components/expedientes';
 import { ConfirmModal } from '@/components/ui';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import type { Animal } from '@/schemas/animal.schema';
@@ -151,7 +151,8 @@ export default function ExpedientePage() {
         )}
       </div>
 
-      <ExpedienteForm
+      <FormularioBloqueadoCapacidad
+        capacidadAlcanzada={limitAlcanzado}
         onOpenHistorial={() => setIsModalOpen(true)}
         onSaveMovimiento={handleSaveMovimiento}
         onSaveAnimal={handleSaveAnimal}
