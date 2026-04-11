@@ -9,4 +9,5 @@ export { OtrosDatosSection } from './OtrosDatosSection';
 export { MovimientoSection } from './MovimientoSection';
 export { LugarDescripcionFields } from './LugarDescripcionFields';
 export { FotoPackage } from './FotoPackage';
+export { CapacidadAlertaBox } from './CapacidadAlertaBox';
 export type { Movimiento } from '@/schemas/movimiento.schema';
