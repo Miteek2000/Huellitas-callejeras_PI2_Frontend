@@ -10,4 +10,5 @@ export { MovimientoSection } from './MovimientoSection';
 export { LugarDescripcionFields } from './LugarDescripcionFields';
 export { FotoPackage } from './FotoPackage';
 export { CapacidadAlertaBox } from './CapacidadAlertaBox';
+export { FormularioBloqueadoCapacidad } from './FormularioBloqueadoCapacidad';
 export type { Movimiento } from '@/schemas/movimiento.schema';

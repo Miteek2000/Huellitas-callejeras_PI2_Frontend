@@ -36,7 +36,7 @@ export function CapacidadAlertaBox({
             Actualmente tienes <span className="font-semibold">{espaciosEnUso} de {capacidadMax}</span> espacios ocupados ({porcentajeUso}%).
           </p>
           <p className="text-sm text-red-600">
-            Para crear nuevos expedientes, debes dar de baja a algunos animales activos o contactar al administrador para aumentar la capacidad.
+            Para crear nuevos expedientes, debes dar de baja a algunos animales activos.
           </p>
         </div>
       </div>
