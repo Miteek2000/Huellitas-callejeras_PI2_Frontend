@@ -26,12 +26,12 @@ export const LugarDescripcionFields: React.FC<LugarDescripcionFieldsProps> = ({
     <div className="mt-4">
       <div className="flex items-center mb-4">
         <div className="bg-[#5A7A8F] text-white px-6 py-2 rounded-l-md">
-          <h3 className="text-sm font-medium">{isCreacion ? 'Información de la entrada' : 'Información del paciente'}</h3>
+          <h3 className="text-sm font-medium">{isCreacion ? 'Datos de rescate' : 'Datos de rescate'}</h3>
         </div>
         <div className="flex-1 h-1 bg-[#5A7A8F]" />
       </div>
       <Input
-        label={isCreacion ? 'Lugar de entrada' : 'Lugar'}
+        label={isCreacion ? 'Lugar' : 'Lugar'}
         name="lugar"
         value={formData.lugar}
         onChange={handleInputChange}
@@ -41,7 +41,7 @@ export const LugarDescripcionFields: React.FC<LugarDescripcionFieldsProps> = ({
         error={getFieldError('lugar')}
       />
       <Textarea
-        label={isCreacion ? 'Detalles de la entrada' : 'Descripción'}
+        label={isCreacion ? 'Descripción' : 'Descripción'}
         name="descripcion"
         value={formData.descripcion}
         onChange={handleInputChange}

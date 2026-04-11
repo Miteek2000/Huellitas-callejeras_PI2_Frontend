@@ -68,6 +68,7 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({
         rol_id: esPropietario ? (colaborador?.rol_id ?? '') : (data.rol_id ?? ''),
         activo: true,
         refugio_id: '',
+        aceptacion_term: true,
       });
     } catch {
     }
