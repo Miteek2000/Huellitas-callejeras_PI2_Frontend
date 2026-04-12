@@ -15,11 +15,11 @@ const stateLabels: Record<RecupercacionState, string> = {
 };
 
 const stateTooltips: Record<RecupercacionState, string> = {
-  recuperacion: 'este estado cambiará al registrar el movimiento de recuperación',
-  adopcion: 'este estado cambiará al registrar el movimiento de adopción',
-  adoptado: 'este estado cambiará al registrar el movimiento de adoptado',
-  defuncion: 'este estado cambiará al registrar el movimiento de defunción',
-  extraviado: 'este estado cambiará al registrar el movimiento de extraviado',
+  recuperacion: '',
+  adopcion: '',
+  adoptado: 'Este estado cambiará al registrar el movimiento',
+  defuncion: 'Este estado cambiará al registrar el movimiento',
+  extraviado: 'Este estado cambiará al registrar el movimiento',
 };
 
 const stateApiValues: Record<RecupercacionState, string> = {
@@ -104,20 +104,33 @@ export const ExpedienteActionButtons: React.FC<ExpedienteActionButtonsProps> = (
             {stateOrder.map((s) => {
               const isBlocked = blockedStates.includes(s);
               return (
-                <button
+                <div
                   key={s}
-                  onClick={() => handleStateSelect(s)}
-                  disabled={isBlocked}
-                  className={`w-full text-left px-4 py-2 transition-colors ${
-                    isBlocked
-                      ? 'opacity-50 cursor-not-allowed text-gray-400'
-                      : `hover:bg-[#194566] hover:text-white ${
-                          state === s ? 'bg-[#194566] text-white' : 'text-gray-800'
-                        }`
-                  }`}
+                  className="relative"
+                  onMouseEnter={() => setHoveredState(s)}
+                  onMouseLeave={() => setHoveredState(null)}
                 >
-                  {stateLabels[s]}
-                </button>
+                  <button
+                    onClick={() => handleStateSelect(s)}
+                    disabled={isBlocked}
+                    className={`w-full text-left px-4 py-2 transition-colors ${
+                      isBlocked
+                        ? 'opacity-50 cursor-not-allowed text-gray-400'
+                        : `hover:bg-[#194566] hover:text-white ${
+                            state === s ? 'bg-[#194566] text-white' : 'text-gray-800'
+                          }`
+                    }`}
+                  >
+                    {stateLabels[s]}
+                  </button>
+                  
+                  {hoveredState === s && isBlocked && (
+                    <div className="absolute left-full top-1/2 ml-2 -translate-y-1/2 px-3 py-2 bg-[#2B264F] text-white text-xs rounded whitespace-nowrap z-50 pointer-events-none">
+                      {stateTooltips[s]}
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-t-transparent border-b-transparent border-r-[#2B264F]"></div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

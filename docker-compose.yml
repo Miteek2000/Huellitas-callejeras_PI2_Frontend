@@ -1,5 +1,9 @@
 services:
   frontend: 
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     image: derekortiz/hc-frontend:latest
     restart: always
     ports:
