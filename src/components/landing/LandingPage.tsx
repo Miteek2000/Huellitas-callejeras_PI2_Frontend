@@ -16,7 +16,6 @@ export const LandingPage: React.FC = () => {
   };
 
   const handleDownloadVideo = () => {
-    // Por ahora, asumimos que el video está en public/videos/
     const link = document.createElement('a');
     link.href = '/tutorial-video.mp4';
     link.download = 'Tutorial_HuellitasCallejeras.mp4';
