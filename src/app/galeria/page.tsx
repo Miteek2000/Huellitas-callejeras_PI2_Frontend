@@ -29,6 +29,7 @@ const getTipoHuella = (movimientos: Movimiento[]): 'entrada' | 'salida' | null =
 export default function GaleriaPage() {
   const router = useRouter();
   const [animales, setAnimales] = useState<Animal[]>([]);
+  const [animalesGlobal, setAnimalesGlobal] = useState<Animal[]>([]);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [busqueda, setBusqueda] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export default function GaleriaPage() {
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [totalAnimales, setTotalAnimales] = useState(0);
   const [cargando, setCargando] = useState(false);
+  const [cargandoBusqueda, setCargandoBusqueda] = useState(false);
 
   const cargarAnimales = async (refugioId: string, page: number) => {
 	try {
@@ -54,6 +56,18 @@ export default function GaleriaPage() {
 	}
 	};
 
+  const cargarAnimalesBusqueda = async (refugioId: string) => {
+	try {
+		setCargandoBusqueda(true);
+		const LIMITE_ALTO = 10000;
+		const resultado = await AnimalsService.getAll(refugioId, 1, LIMITE_ALTO);
+		console.log('animales globales:', resultado);
+		setAnimalesGlobal(resultado?.data ?? []);
+	} finally {
+		setCargandoBusqueda(false);
+	}
+	};
+
   useEffect(() => {
 	const refugioId = getRefugioId();
 	setIsColaborador(getUserRole() === ROLES.COLABORADOR);
@@ -61,7 +75,21 @@ export default function GaleriaPage() {
 	MovementsService.getAll().then(data => setMovimientos(data ?? []));
 	}, [paginaActual]);
 
-  const animalesFiltrados = animales.filter(animal =>
+
+  useEffect(() => {
+	const refugioId = getRefugioId();
+	if (busqueda.trim().length > 0) {
+		cargarAnimalesBusqueda(refugioId);
+	} else {
+		setAnimalesGlobal([]);
+		setPaginaActual(1);
+	}
+	}, [busqueda]);
+
+ 
+  const listaAnimales = busqueda.trim().length > 0 ? animalesGlobal : animales;
+  
+  const animalesFiltrados = listaAnimales.filter(animal =>
     animal.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
     (animal.id_animal && animal.id_animal.toLowerCase().includes(busqueda.toLowerCase()))
   );
@@ -117,9 +145,9 @@ export default function GaleriaPage() {
       </div>
 
       <div className="bg-[#E8E8E8] rounded-2xl p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-8 justify-items-center" style={{ boxShadow: '2px 4px 6px #e0e0e0' }}>
-        {cargando ? (
+        {cargando || cargandoBusqueda ? (
             <div className="col-span-full flex justify-center items-center py-16">
-              <Spinner message="Cargando galeria..." fullScreen={false} />
+              <Spinner message={busqueda.trim() ? "Buscando en todos los pacientes..." : "Cargando galeria..."} fullScreen={false} />
             </div>
         ) : animalesFiltrados.length === 0 && busqueda.trim() !== '' ? (
           <div className="col-span-full flex flex-col items-center justify-center py-16 gap-4">

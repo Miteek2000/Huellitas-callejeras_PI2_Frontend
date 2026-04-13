@@ -9,9 +9,9 @@ interface PromediosTableProps {
 type Nivel = 'Alto' | 'Mediano' | 'Bajo';
 
 const RESULTADO_COLORES: Record<string, string> = {
-  alto: 'text-red-600 font-semibold',
+  alto: 'text-green-700 font-semibold',
   mediano: 'text-yellow-700 font-semibold',
-  bajo: 'text-green-700 font-semibold',
+  bajo: 'text-red-600 font-semibold',
 };
 
 function getColorResultado(resultado: string): string {

@@ -1,6 +1,7 @@
 import { ENDPOINTS } from '@/app/lib/endpoints';
 import { apiFetch } from '@/app/lib/interceptors';
 import type { Animal } from '@/schemas/animal.schema';
+import type { Movimiento } from '@/schemas/movimiento.schema';
 
 export type CreateAnimalDTO = Omit<Animal, 'id_animal'>;
 export type UpdateAnimalDTO = Partial<CreateAnimalDTO>;
@@ -38,6 +39,19 @@ export const AnimalsService = {
       method: 'POST',
       body: formData,
     }),
+
+  createWithFormAndMovement: (
+    formData: FormData,
+    movimiento: Omit<Movimiento, 'id_movimiento' | 'animal_id'>
+  ): Promise<Animal> => {
+    formData.append('tipo_movimiento', movimiento.tipo_movimiento);
+    formData.append('fecha_movimiento', movimiento.fecha_movimiento);
+    formData.append('motivo', movimiento.motivo);
+    return apiFetch<Animal>(ENDPOINTS.ANIMALS, {
+      method: 'POST',
+      body: formData,
+    });
+  },
 
   updateWithForm: (id: string, formData: FormData): Promise<Animal> =>
     apiFetch<Animal>(`${ENDPOINTS.ANIMALS}/${id}`, {
