@@ -11,6 +11,8 @@ interface MovimientoSectionProps {
   tipoMovimientoOptions: Array<{ value: string; label: string }>;
   motivoOptions: Array<{ value: string; label: string }>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  backendError?: string;
+  setBackendError?: (error: string) => void;
 }
 
 export const MovimientoSection: React.FC<MovimientoSectionProps> = ({
@@ -21,6 +23,8 @@ export const MovimientoSection: React.FC<MovimientoSectionProps> = ({
   tipoMovimientoOptions,
   motivoOptions,
   handleInputChange,
+  backendError = '',
+  setBackendError,
 }) => {
   const hasError = (field: string) => Boolean(errors[field]);
 
@@ -88,6 +92,9 @@ export const MovimientoSection: React.FC<MovimientoSectionProps> = ({
             className={hasError('motivo') ? 'border-red-500' : ''}
           />
           <MovimientoValidationError tipo_movimiento={movimientoData.tipo_movimiento} motivo={movimientoData.motivo} />
+          {backendError && (
+            <p className="text-red-600 text-sm mt-1">{backendError}</p>
+          )}
         </>
       )}
     </div>

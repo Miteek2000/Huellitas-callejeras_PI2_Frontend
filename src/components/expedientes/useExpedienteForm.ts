@@ -77,6 +77,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
   const [isSaving, setIsSaving] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showFotoModal, setShowFotoModal] = useState(false);
+  const [backendError, setBackendError] = useState<string>('');
 
   const especiesOptions = [
     { value: '', label: 'Seleccione...' },
@@ -159,6 +160,8 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       } else {
         setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
       }
+      // Limpiar error del backend cuando el usuario modifica campos de movimiento
+      if (backendError) setBackendError('');
     } else if (name === 'unidad_edad') {
       setFormData(prev => ({ ...prev, unidad_edad: value as 'meses' | 'años' }));
     } else if (name === 'edad') {
@@ -243,6 +246,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
     try {
       setIsSaving(true);
+      setBackendError('');
       if (options?.onSaveAnimal) {
         await options.onSaveAnimal(formData, fotosNuevas, movimiento);
       }
@@ -251,7 +255,8 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
       setFotoPreviews([]);
       options?.onSaveSuccess?.();
     } catch (error) {
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : 'Error al guardar';
+      setBackendError(errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -269,6 +274,8 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     movimientoData,
     errors,
     isSaving,
+    backendError,
+    setBackendError,
     especiesOptions,
     sexoOptions,
     tamanoOptions,

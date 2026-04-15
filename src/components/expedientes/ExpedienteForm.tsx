@@ -50,6 +50,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
     movimientoData,
     errors,
     isSaving,
+    backendError,
+    setBackendError,
     especiesOptions,
     sexoOptions,
     tamanoOptions,
@@ -168,6 +170,8 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               tipoMovimientoOptions={tipoMovimientoOptions}
               motivoOptions={motivoOptions}
               handleInputChange={handleInputChange}
+              backendError={backendError}
+              setBackendError={setBackendError}
             />
             <LugarDescripcionFields
               isCreacion={isCreacion}
