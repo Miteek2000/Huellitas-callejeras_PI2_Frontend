@@ -99,8 +99,27 @@ export default function ExpedientePage() {
       form.append('imagen', fotosNuevas[0]);
     }
 
-    const animalCreado = movimiento
-      ? await AnimalsService.createWithFormAndMovement(form, movimiento)
+    const normalizarFechaLocal = (fechaStr?: string): string => {
+      if (!fechaStr) {
+        return new Date().toISOString(); 
+      }
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(fechaStr)) {
+        return `${fechaStr}T12:00:00`;
+      }
+      return fechaStr;
+    };
+
+    const movimientoNormalizado = movimiento
+      ? {
+          tipo_movimiento: movimiento.tipo_movimiento,
+          motivo: movimiento.motivo,
+          fecha_movimiento: normalizarFechaLocal(movimiento.fecha_movimiento),
+        }
+      : undefined;
+
+    const animalCreado = movimientoNormalizado
+      ? await AnimalsService.createWithFormAndMovement(form, movimientoNormalizado)
       : await AnimalsService.createWithForm(form);
 
     if (fotosNuevas && fotosNuevas.length > 1 && animalCreado.id_animal) {
