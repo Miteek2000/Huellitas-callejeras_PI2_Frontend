@@ -52,7 +52,7 @@ export default function EditarExpedientePage() {
     const {
       id_animal, usuario_id, refugio_id,
       imagenes, etiquetas, createdAt, updatedAt,
-      unidad_edad,
+      unidad_edad, estado,
       ...payload
     } = data;
 
