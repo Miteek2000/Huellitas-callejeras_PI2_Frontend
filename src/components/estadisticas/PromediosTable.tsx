@@ -22,7 +22,7 @@ export function PromediosTable({ indicadores }: PromediosTableProps) {
   return (
     <div className="bg-white rounded-3xl shadow-lg p-4 sm:p-8 w-full h-fit">
       <h2 className="text-sm sm:text-base font-semibold text-[#2B264F] text-center mb-6 sm:mb-8 uppercase tracking-wide">
-        Promedios calculados del refugio
+        Indicadores del refugio
       </h2>
 
       <div className="overflow-x-auto">

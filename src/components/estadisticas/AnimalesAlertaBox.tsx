@@ -23,6 +23,32 @@ const NIVEL_COLORES: Record<string, { bg: string; text: string; badge: string }>
   },
 };
 
+const ACENTOS_REEMPLAZOS: Record<string, string> = {
+  adopcion: 'adopción',
+  defuncion: 'defunción',
+  extravio: 'extravío',
+};
+
+function corregirAcentos(texto: string): string {
+  return texto.replace(/\b(adopcion|defuncion|extravio)\b/gi, (match) => {
+    const replacement = ACENTOS_REEMPLAZOS[match.toLowerCase()];
+
+    if (!replacement) {
+      return match;
+    }
+
+    if (match === match.toUpperCase()) {
+      return replacement.toUpperCase();
+    }
+
+    if (match[0] === match[0].toUpperCase()) {
+      return replacement[0].toUpperCase() + replacement.slice(1);
+    }
+
+    return replacement;
+  });
+}
+
 export function AnimalesAlertaBox({ alertas }: AnimalesAlertaBoxProps) {
 
   if (!alertas || alertas.length === 0) {
@@ -55,6 +81,8 @@ export function AnimalesAlertaBox({ alertas }: AnimalesAlertaBoxProps) {
           const config = NIVEL_COLORES[alerta.nivel_riesgo] || NIVEL_COLORES['Bajo'];
           const dias = calcularDias(alerta.fecha_primer_ingreso);
           const alertKey = `${alerta.id_alerta}-${idx}`;
+          const tipoAlerta = corregirAcentos(alerta.tipo_alerta);
+          const estadoRegistro = corregirAcentos(alerta.estado_registro);
           return (
             <div key={alertKey} className="flex gap-3 items-start pt-3 pb-3 border-b border-[#E5EBF8] last:border-b-0 relative">
 
@@ -68,7 +96,7 @@ export function AnimalesAlertaBox({ alertas }: AnimalesAlertaBoxProps) {
               
               <div className="flex-1">
                 <p className="text-xs font-semibold text-[#2B264F]">{alerta.animal}</p>
-                <p className="text-xs text-[#666] mt-0.5">{alerta.tipo_alerta} — {alerta.estado_registro}</p>
+                <p className="text-xs text-[#666] mt-0.5">{tipoAlerta} — {estadoRegistro}</p>
               </div>
               
               <span className="text-xs font-semibold text-[#2B264F] whitespace-nowrap">{dias} días</span>
