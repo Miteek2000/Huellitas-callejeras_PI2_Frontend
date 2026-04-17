@@ -5,6 +5,7 @@ export const ENDPOINTS = {
   AUTH: {
     REGISTER: `${BASE_URL}/auth/register`,
     LOGIN: `${BASE_URL}/auth/login`,
+    ME: `${BASE_URL}/auth/me`,
   },
   REFUGIOS: `${BASE_URL}/refugios`,
   ANIMALS: `${BASE_URL}/animals`,

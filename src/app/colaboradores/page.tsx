@@ -5,7 +5,8 @@ import { ColaboradoresService } from '../../services/colaboradores.service';
 import { RefugiosService, type Refugio } from '../../services/refugios.service';
 import { StatisticsService } from '../../services/statistics.service';
 import { RolesService } from '../../services/roles.service';
-import { getRefugioId, getUserRole, getUsuarioId, ROLES } from '../lib/auth';
+import { getRefugioId, getUserRole, ROLES } from '../lib/auth';
+import { AuthService } from '../../services/auth.service';
 import ColaboradorModal from '../../components/colaboradores/ColaboradorModal';
 import DomicilioModal from '../../components/colaboradores/DomicilioModal';
 import ConfirmModal from '../../components/colaboradores/ConfirmModal';
@@ -17,6 +18,21 @@ import { Spinner } from '@/components/ui/Spinner';
 import type { Usuario } from '@/schemas/auth.schema';
 import type { Rol } from '../../services/roles.service';
 import { use2FA } from '@/hooks/use2FA';
+
+type AuthMeUser = Awaited<ReturnType<typeof AuthService.getMe>>;
+
+const mapAuthUserToUsuario = (user: AuthMeUser): Usuario => ({
+  id_usuario: String(user.id_usuario),
+  nombre: user.nombre,
+  apellido_p: user.apellido_p,
+  apellido_m: user.apellido_m,
+  email: user.email,
+  contrasena: '',
+  activo: user.activo ?? true,
+  rol_id: user.rol?.id_roles ?? '',
+  refugio_id: user.refugio?.id_refugio ?? getRefugioId(),
+  rol: user.rol,
+});
 
 export default function ColaboradoresPage() {
   const router = useRouter();
@@ -45,8 +61,8 @@ export default function ColaboradoresPage() {
     let todosUsuarios: Usuario[] = [];
     try {
       if (rol === ROLES.COLABORADOR) {
-        const usuario = await ColaboradoresService.findById(getUsuarioId());
-        todosUsuarios = [usuario];
+        const usuario = await AuthService.getMe();
+        todosUsuarios = usuario ? [mapAuthUserToUsuario(usuario)] : [];
       } else {
         todosUsuarios = await ColaboradoresService.findAll(refugioId);
       }
@@ -56,7 +72,7 @@ export default function ColaboradoresPage() {
 
     if (rol === ROLES.COLABORADOR) {
       setAdminData(null);
-      setColaboradores(todosUsuarios.filter((u) => String(u.id_usuario) === String(getUsuarioId())));
+      setColaboradores(todosUsuarios);
     } else {
       const propietario = todosUsuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
       const soloColaboradores = todosUsuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
@@ -70,7 +86,7 @@ export default function ColaboradoresPage() {
 
     Promise.all([
       rol === ROLES.COLABORADOR 
-        ? ColaboradoresService.findById(getUsuarioId()).then(u => [u]).catch(() => []) 
+        ? AuthService.getMe().then(u => (u ? [mapAuthUserToUsuario(u)] : [])).catch(() => []) 
         : ColaboradoresService.findAll(refugioId).catch(() => []),
       refugioId ? RefugiosService.getById(refugioId).catch(() => null) : Promise.resolve(null),
       refugioId ? StatisticsService.getAnimalesActivos(refugioId).catch(() => null) : Promise.resolve(null),
@@ -80,7 +96,7 @@ export default function ColaboradoresPage() {
       const usuarios = todosUsuarios as Usuario[];
       if (rol === ROLES.COLABORADOR) {
         setAdminData(null);
-        setColaboradores(usuarios.filter((u) => String(u.id_usuario) === String(getUsuarioId())));
+        setColaboradores(usuarios);
       } else {
         const propietario = usuarios.find((u) => u.rol?.nombre.toLowerCase() === 'propietario') ?? null;
         const soloColaboradores = usuarios.filter((u) => u.rol?.nombre.toLowerCase() !== 'propietario');
@@ -146,6 +162,9 @@ export default function ColaboradoresPage() {
     setSelectedColaborador(null);
   };
 
+  const handleNoopColaborador = (_col: Usuario) => {};
+  const handleNoop = () => {};
+
     if (loading) return <Spinner message="Cargando colaboradores..." />;
 
   return (
@@ -195,14 +214,29 @@ export default function ColaboradoresPage() {
         onEditar={() => setShowDomicilioModal(true)}
       />
 
-      <ColaboradoresTable
-        colaboradores={colaboradores}
-        isAdmin={isAdminOrPropietario}
-        canAgregar={isPropietario}
-        onEditar={(col) => { setSelectedColaborador(col); setEsPropietario(false); setErrorModal(''); setShowColaboradorModal(true); }}
-        onEliminar={(col) => { setSelectedColaborador(col); setShowConfirmModal(true); }}
-        onAgregar={() => { setSelectedColaborador(null); setEsPropietario(false); setErrorModal(''); setShowColaboradorModal(true); }}
-      />
+      {rol === ROLES.COLABORADOR ? (
+        <>
+          <ColaboradoresTable
+            colaboradores={colaboradores}
+            isAdmin={false}
+            onEditar={handleNoopColaborador}
+            onEliminar={handleNoopColaborador}
+            onAgregar={handleNoop}
+          />
+          <p className="text-left text-sm text-gray-500">
+            No cuentas con los permisos necesarios para visualizar a los demás colaboradores.
+          </p>
+        </>
+      ) : (
+        <ColaboradoresTable
+          colaboradores={colaboradores}
+          isAdmin={isAdminOrPropietario}
+          canAgregar={isPropietario}
+          onEditar={(col) => { setSelectedColaborador(col); setEsPropietario(false); setErrorModal(''); setShowColaboradorModal(true); }}
+          onEliminar={(col) => { setSelectedColaborador(col); setShowConfirmModal(true); }}
+          onAgregar={() => { setSelectedColaborador(null); setEsPropietario(false); setErrorModal(''); setShowColaboradorModal(true); }}
+        />
+      )}
 
       {showDomicilioModal && (
         <DomicilioModal

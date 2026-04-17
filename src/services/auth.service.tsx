@@ -8,6 +8,9 @@ import type {
 
 const TOKEN_KEY = 'access_token';
 
+type AuthMeUser = NonNullable<AuthResponse['user']>;
+type AuthMeResponse = AuthMeUser | { user: AuthMeUser };
+
 export const AuthService = {
   async registroCompleto(data: RegistroCompletoData): Promise<AuthResponse> {
     const payload = {
@@ -48,6 +51,22 @@ export const AuthService = {
       this.saveToken(response.access_token);
     }
     return response;
+  },
+
+  async getMe(): Promise<AuthMeUser> {
+    const response = await apiFetch<AuthMeResponse>(ENDPOINTS.AUTH.ME, {
+      method: 'GET',
+    });
+
+    if (!response) {
+      throw new Error('No se pudo obtener el usuario actual');
+    }
+
+    if ('user' in response && response.user) {
+      return response.user;
+    }
+
+    return response as AuthMeUser;
   },
 
   logout(): void {
