@@ -7,7 +7,11 @@ import { EditarEtiquetaModal } from './EditarEtiquetaModal';
 import { ConfirmarBorradoModal } from './ConfirmarBorradoModal';
 import type { Etiqueta } from '@/schemas/animal.schema';
 
-export const HistorialEtiquetas: React.FC = () => {
+interface HistorialEtiquetasProps {
+  readOnly?: boolean;
+}
+
+export const HistorialEtiquetas: React.FC<HistorialEtiquetasProps> = ({ readOnly = false }) => {
   const [showModal, setShowModal] = useState(false);
   const [etiquetas, setEtiquetas] = useState<Etiqueta[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +40,7 @@ export const HistorialEtiquetas: React.FC = () => {
   };
 
   const handleEditarClick = (etiqueta: Etiqueta) => {
+    if (readOnly) return;
     setEtiquetaEditando(etiqueta);
     setShowEditModal(true);
   };
@@ -60,6 +65,7 @@ export const HistorialEtiquetas: React.FC = () => {
   };
 
   const handleBorrar = (id: string) => {
+    if (readOnly) return;
     setIdEtiquetaBorrar(id);
   };
 
@@ -121,22 +127,24 @@ export const HistorialEtiquetas: React.FC = () => {
                       <div className="flex-1">
                         <span className="text-[#194566] text-base ml-3">{etiqueta.nombre}</span>
                       </div>
-                      <div className="flex gap-2 ml-2">
-                        <button
-                          type="button"
-                          onClick={() => handleEditarClick(etiqueta)}
-                          disabled={isProcessing}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#194566] text-white text-sm hover:bg-[#153a52] transition-colors disabled:opacity-50 font-medium">
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleBorrar(etiqueta.id_etiqueta)}
-                          disabled={isProcessing}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#E83525] text-white text-sm hover:bg-red-600 transition-colors disabled:opacity-50 font-medium">
-                          Borrar
-                        </button>
-                      </div>
+                      {!readOnly && (
+                        <div className="flex gap-2 ml-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditarClick(etiqueta)}
+                            disabled={isProcessing}
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#194566] text-white text-sm hover:bg-[#153a52] transition-colors disabled:opacity-50 font-medium">
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleBorrar(etiqueta.id_etiqueta)}
+                            disabled={isProcessing}
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#E83525] text-white text-sm hover:bg-red-600 transition-colors disabled:opacity-50 font-medium">
+                            Borrar
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -150,24 +158,28 @@ export const HistorialEtiquetas: React.FC = () => {
         </div>
       )}
 
-      <ConfirmarBorradoModal
-        isOpen={!!idEtiquetaBorrar}
-        onClose={() => setIdEtiquetaBorrar(null)}
-        onConfirm={handleConfirmarBorrado}
-        isLoading={isProcessing}
-      />
+      {!readOnly && (
+        <>
+          <ConfirmarBorradoModal
+            isOpen={!!idEtiquetaBorrar}
+            onClose={() => setIdEtiquetaBorrar(null)}
+            onConfirm={handleConfirmarBorrado}
+            isLoading={isProcessing}
+          />
 
-      {etiquetaEditando && (
-        <EditarEtiquetaModal
-          isOpen={showEditModal}
-          onClose={() => {
-            setShowEditModal(false);
-            setEtiquetaEditando(null);
-          }}
-          onSave={handleGuardarEdicion}
-          nombreInicial={etiquetaEditando.nombre}
-          isLoading={isProcessing}
-        />
+          {etiquetaEditando && (
+            <EditarEtiquetaModal
+              isOpen={showEditModal}
+              onClose={() => {
+                setShowEditModal(false);
+                setEtiquetaEditando(null);
+              }}
+              onSave={handleGuardarEdicion}
+              nombreInicial={etiquetaEditando.nombre}
+              isLoading={isProcessing}
+            />
+          )}
+        </>
       )}
     </>
   );

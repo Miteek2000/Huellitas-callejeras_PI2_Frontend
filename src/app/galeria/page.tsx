@@ -138,8 +138,8 @@ export default function GaleriaPage() {
             />
           </div>
           <div className="flex justify-end gap-2">
-            <EtiquetasGaleria />
-            <HistorialEtiquetas />
+            <EtiquetasGaleria readOnly={isColaborador} />
+            <HistorialEtiquetas readOnly={isColaborador} />
           </div>
         </div>
       </div>

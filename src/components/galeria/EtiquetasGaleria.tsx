@@ -7,11 +7,16 @@ import { getRefugioId } from '@/app/lib/auth';
 
 interface AgregarEtiquetaButtonProps {
   onRefresh?: () => void;
+  readOnly?: boolean;
 }
 
-export const EtiquetasGaleria: React.FC<AgregarEtiquetaButtonProps> = ({ onRefresh }) => {
+export const EtiquetasGaleria: React.FC<AgregarEtiquetaButtonProps> = ({ onRefresh, readOnly = false }) => {
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  if (readOnly) {
+    return null;
+  }
 
   const handleAddEtiqueta = async (nombre: string) => {
     setIsLoading(true);
