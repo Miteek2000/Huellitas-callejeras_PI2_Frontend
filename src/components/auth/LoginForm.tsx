@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui';
-import type { LoginFormData } from '@/schemas/auth.schema';
+import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
 
 export const LoginForm: React.FC<{ 
   onSubmit?: (data: LoginFormData) => void;
@@ -18,18 +19,44 @@ export const LoginForm: React.FC<{
     password: '',
   });
   const [totpCode, setTotpCode] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    password?: string;
+    totpCode?: string;
+  }>({});
+
+  const totpSchema = z.string().regex(/^\d{6}$/, 'El codigo debe tener 6 digitos');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name as keyof typeof fieldErrors]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 'credentials') {
-      onSubmit?.(formData);
+      const result = loginSchema.safeParse(formData);
+      if (!result.success) {
+        const errors = result.error.flatten().fieldErrors;
+        setFieldErrors({
+          email: errors.email?.[0],
+          password: errors.password?.[0],
+        });
+        return;
+      }
+      setFieldErrors({});
+      onSubmit?.(result.data);
     } else if (step === '2fa') {
-      onVerify2FA?.(totpCode);
+      const totpResult = totpSchema.safeParse(totpCode);
+      if (!totpResult.success) {
+        setFieldErrors({ totpCode: totpResult.error.issues[0]?.message });
+        return;
+      }
+      setFieldErrors({});
+      onVerify2FA?.(totpResult.data);
     }
   };
 
@@ -59,6 +86,7 @@ export const LoginForm: React.FC<{
                   onChange={handleInputChange}
                   placeholder="Ingrese su email"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-600"
+                  error={fieldErrors.email}
                 />
                 
                 <Input
@@ -68,6 +96,7 @@ export const LoginForm: React.FC<{
                   onChange={handleInputChange}
                   placeholder="Ingrese su contraseña"
                   className="bg-[#D9D9D9] border-none placeholder:text-gray-600"
+                  error={fieldErrors.password}
                 />
               </>
             ) : (
@@ -81,10 +110,16 @@ export const LoginForm: React.FC<{
                     type="text"
                     maxLength={6}
                     value={totpCode}
-                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => {
+                      setTotpCode(e.target.value.replace(/\D/g, ''));
+                      if (fieldErrors.totpCode) {
+                        setFieldErrors((prev) => ({ ...prev, totpCode: undefined }));
+                      }
+                    }}
                     placeholder="000000"
                     autoFocus
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-400 text-center text-3xl tracking-[0.5em] font-mono h-16 w-full max-w-xs"
+                    error={fieldErrors.totpCode}
                   />
                 </div>
               </>

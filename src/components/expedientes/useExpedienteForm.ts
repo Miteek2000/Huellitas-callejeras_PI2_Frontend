@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import type { Animal, AnimalImagen } from '@/schemas/animal.schema';
 import type { Movimiento } from '@/schemas/movimiento.schema';
 import { getMotivosPermitidos } from './MovimientoValidationError';
+import { sanitizeInput } from '@/utils/sanitize';
 import { EXPEDIENTE_AGE_LIMITS, validateExpedienteForm } from './expedienteValidation';
 
 interface UseExpedienteFormOptions {
@@ -138,6 +139,7 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    const sanitizedValue = sanitizeInput(value);
 
     if (name === 'tipo_movimiento' || name === 'fecha_movimiento' || name === 'motivo_movimiento') {
 
@@ -151,21 +153,21 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
 
       const fieldName = name === 'motivo_movimiento' ? 'motivo' : name;
       if (name === 'tipo_movimiento') {
-        const permitidos = getMotivosPermitidos(value);
+        const permitidos = getMotivosPermitidos(sanitizedValue);
         setMovimientoData(prev => ({
           ...prev,
-          tipo_movimiento: value,
+          tipo_movimiento: sanitizedValue,
           motivo: permitidos.includes(prev.motivo) ? prev.motivo : '',
         }));
       } else {
-        setMovimientoData(prev => ({ ...prev, [fieldName]: value }));
+        setMovimientoData(prev => ({ ...prev, [fieldName]: sanitizedValue }));
       }
       // Limpiar error del backend cuando el usuario modifica campos de movimiento
       if (backendError) setBackendError('');
     } else if (name === 'unidad_edad') {
-      setFormData(prev => ({ ...prev, unidad_edad: value as 'meses' | 'años' }));
+      setFormData(prev => ({ ...prev, unidad_edad: sanitizedValue as 'meses' | 'años' }));
     } else if (name === 'edad') {
-      const soloDigitos = value.replace(/\D/g, '');
+      const soloDigitos = sanitizedValue.replace(/\D/g, '');
       const maxEdad = formData.unidad_edad === 'años'
         ? EXPEDIENTE_AGE_LIMITS.MAX_AÑOS
         : EXPEDIENTE_AGE_LIMITS.MAX_MESES;
@@ -178,9 +180,9 @@ export const useExpedienteForm = (options?: UseExpedienteFormOptions) => {
         }));
       }
     } else if (name === 'peso') {
-      setFormData(prev => ({ ...prev, peso: value.replace(/-/g, '') }));
+      setFormData(prev => ({ ...prev, peso: sanitizedValue.replace(/-/g, '') }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
     }
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: false }));
   };

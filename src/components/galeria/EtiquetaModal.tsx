@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui';
+import { generalTextSchema } from '@/schemas/inputSchema';
 
 interface EtiquetaModalProps {
   isOpen: boolean;
@@ -29,13 +30,16 @@ export const EtiquetaModal: React.FC<EtiquetaModalProps> = ({
     e.preventDefault();
     setError('');
 
-    if (!nombre.trim()) {
-      setError('El nombre de la etiqueta no puede estar vacío');
+    const result = generalTextSchema
+      .min(1, 'El nombre de la etiqueta no puede estar vacio')
+      .safeParse(nombre);
+    if (!result.success) {
+      setError(result.error.issues[0]?.message ?? 'Entrada invalida');
       return;
     }
 
     try {
-      await onSave(nombre.trim());
+      await onSave(result.data);
       setNombre('');
       handleClose();
     } catch (err) {

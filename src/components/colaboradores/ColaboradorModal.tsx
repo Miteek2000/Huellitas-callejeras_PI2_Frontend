@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '@/components/ui';
+import { Input, Select } from '@/components/ui';
 import type { Rol } from '../../services/roles.service';
 import type { Usuario } from '@/schemas/auth.schema';
 import {
@@ -29,6 +29,10 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({
   error,
 }) => {
   const isEditMode = !!colaborador;
+  const roleOptions = [
+    { value: '', label: 'Seleccionar rol' },
+    ...roles.map((rol) => ({ value: rol.id_roles, label: rol.nombre.toLowerCase() })),
+  ];
 
   const schema = esPropietario
     ? propietarioEditSchema
@@ -165,22 +169,12 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({
             />
 
             {!esPropietario && (
-              <div className="mb-4">
-                <select
-                  {...register('rol_id')}
-                  className="w-full px-4 py-2 rounded-lg bg-[#FFFFFF] border-none text-black focus:outline-none focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20"
-                >
-                  <option value="">Seleccionar rol</option>
-                  {roles.map((rol) => (
-                    <option key={rol.id_roles} value={rol.id_roles}>
-                      {rol.nombre.toLowerCase()}
-                    </option>
-                  ))}
-                </select>
-                {errors.rol_id && (
-                  <p className="mt-1 text-sm text-red-600">{errors.rol_id.message}</p>
-                )}
-              </div>
+              <Select
+                options={roleOptions}
+                {...register('rol_id')}
+                className="bg-[#FFFFFF] border-none"
+                error={errors.rol_id?.message}
+              />
             )}
 
             {error && (

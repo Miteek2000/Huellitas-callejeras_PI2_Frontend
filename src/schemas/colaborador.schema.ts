@@ -1,14 +1,15 @@
 import { z } from 'zod';
 import { passwordSchema } from './password.schema';
+import { emailSchema, generalTextSchema, nameSchemaBase } from './inputSchema';
 
 const baseSchema = z.object({
-  nombre: z.string().min(1, 'El nombre es obligatorio'),
-  apellidoPaterno: z.string().min(1, 'El apellido paterno es obligatorio'),
-  apellidoMaterno: z.string().min(1, 'El apellido materno es obligatorio'),
-  email: z.string().email('Email inválido'),
-  contrasena: z.string().optional(),
-  confirmarContrasena: z.string().optional(),
-  rol_id: z.string().optional(),
+  nombre: nameSchemaBase.min(1, 'El nombre es obligatorio'),
+  apellidoPaterno: nameSchemaBase.min(1, 'El apellido paterno es obligatorio'),
+  apellidoMaterno: nameSchemaBase.min(1, 'El apellido materno es obligatorio'),
+  email: emailSchema,
+  contrasena: generalTextSchema.optional(),
+  confirmarContrasena: generalTextSchema.optional(),
+  rol_id: generalTextSchema.optional(),
 });
 
 export const colaboradorCreateSchema = baseSchema

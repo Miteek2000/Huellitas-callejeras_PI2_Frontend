@@ -1,29 +1,30 @@
 import { z } from 'zod';
 import { passwordSchema } from './password.schema';
+import { emailSchema, generalTextSchema, nameSchemaBase } from './inputSchema';
 
 export const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(1, 'La contraseña es obligatoria'),
+  email: emailSchema,
+  password: generalTextSchema.min(1, 'La contraseña es obligatoria'),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 
 export const registroSchema = z
   .object({
-    nombreRefugio: z.string().min(1, 'El nombre del refugio es obligatorio'),
-    capacidad: z.string().min(1, 'La capacidad es obligatoria'),
-    estado: z.string().min(1, 'El estado es obligatorio'),
-    municipio: z.string().min(1, 'El municipio es obligatorio'),
-    colonia: z.string().min(1, 'La colonia es obligatoria'),
-    calle: z.string().min(1, 'La calle es obligatoria'),
-    numeroInterior: z.string().optional(),
-    numeroExterior: z.string().optional(),
-    nombres: z.string().min(1, 'El nombre es obligatorio'),
-    apellidoPaterno: z.string().min(1, 'El apellido paterno es obligatorio'),
-    apellidoMaterno: z.string().min(1, 'El apellido materno es obligatorio'),
-    email: z.string().email('Email inválido'),
+    nombreRefugio: generalTextSchema.min(1, 'El nombre del refugio es obligatorio'),
+    capacidad: generalTextSchema.min(1, 'La capacidad es obligatoria'),
+    estado: generalTextSchema.min(1, 'El estado es obligatorio'),
+    municipio: generalTextSchema.min(1, 'El municipio es obligatorio'),
+    colonia: generalTextSchema.min(1, 'La colonia es obligatoria'),
+    calle: generalTextSchema.min(1, 'La calle es obligatoria'),
+    numeroInterior: generalTextSchema.optional(),
+    numeroExterior: generalTextSchema.optional(),
+    nombres: nameSchemaBase.min(1, 'El nombre es obligatorio'),
+    apellidoPaterno: nameSchemaBase.min(1, 'El apellido paterno es obligatorio'),
+    apellidoMaterno: nameSchemaBase.min(1, 'El apellido materno es obligatorio'),
+    email: emailSchema,
     contrasena: passwordSchema,
-    confirmarContrasena: z.string().min(1, 'Confirma tu contraseña'),
+    confirmarContrasena: generalTextSchema.min(1, 'Confirma tu contraseña'),
     acepta_terminos: z.boolean(),
   })
   .refine((data) => !isNaN(Number(data.capacidad)) && Number(data.capacidad) > 0, {

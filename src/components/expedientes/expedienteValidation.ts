@@ -1,6 +1,9 @@
 import type { Animal } from '@/schemas/animal.schema';
+import { generalTextSchema } from '@/schemas/inputSchema';
 
 export const EXPEDIENTE_REQUIRED_FIELD_MESSAGE = 'Este campo es obligatorio';
+const EXPEDIENTE_TEXT_INVALID_MESSAGE =
+  'Este campo es obligatorio y no puede contener HTML';
 
 export const EXPEDIENTE_AGE_LIMITS = {
   MIN: 1,
@@ -14,15 +17,15 @@ export const EXPEDIENTE_AGE_INVALID_MESSAGE =
 export const EXPEDIENTE_WEIGHT_INVALID_MESSAGE = 'El peso debe ser mayor a 0';
 
 export const EXPEDIENTE_FIELD_ERROR_MESSAGES = {
-  nombre: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
+  nombre: EXPEDIENTE_TEXT_INVALID_MESSAGE,
   especie: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
-  raza: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
+  raza: EXPEDIENTE_TEXT_INVALID_MESSAGE,
   edad: EXPEDIENTE_AGE_INVALID_MESSAGE,
   sexo: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
   peso: EXPEDIENTE_WEIGHT_INVALID_MESSAGE,
   tamano: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
-  lugar: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
-  descripcion: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
+  lugar: EXPEDIENTE_TEXT_INVALID_MESSAGE,
+  descripcion: EXPEDIENTE_TEXT_INVALID_MESSAGE,
   foto: EXPEDIENTE_REQUIRED_FIELD_MESSAGE,
   primer_movimiento: 'Para crear un expediente, primero debe registrar una fecha de entrada',
 } as const;
@@ -63,6 +66,22 @@ export const validateExpedienteForm = (
   if (isEmpty(formData.lugar)) nextErrors.lugar = true;
   if (isEmpty(formData.descripcion)) nextErrors.descripcion = true;
   if (!hasFoto) nextErrors.foto = true;
+
+  const textoValido = (value: string) =>
+    generalTextSchema.safeParse(value).success;
+
+  if (!isEmpty(formData.nombre) && !textoValido(String(formData.nombre))) {
+    nextErrors.nombre = true;
+  }
+  if (!isEmpty(formData.raza) && !textoValido(String(formData.raza))) {
+    nextErrors.raza = true;
+  }
+  if (!isEmpty(formData.lugar) && !textoValido(String(formData.lugar))) {
+    nextErrors.lugar = true;
+  }
+  if (!isEmpty(formData.descripcion) && !textoValido(String(formData.descripcion))) {
+    nextErrors.descripcion = true;
+  }
 
   return nextErrors;
 };

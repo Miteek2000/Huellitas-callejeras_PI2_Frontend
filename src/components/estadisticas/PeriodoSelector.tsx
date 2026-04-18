@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { sanitizeInput } from '@/utils/sanitize';
 
 type Modo = 'semana' | 'mes';
 
@@ -50,7 +53,7 @@ export function PeriodoSelector({
           <input
             type="date"
             value={fechaBase}
-            onChange={(e) => onFechaBaseChange(e.target.value)}
+            onChange={(e) => onFechaBaseChange(sanitizeInput(e.target.value))}
             className="rounded-md border border-[#C9D3E7] bg-white px-3 py-1.5 text-xs text-[#1F2A56] font-medium focus:outline-none focus:border-[#2855CF] focus:ring-1 focus:ring-[#2855CF]/10 transition-all"
           />
         </label>

@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
+import { sanitizeInput } from '@/utils/sanitize';
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -16,8 +19,18 @@ export const Select: React.FC<SelectProps> = ({
   icon,
   iconAlt = 'icon',
   className = '',
+  onChange,
   ...props 
 }) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const sanitizedValue = sanitizeInput(event.target.value);
+    if (sanitizedValue !== event.target.value) {
+      event.target.value = sanitizedValue;
+    }
+    // Sanitize input before propagating to handlers/state.
+    onChange?.(event);
+  };
+
   return (
     <div className="mb-4">
       {label && (
@@ -35,6 +48,7 @@ export const Select: React.FC<SelectProps> = ({
           className={`w-full ${icon ? 'pl-11' : 'pl-4'} pr-10 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 appearance-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-300 ${
             error ? 'border-red-500' : ''
           } ${className}`}
+          onChange={handleChange}
           {...props}
         >
           {options.map((option) => (

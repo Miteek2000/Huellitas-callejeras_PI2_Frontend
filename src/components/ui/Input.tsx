@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { sanitizeInput } from '@/utils/sanitize';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -9,10 +12,20 @@ export const Input: React.FC<InputProps> = ({
   label, 
   error, 
   className = '',
+  onChange,
   ...props 
 }) => {
   const defaultBg = className.includes('bg-') ? '' : 'bg-[#FFFFFF]';
   const defaultBorder = className.includes('border-') ? '' : 'border-none';
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitizedValue = sanitizeInput(event.target.value);
+    if (sanitizedValue !== event.target.value) {
+      event.target.value = sanitizedValue;
+    }
+    // Sanitize input before propagating to handlers/state.
+    onChange?.(event);
+  };
   
   return (
     <div className="mb-4">
@@ -25,6 +38,7 @@ export const Input: React.FC<InputProps> = ({
         className={`w-full px-4 py-2 rounded-lg ${defaultBg} ${defaultBorder} text-black focus:outline-none focus:border-[#194566] focus:ring-2 focus:ring-[#194566] focus:ring-opacity-20 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-300 
           autofill:bg-inherit autofill:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)]
           ${error ? 'border-red-500 !border !border-solid' : ''} ${className}`}
+        onChange={handleChange}
         {...props}
       />
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}

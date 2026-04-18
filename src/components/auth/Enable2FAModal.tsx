@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { z } from 'zod';
 import Image from 'next/image';
 import { use2FA } from '@/hooks/use2FA';
+import { sanitizeInput } from '@/utils/sanitize';
 
 interface Enable2FAModalProps {
   isOpen: boolean;
@@ -22,6 +24,7 @@ export default function Enable2FAModal({
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState('');
+  const totpSchema = z.string().regex(/^\d{6}$/, 'El codigo debe tener 6 digitos');
 
   useEffect(() => {
     if (isOpen) {
@@ -50,6 +53,12 @@ export default function Enable2FAModal({
 
   const handleVerify = async () => {
     if (!secret) return;
+
+    const validation = totpSchema.safeParse(totpCode);
+    if (!validation.success) {
+      setError(validation.error.issues[0]?.message ?? 'Codigo invalido');
+      return;
+    }
 
     const result = await enableTwoFactor(totpCode, secret);
     if (result) {
@@ -145,7 +154,11 @@ export default function Enable2FAModal({
               maxLength={6}
               placeholder="000000"
               value={totpCode}
-              onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+              onChange={(e) => {
+                const sanitizedValue = sanitizeInput(e.target.value);
+                setTotpCode(sanitizedValue.replace(/\D/g, ''));
+                if (error) setError(null);
+              }}
               className="w-full border-2 border-gray-200 rounded-lg px-3 py-3 text-center text-3xl tracking-[0.5em] font-mono focus:border-[#182F51] focus:ring-0 outline-none"
             />
 

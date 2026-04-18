@@ -1,13 +1,26 @@
 'use client';
 import React, { useState } from 'react';
+import { z } from 'zod';
 import { Input } from '@/components/ui';
 import type { Refugio } from '../../services/refugios.service';
+import { generalTextSchema } from '@/schemas/inputSchema';
 
 interface DomicilioModalProps {
   refugio?: Refugio | null;
   onClose: () => void;
   onSave: (data: Partial<Refugio>) => void;
 }
+
+const domicilioSchema = z.object({
+  estado: generalTextSchema.min(1, 'El estado es obligatorio'),
+  municipio: generalTextSchema.min(1, 'El municipio es obligatorio'),
+  colonia: generalTextSchema.min(1, 'La colonia es obligatoria'),
+  calle: generalTextSchema.min(1, 'La calle es obligatoria'),
+  num_interior: generalTextSchema.optional(),
+  num_exterior: generalTextSchema.optional(),
+});
+
+type DomicilioFormData = z.infer<typeof domicilioSchema>;
 
 const DomicilioModal: React.FC<DomicilioModalProps> = ({ refugio, onClose, onSave }) => {
   const [form, setForm] = useState({
@@ -18,21 +31,41 @@ const DomicilioModal: React.FC<DomicilioModalProps> = ({ refugio, onClose, onSav
     num_interior: refugio?.num_interior ?? '',
     num_exterior: refugio?.num_exterior ?? '',
   });
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof DomicilioFormData, string>>
+  >({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (fieldErrors[e.target.name as keyof DomicilioFormData]) {
+      setFieldErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const result = domicilioSchema.safeParse(form);
+    if (!result.success) {
+      const nextErrors: Partial<Record<keyof DomicilioFormData, string>> = {};
+      for (const [key, messages] of Object.entries(result.error.flatten().fieldErrors)) {
+        if (messages?.length) {
+          nextErrors[key as keyof DomicilioFormData] = messages[0];
+        }
+      }
+      setFieldErrors(nextErrors);
+      return;
+    }
+
+    const data = result.data;
     onSave({
-      estado: form.estado,
-      municipio: form.municipio,
-      colonia: form.colonia,
-      calle: form.calle,
-      num_interior: form.num_interior !== '' ? Number(form.num_interior) : undefined,
-      num_exterior: form.num_exterior !== '' ? Number(form.num_exterior) : undefined,
+      estado: data.estado,
+      municipio: data.municipio,
+      colonia: data.colonia,
+      calle: data.calle,
+      num_interior: data.num_interior ? Number(data.num_interior) : undefined,
+      num_exterior: data.num_exterior ? Number(data.num_exterior) : undefined,
     });
+    setFieldErrors({});
     onClose();
   };
 
@@ -60,12 +93,12 @@ const DomicilioModal: React.FC<DomicilioModalProps> = ({ refugio, onClose, onSav
 
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-1">
-            <Input name="estado" value={form.estado} onChange={handleChange} placeholder="Estado" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
-            <Input name="municipio" value={form.municipio} onChange={handleChange} placeholder="Municipio" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
-            <Input name="colonia" value={form.colonia} onChange={handleChange} placeholder="Colonia" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
-            <Input name="calle" value={form.calle} onChange={handleChange} placeholder="Calle" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" required />
-            <Input name="num_interior" type="number" value={form.num_interior} onChange={handleChange} placeholder="Número interior" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" />
-            <Input name="num_exterior" type="number" value={form.num_exterior} onChange={handleChange} placeholder="Número exterior" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" />
+            <Input name="estado" value={form.estado} onChange={handleChange} placeholder="Estado" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" error={fieldErrors.estado} required />
+            <Input name="municipio" value={form.municipio} onChange={handleChange} placeholder="Municipio" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" error={fieldErrors.municipio} required />
+            <Input name="colonia" value={form.colonia} onChange={handleChange} placeholder="Colonia" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" error={fieldErrors.colonia} required />
+            <Input name="calle" value={form.calle} onChange={handleChange} placeholder="Calle" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" error={fieldErrors.calle} required />
+            <Input name="num_interior" type="number" value={form.num_interior} onChange={handleChange} placeholder="Número interior" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" error={fieldErrors.num_interior} />
+            <Input name="num_exterior" type="number" value={form.num_exterior} onChange={handleChange} placeholder="Número exterior" className="bg-[#FFFFFF] border-none placeholder:text-gray-500" error={fieldErrors.num_exterior} />
             <button
               type="submit"
               className="w-full bg-[#194566] text-white py-2 rounded-3xl font-semibold hover:bg-[#15374f] transition-colors mt-2"
