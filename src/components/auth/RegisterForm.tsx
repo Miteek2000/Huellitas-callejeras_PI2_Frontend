@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui';
 import { registroSchema, type RegisterFormData } from '@/schemas/auth.schema';
+import { USER_TEXT_ALLOWED_CHAR_REGEX } from '@/schemas/inputSchema';
 import { TermsModal } from './TermsModal';
 
 export const RegisterForm: React.FC<{
@@ -69,6 +70,7 @@ export const RegisterForm: React.FC<{
                 placeholder="Nombre del refugio"
                 className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                 error={errors.nombreRefugio?.message}
+                allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
               />
 
               <Input
@@ -87,24 +89,28 @@ export const RegisterForm: React.FC<{
                     placeholder="Estado"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                     error={errors.estado?.message}
+                    allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
                   />
                   <Input
                     {...register('municipio')}
                     placeholder="Municipio"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                     error={errors.municipio?.message}
+                    allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
                   />
                   <Input
                     {...register('colonia')}
                     placeholder="Colonia"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                     error={errors.colonia?.message}
+                    allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
                   />
                   <Input
                     {...register('calle')}
                     placeholder="Calle"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                     error={errors.calle?.message}
+                    allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <Input
@@ -133,18 +139,21 @@ export const RegisterForm: React.FC<{
                     placeholder="Nombres"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                     error={errors.nombres?.message}
+                    allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
                   />
                   <Input
                     {...register('apellidoPaterno')}
                     placeholder="Apellido Paterno"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                     error={errors.apellidoPaterno?.message}
+                    allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
                   />
                   <Input
                     {...register('apellidoMaterno')}
                     placeholder="Apellido Materno"
                     className="bg-[#D9D9D9] border-none placeholder:text-gray-500"
                     error={errors.apellidoMaterno?.message}
+                    allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
                   />
                   <Input
                     {...register('email')}

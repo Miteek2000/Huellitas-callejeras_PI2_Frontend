@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { passwordSchema } from './password.schema';
-import { emailSchema, generalTextSchema, nameSchemaBase } from './inputSchema';
+import { emailSchema, generalTextSchema, nameSchemaBase, userTextSchema } from './inputSchema';
 
 export const loginSchema = z.object({
   email: emailSchema,
@@ -11,17 +11,17 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 
 export const registroSchema = z
   .object({
-    nombreRefugio: generalTextSchema.min(1, 'El nombre del refugio es obligatorio'),
+    nombreRefugio: userTextSchema.min(1, 'El nombre del refugio es obligatorio'),
     capacidad: generalTextSchema.min(1, 'La capacidad es obligatoria'),
-    estado: generalTextSchema.min(1, 'El estado es obligatorio'),
-    municipio: generalTextSchema.min(1, 'El municipio es obligatorio'),
-    colonia: generalTextSchema.min(1, 'La colonia es obligatoria'),
-    calle: generalTextSchema.min(1, 'La calle es obligatoria'),
-    numeroInterior: generalTextSchema.optional(),
-    numeroExterior: generalTextSchema.optional(),
-    nombres: nameSchemaBase.min(1, 'El nombre es obligatorio'),
-    apellidoPaterno: nameSchemaBase.min(1, 'El apellido paterno es obligatorio'),
-    apellidoMaterno: nameSchemaBase.min(1, 'El apellido materno es obligatorio'),
+    estado: userTextSchema.min(1, 'El estado es obligatorio'),
+    municipio: userTextSchema.min(1, 'El municipio es obligatorio'),
+    colonia: userTextSchema.min(1, 'La colonia es obligatoria'),
+    calle: userTextSchema.min(1, 'La calle es obligatoria'),
+    numeroInterior: userTextSchema.optional(),
+    numeroExterior: userTextSchema.optional(),
+    nombres: userTextSchema.min(1, 'El nombre es obligatorio'),
+    apellidoPaterno: userTextSchema.min(1, 'El apellido paterno es obligatorio'),
+    apellidoMaterno: userTextSchema.min(1, 'El apellido materno es obligatorio'),
     email: emailSchema,
     contrasena: passwordSchema,
     confirmarContrasena: generalTextSchema.min(1, 'Confirma tu contraseña'),

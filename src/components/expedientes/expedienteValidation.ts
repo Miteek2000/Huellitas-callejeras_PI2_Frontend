@@ -1,9 +1,9 @@
 import type { Animal } from '@/schemas/animal.schema';
-import { generalTextSchema } from '@/schemas/inputSchema';
+import { animalTextSchema } from '@/schemas/inputSchema';
 
 export const EXPEDIENTE_REQUIRED_FIELD_MESSAGE = 'Este campo es obligatorio';
 const EXPEDIENTE_TEXT_INVALID_MESSAGE =
-  'Este campo es obligatorio y no puede contener HTML';
+  'Este campo es obligatorio y solo admite letras A-Z, a-z, numeros 0-9 y simbolos - = + _ ( ).';
 
 export const EXPEDIENTE_AGE_LIMITS = {
   MIN: 1,
@@ -68,7 +68,7 @@ export const validateExpedienteForm = (
   if (!hasFoto) nextErrors.foto = true;
 
   const textoValido = (value: string) =>
-    generalTextSchema.safeParse(value).success;
+    animalTextSchema.safeParse(value).success;
 
   if (!isEmpty(formData.nombre) && !textoValido(String(formData.nombre))) {
     nextErrors.nombre = true;

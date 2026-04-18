@@ -134,6 +134,9 @@ export const ExpedienteForm: React.FC<ExpedienteFormProps> = ({
               currentState={initialData?.estado}
               disabled={readOnly}
             />
+            <p className="text-xs text-gray-600 mt-2 text-center sm:text-left">
+              Solo se permiten letras A-Z, a-z, numeros 0-9, espacios y simbolos - = + _ ( ).
+            </p>
             {hasError('foto') && (
               <p className="text-red-600 text-sm mt-2">Agrega al menos una foto</p>
             )}

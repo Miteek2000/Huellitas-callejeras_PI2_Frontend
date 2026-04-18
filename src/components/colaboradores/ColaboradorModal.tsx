@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input, Select } from '@/components/ui';
 import type { Rol } from '../../services/roles.service';
 import type { Usuario } from '@/schemas/auth.schema';
+import { USER_TEXT_ALLOWED_CHAR_REGEX } from '@/schemas/inputSchema';
 import {
   colaboradorCreateSchema,
   colaboradorEditSchema,
@@ -113,18 +114,21 @@ const ColaboradorModal: React.FC<ColaboradorModalProps> = ({
               placeholder="Nombre"
               className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
               error={errors.nombre?.message}
+              allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
             />
             <Input
               {...register('apellidoPaterno')}
               placeholder="Apellido Paterno"
               className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
               error={errors.apellidoPaterno?.message}
+              allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
             />
             <Input
               {...register('apellidoMaterno')}
               placeholder="Apellido Materno"
               className="bg-[#FFFFFF] border-none placeholder:text-gray-500"
               error={errors.apellidoMaterno?.message}
+              allowedPattern={USER_TEXT_ALLOWED_CHAR_REGEX}
             />
             <Input
               {...register('email')}

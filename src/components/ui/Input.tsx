@@ -6,22 +6,34 @@ import { sanitizeInput } from '@/utils/sanitize';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  allowedPattern?: RegExp;
 }
 
 export const Input: React.FC<InputProps> = ({ 
   label, 
   error, 
   className = '',
+  allowedPattern,
   onChange,
   ...props 
 }) => {
   const defaultBg = className.includes('bg-') ? '' : 'bg-[#FFFFFF]';
   const defaultBorder = className.includes('border-') ? '' : 'border-none';
 
+  const filterAllowed = (value: string) => {
+    if (!allowedPattern) return value;
+    const safePattern = new RegExp(
+      allowedPattern.source,
+      allowedPattern.flags.replace('g', '')
+    );
+    return Array.from(value).filter((char) => safePattern.test(char)).join('');
+  };
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const sanitizedValue = sanitizeInput(event.target.value);
-    if (sanitizedValue !== event.target.value) {
-      event.target.value = sanitizedValue;
+    const filteredValue = filterAllowed(sanitizedValue);
+    if (filteredValue !== event.target.value) {
+      event.target.value = filteredValue;
     }
     // Sanitize input before propagating to handlers/state.
     onChange?.(event);

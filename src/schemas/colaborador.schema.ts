@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { passwordSchema } from './password.schema';
-import { emailSchema, generalTextSchema, nameSchemaBase } from './inputSchema';
+import { emailSchema, generalTextSchema, userTextSchema } from './inputSchema';
 
 const baseSchema = z.object({
-  nombre: nameSchemaBase.min(1, 'El nombre es obligatorio'),
-  apellidoPaterno: nameSchemaBase.min(1, 'El apellido paterno es obligatorio'),
-  apellidoMaterno: nameSchemaBase.min(1, 'El apellido materno es obligatorio'),
+  nombre: userTextSchema.min(1, 'El nombre es obligatorio'),
+  apellidoPaterno: userTextSchema.min(1, 'El apellido paterno es obligatorio'),
+  apellidoMaterno: userTextSchema.min(1, 'El apellido materno es obligatorio'),
   email: emailSchema,
   contrasena: generalTextSchema.optional(),
   confirmarContrasena: generalTextSchema.optional(),
